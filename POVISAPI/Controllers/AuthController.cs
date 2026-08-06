@@ -19,6 +19,14 @@ namespace POVISAPI.Controllers
         }
 
         [AllowAnonymous]
+        [HttpGet("admin-exists")]
+        public async Task<IActionResult> AdminExists()
+        {
+            var exists = await authService.AdminExistsAsync();
+            return Ok(new APIResponse<object> { Success = true, Message = "OK", Data = new { exists } });
+        }
+
+        [AllowAnonymous]
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDTO dto)
         {

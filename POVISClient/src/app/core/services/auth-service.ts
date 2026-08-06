@@ -35,7 +35,15 @@ export class AuthService {
   register(dto: RegisterDTO): Observable<AuthResponse> {
     return this.api.register(dto).pipe(
       map((res) => res.data as AuthResponse),
+      tap((auth) => this.storeSession(auth)),
       catchError((err) => this.rethrowAsError(err)),
+    );
+  }
+
+  adminExists(): Observable<boolean> {
+    return this.api.adminExists().pipe(
+      map((res) => !!res.data?.exists),
+      catchError(() => throwError(() => new Error('Unable to reach the server. Please try again.'))),
     );
   }
 

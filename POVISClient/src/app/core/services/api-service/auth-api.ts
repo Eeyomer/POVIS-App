@@ -19,4 +19,8 @@ export class AuthApi {
   register(dto: RegisterDTO): Observable<APIResponse<AuthResponse>> {
     return this.http.post<APIResponse<AuthResponse>>(`${this.apiUrl}/register`, dto);
   }
+
+  adminExists(): Observable<APIResponse<{ exists: boolean }>> {
+    return this.http.get<APIResponse<{ exists: boolean }>>(`${this.apiUrl}/admin-exists`);
+  }
 }

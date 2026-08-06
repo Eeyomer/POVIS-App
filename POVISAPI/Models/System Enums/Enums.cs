@@ -9,9 +9,12 @@ public enum Gender
 /// <summary>Apprehending unit (DIVISION column: BPD, PNP, etc.)</summary>
 public enum Division
 {
-    Bpd = 1,   // Barangay Police / Public Order Division
-    Pnp = 2,
-    Cenro = 3,
+    POD = 1,   // Barangay Police / Public Order Division
+    BPD = 2,
+    ALD = 3,
+    PSD = 4,
+    PNP = 5,
+    SOG = 6,
     Other = 99
 }
 

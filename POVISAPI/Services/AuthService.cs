@@ -9,6 +9,7 @@ using POVISAPI.Data;
 using POVISAPI.Interfaces;
 using POVISAPI.Models.DTO;
 using POVISAPI.Models.Entity;
+using POVISAPI.Models.Entity.Enums;
 using POVISAPI.Models.System_Models;
 
 namespace POVISAPI.Services;
@@ -52,6 +53,11 @@ public class AuthService : IAuthService
             throw new AuthenticationException("Invalid username or password.");
 
         return BuildAuthResponse(user);
+    }
+
+    public async Task<bool> AdminExistsAsync()
+    {
+        return await context.Users.AnyAsync(u => u.Role == Role.Admin && u.IsActive);
     }
 
     private AuthResponseDTO BuildAuthResponse(User user)

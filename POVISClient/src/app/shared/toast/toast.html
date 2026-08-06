@@ -24,15 +24,15 @@
 
       <div class="flex-1 min-w-0">
         @if (t.summary) {
-          <div class="font-poppins font-semibold text-[13.5px] text-[#241033]">{{ t.summary }}</div>
+          <div class="font-poppins font-semibold text-[13.5px] text-[#152238]">{{ t.summary }}</div>
         }
-        <div class="text-[13px] text-[#5a4d68] leading-snug">{{ t.detail }}</div>
+        <div class="text-[13px] text-[#4a5972] leading-snug">{{ t.detail }}</div>
       </div>
 
       @if (t.closable) {
         <button
           type="button"
-          class="shrink-0 text-[#a999b8] hover:text-[#241033] transition-colors -mt-0.5 -mr-1"
+          class="shrink-0 text-[#8291a6] hover:text-[#152238] transition-colors -mt-0.5 -mr-1"
           aria-label="Dismiss notification"
           (click)="close(t)"
         >

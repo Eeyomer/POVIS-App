@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
 import { AuthService } from '../services/auth-service';
 
-const AUTH_ENDPOINTS = ['/api/Auth/login', '/api/Auth/register'];
+const AUTH_ENDPOINTS = ['/api/Auth/login', '/api/Auth/register', '/api/Auth/admin-exists'];
 
 export const authInterceptor: HttpInterceptorFn = (
   req: HttpRequest<unknown>,
