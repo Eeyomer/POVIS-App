@@ -1,0 +1,37 @@
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { AuthService } from '../../core/services/auth-service';
+
+@Component({
+  selector: 'app-admin-sidebar',
+  imports: [CommonModule, RouterLink, RouterLinkActive],
+  templateUrl: './sidebar.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class Sidebar implements OnInit {
+  username: string | null = null;
+  initials = 'A';
+
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private cdr: ChangeDetectorRef,
+  ) {}
+
+  ngOnInit(): void {
+    this.username = this.authService.getUsername();
+    this.initials = this.computeInitials(this.username);
+    this.cdr.markForCheck();
+  }
+
+  private computeInitials(username: string | null): string {
+    if (!username) return 'A';
+    return username.trim().slice(0, 2).toUpperCase();
+  }
+
+  logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/login']);
+  }
+}

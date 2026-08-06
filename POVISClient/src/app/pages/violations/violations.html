@@ -1,0 +1,167 @@
+<div class="p-8">
+  <div class="flex items-center justify-between mb-6 gap-4">
+    <h1 class="font-poppins font-bold text-[22px] text-[#241033]">Violations</h1>
+    <div class="flex gap-3">
+      <select [value]="statusFilter()" (change)="onStatusFilterChange($any($event.target).value)"
+        class="px-3 py-2 rounded-lg border border-[#e2d9ee] text-[13px]">
+        <option value="">All statuses</option>
+        <option value="Pending">Pending</option>
+        <option value="Paid">Paid</option>
+        <option value="ForSeminar">For Seminar</option>
+        <option value="ForCounseling">For Counseling</option>
+        <option value="ForCommunityService">For Community Service</option>
+        <option value="CaseFiled">Case Filed</option>
+        <option value="Dismissed">Dismissed</option>
+        <option value="Closed">Closed</option>
+        <option value="DidNotComply">Did Not Comply</option>
+        <option value="WarningIssued">Warning Issued</option>
+      </select>
+      <button type="button" (click)="openAdd()"
+        class="px-4 py-2 rounded-lg bg-[#5b1e8c] text-white text-[13px] font-semibold hover:bg-[#4a1873]">
+        + Record Violation
+      </button>
+    </div>
+  </div>
+
+  @if (showForm()) {
+  <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
+    <h2 class="text-[15px] font-semibold text-[#241033] mb-4">{{ editing() ? 'Edit' : 'Record' }} Violation</h2>
+    <form [formGroup]="form" (ngSubmit)="save()" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      @if (!editing()) {
+      <div>
+        <label class="block text-[13px] font-semibold text-[#241033] mb-1">Violator</label>
+        <select formControlName="violatorId" class="w-full px-3 py-2 rounded-lg border border-[#e2d9ee] text-[14px]">
+          <option value="">Select violator</option>
+          @for (v of violators(); track v.violatorId) {
+          <option [value]="v.violatorId">{{ v.lastName }}, {{ v.firstName }}</option>
+          }
+        </select>
+      </div>
+      }
+      <div>
+        <label class="block text-[13px] font-semibold text-[#241033] mb-1">OVR Number</label>
+        <input type="text" formControlName="ovrNumber" [readOnly]="!!editing()"
+          class="w-full px-3 py-2 rounded-lg border border-[#e2d9ee] text-[14px]" />
+      </div>
+      <div>
+        <label class="block text-[13px] font-semibold text-[#241033] mb-1">Division</label>
+        <select formControlName="division" class="w-full px-3 py-2 rounded-lg border border-[#e2d9ee] text-[14px]">
+          <option value="Bpd">BPD</option>
+          <option value="Pnp">PNP</option>
+          <option value="Cenro">CENRO</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-[13px] font-semibold text-[#241033] mb-1">Date of Submission</label>
+        <input type="date" formControlName="dateOfSubmission" class="w-full px-3 py-2 rounded-lg border border-[#e2d9ee] text-[14px]" />
+      </div>
+      <div>
+        <label class="block text-[13px] font-semibold text-[#241033] mb-1">Date of Occurrence</label>
+        <input type="date" formControlName="dateOfOccurrence" class="w-full px-3 py-2 rounded-lg border border-[#e2d9ee] text-[14px]" />
+      </div>
+      <div>
+        <label class="block text-[13px] font-semibold text-[#241033] mb-1">Time of Occurrence</label>
+        <input type="time" formControlName="timeOfOccurrence" class="w-full px-3 py-2 rounded-lg border border-[#e2d9ee] text-[14px]" />
+      </div>
+      <div>
+        <label class="block text-[13px] font-semibold text-[#241033] mb-1">Age at Apprehension</label>
+        <input type="number" formControlName="ageAtApprehension" class="w-full px-3 py-2 rounded-lg border border-[#e2d9ee] text-[14px]" />
+      </div>
+      <div class="sm:col-span-2">
+        <label class="block text-[13px] font-semibold text-[#241033] mb-1">Place of Occurrence</label>
+        <input type="text" formControlName="placeOfOccurrence" class="w-full px-3 py-2 rounded-lg border border-[#e2d9ee] text-[14px]" />
+      </div>
+      <div>
+        <label class="block text-[13px] font-semibold text-[#241033] mb-1">Barangay of Occurrence</label>
+        <select formControlName="barangayOfOccurrenceId" class="w-full px-3 py-2 rounded-lg border border-[#e2d9ee] text-[14px]">
+          <option value="">—</option>
+          @for (b of barangays(); track b.barangayId) {
+          <option [value]="b.barangayId">{{ b.name }}</option>
+          }
+        </select>
+      </div>
+      <div>
+        <label class="block text-[13px] font-semibold text-[#241033] mb-1">Witness</label>
+        <input type="text" formControlName="witness" class="w-full px-3 py-2 rounded-lg border border-[#e2d9ee] text-[14px]" />
+      </div>
+      <div>
+        <label class="block text-[13px] font-semibold text-[#241033] mb-1">Apprehending Officer</label>
+        <input type="text" formControlName="apprehendingOfficer" class="w-full px-3 py-2 rounded-lg border border-[#e2d9ee] text-[14px]" />
+      </div>
+
+      @if (!editing()) {
+      <div>
+        <label class="block text-[13px] font-semibold text-[#241033] mb-1">Ordinance</label>
+        <select formControlName="ordinanceId" (change)="onOrdinanceChange($any($event.target).value)"
+          class="w-full px-3 py-2 rounded-lg border border-[#e2d9ee] text-[14px]">
+          <option value="">Select ordinance</option>
+          @for (o of ordinances(); track o.ordinanceId) {
+          <option [value]="o.ordinanceId">{{ o.shortName }}</option>
+          }
+        </select>
+      </div>
+      }
+      <div>
+        <label class="block text-[13px] font-semibold text-[#241033] mb-1">Section</label>
+        <select formControlName="ordinanceSectionId" class="w-full px-3 py-2 rounded-lg border border-[#e2d9ee] text-[14px]">
+          <option value="">—</option>
+          @for (s of selectedOrdinanceDetail()?.sections; track s.ordinanceSectionId) {
+          <option [value]="s.ordinanceSectionId">{{ s.sectionCode }}</option>
+          }
+        </select>
+      </div>
+      <div class="flex items-center gap-2 mt-6">
+        <input type="checkbox" formControlName="isWarningTicket" id="isWt" />
+        <label for="isWt" class="text-[13px] font-semibold text-[#241033]">Warning Ticket</label>
+      </div>
+
+      <div class="sm:col-span-3">
+        <label class="block text-[13px] font-semibold text-[#241033] mb-1">Remarks</label>
+        <input type="text" formControlName="remarks" class="w-full px-3 py-2 rounded-lg border border-[#e2d9ee] text-[14px]" />
+      </div>
+      <div class="sm:col-span-3">
+        <label class="block text-[13px] font-semibold text-[#241033] mb-1">Remarks II</label>
+        <input type="text" formControlName="remarks2" class="w-full px-3 py-2 rounded-lg border border-[#e2d9ee] text-[14px]" />
+      </div>
+
+      <div class="sm:col-span-3 flex gap-3">
+        <button type="submit" class="px-4 py-2 rounded-lg bg-[#5b1e8c] text-white text-[13px] font-semibold">Save</button>
+        <button type="button" (click)="cancel()" class="px-4 py-2 rounded-lg border border-[#e2d9ee] text-[13px] font-semibold text-[#241033]">Cancel</button>
+      </div>
+    </form>
+  </div>
+  }
+
+  <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+    <table class="w-full text-[13px]">
+      <thead class="bg-[#f7f3fb] text-[#7a6a89] text-left">
+        <tr>
+          <th class="px-4 py-3">OVR #</th>
+          <th class="px-4 py-3">Violator</th>
+          <th class="px-4 py-3">Ordinance</th>
+          <th class="px-4 py-3">Date</th>
+          <th class="px-4 py-3">Status</th>
+          <th class="px-4 py-3"></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (v of violations(); track v.violationId) {
+        <tr class="border-t border-[#f0eaf7]">
+          <td class="px-4 py-3 font-medium text-[#241033]">{{ v.ovrNumber }}</td>
+          <td class="px-4 py-3">{{ v.violatorFullName }}</td>
+          <td class="px-4 py-3">{{ v.ordinanceShortName }}</td>
+          <td class="px-4 py-3">{{ v.dateOfOccurrence }}</td>
+          <td class="px-4 py-3">{{ v.status }}</td>
+          <td class="px-4 py-3 text-right">
+            <button type="button" (click)="openEdit(v)" class="text-[#5b1e8c] font-semibold mr-3">Edit</button>
+            <button type="button" (click)="remove(v)" class="text-red-500 font-semibold">Delete</button>
+          </td>
+        </tr>
+        } @empty {
+        <tr><td colspan="6" class="px-4 py-6 text-center text-[#7a6a89]">No violations recorded.</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

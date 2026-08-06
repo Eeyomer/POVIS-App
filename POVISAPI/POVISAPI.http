@@ -1,0 +1,6 @@
+@POVISAPI_HostAddress = http://localhost:5185
+
+GET {{POVISAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

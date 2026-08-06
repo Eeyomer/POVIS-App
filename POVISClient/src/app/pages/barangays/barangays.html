@@ -1,0 +1,63 @@
+<div class="p-8">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="font-poppins font-bold text-[22px] text-[#241033]">Barangays</h1>
+    <button type="button" (click)="openAdd()"
+      class="px-4 py-2 rounded-lg bg-[#5b1e8c] text-white text-[13px] font-semibold hover:bg-[#4a1873]">
+      + Add Barangay
+    </button>
+  </div>
+
+  @if (showForm()) {
+  <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
+    <h2 class="text-[15px] font-semibold text-[#241033] mb-4">{{ editing() ? 'Edit' : 'Add' }} Barangay</h2>
+    <form [formGroup]="form" (ngSubmit)="save()" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-[13px] font-semibold text-[#241033] mb-1">Name</label>
+        <input type="text" formControlName="name"
+          class="w-full px-3 py-2 rounded-lg border border-[#e2d9ee] text-[14px]" />
+      </div>
+      <div>
+        <label class="block text-[13px] font-semibold text-[#241033] mb-1">District</label>
+        <input type="number" formControlName="district" min="1" max="2"
+          class="w-full px-3 py-2 rounded-lg border border-[#e2d9ee] text-[14px]" />
+      </div>
+      <div class="sm:col-span-2 flex gap-3">
+        <button type="submit" class="px-4 py-2 rounded-lg bg-[#5b1e8c] text-white text-[13px] font-semibold">Save</button>
+        <button type="button" (click)="cancel()" class="px-4 py-2 rounded-lg border border-[#e2d9ee] text-[13px] font-semibold text-[#241033]">Cancel</button>
+      </div>
+    </form>
+  </div>
+  }
+
+  <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+    <table class="w-full text-[13px]">
+      <thead class="bg-[#f7f3fb] text-[#7a6a89] text-left">
+        <tr>
+          <th class="px-4 py-3">Name</th>
+          <th class="px-4 py-3">District</th>
+          <th class="px-4 py-3">Status</th>
+          <th class="px-4 py-3"></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (b of barangays(); track b.barangayId) {
+        <tr class="border-t border-[#f0eaf7]">
+          <td class="px-4 py-3 font-medium text-[#241033]">{{ b.name }}</td>
+          <td class="px-4 py-3">{{ b.district ?? '—' }}</td>
+          <td class="px-4 py-3">
+            <span [class]="b.isActive ? 'text-green-600' : 'text-red-500'">{{ b.isActive ? 'Active' : 'Inactive' }}</span>
+          </td>
+          <td class="px-4 py-3 text-right">
+            <button type="button" (click)="openEdit(b)" class="text-[#5b1e8c] font-semibold mr-3">Edit</button>
+            <button type="button" (click)="toggleActive(b)" class="text-[#7a6a89] font-semibold">
+              {{ b.isActive ? 'Deactivate' : 'Activate' }}
+            </button>
+          </td>
+        </tr>
+        } @empty {
+        <tr><td colspan="4" class="px-4 py-6 text-center text-[#7a6a89]">No barangays yet.</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
