@@ -22,6 +22,10 @@ export class Login implements OnInit {
   errorMessage = signal<string | null>(null);
   isSubmitting = signal(false);
 
+  showPassword = signal(false);
+  showRegisterPassword = signal(false);
+  showConfirmPassword = signal(false);
+
   private fb = inject(FormBuilder);
 
   form = this.fb.group({
@@ -55,6 +59,18 @@ export class Login implements OnInit {
         this.checkingAdmin.set(false);
       },
     });
+  }
+
+  toggleShowPassword(): void {
+    this.showPassword.update((v) => !v);
+  }
+
+  toggleShowRegisterPassword(): void {
+    this.showRegisterPassword.update((v) => !v);
+  }
+
+  toggleShowConfirmPassword(): void {
+    this.showConfirmPassword.update((v) => !v);
   }
 
   submit(): void {
