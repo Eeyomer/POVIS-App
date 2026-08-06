@@ -149,6 +149,13 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
+if (!app.Environment.IsDevelopment())
+{
+    var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
+    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+}
+
+
 // Configure the HTTP request pipeline.
 using (var scope = app.Services.CreateScope())
 {
