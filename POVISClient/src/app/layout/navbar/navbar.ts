@@ -1,6 +1,7 @@
 import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/services/auth-service';
+import { SidebarService } from '../../core/services/sidebar-service';
 
 @Component({
   selector: 'app-admin-navbar',
@@ -16,6 +17,7 @@ export class Navbar implements OnInit {
   constructor(
     private authService: AuthService,
     private cdr: ChangeDetectorRef,
+    public sidebarService: SidebarService,
   ) {}
 
   ngOnInit(): void {

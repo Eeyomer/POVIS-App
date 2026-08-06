@@ -2,6 +2,7 @@ import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../core/services/auth-service';
+import { SidebarService } from '../../core/services/sidebar-service';
 
 @Component({
   selector: 'app-admin-sidebar',
@@ -17,6 +18,7 @@ export class Sidebar implements OnInit {
     private authService: AuthService,
     private router: Router,
     private cdr: ChangeDetectorRef,
+    public sidebarService: SidebarService,
   ) {}
 
   ngOnInit(): void {
@@ -28,6 +30,10 @@ export class Sidebar implements OnInit {
   private computeInitials(username: string | null): string {
     if (!username) return 'A';
     return username.trim().slice(0, 2).toUpperCase();
+  }
+
+  onNavigate(): void {
+    this.sidebarService.close();
   }
 
   logout(): void {

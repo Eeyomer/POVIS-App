@@ -1,10 +1,10 @@
-<div class="p-8">
-  <div class="flex items-center justify-between mb-6 gap-4">
-    <h1 class="font-poppins font-bold text-[22px] text-[#152238]">Violators</h1>
-    <div class="flex gap-3">
+<div class="p-4 sm:p-6 md:p-8">
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+    <h1 class="font-poppins font-bold text-[19px] sm:text-[22px] text-[#152238]">Violators</h1>
+    <div class="flex flex-wrap gap-3">
       <input type="text" placeholder="Search violators..." [value]="search()"
         (input)="onSearchChange($any($event.target).value)"
-        class="px-3 py-2 rounded-lg border border-[#d3dae5] text-[13px] w-64" />
+        class="px-3 py-2 rounded-lg border border-[#d3dae5] text-[13px] w-full sm:w-64" />
       <button type="button" (click)="openAdd()"
         class="px-4 py-2 rounded-lg bg-[#1e3a63] text-white text-[13px] font-semibold hover:bg-[#284d82]">
         + Add Violator
@@ -78,39 +78,41 @@
 
   @if (historyFor(); as h) {
   <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
-    <div class="flex items-center justify-between mb-4">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
       <h2 class="text-[15px] font-semibold text-[#152238]">Violation history — {{ h.firstName }} {{ h.lastName }}</h2>
       <button type="button" (click)="closeHistory()" class="text-[#7a889c] font-semibold text-[13px]">Close</button>
     </div>
-    <table class="w-full text-[13px]">
-      <thead class="bg-[#f3f5f8] text-[#7a889c] text-left">
-        <tr>
-          <th class="px-4 py-2">OVR #</th>
-          <th class="px-4 py-2">Date</th>
-          <th class="px-4 py-2">Ordinance</th>
-          <th class="px-4 py-2">Offense Level</th>
-          <th class="px-4 py-2">Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (item of history(); track item.violationId) {
-        <tr class="border-t border-[#eef2f8]">
-          <td class="px-4 py-2">{{ item.ovrNumber }}</td>
-          <td class="px-4 py-2">{{ item.dateOfOccurrence }}</td>
-          <td class="px-4 py-2">{{ item.ordinanceShortName }}</td>
-          <td class="px-4 py-2">{{ item.offenseLevel }}</td>
-          <td class="px-4 py-2">{{ item.status }}</td>
-        </tr>
-        } @empty {
-        <tr><td colspan="5" class="px-4 py-4 text-center text-[#7a889c]">No prior violations.</td></tr>
-        }
-      </tbody>
-    </table>
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[640px] text-[13px]">
+        <thead class="bg-[#f3f5f8] text-[#7a889c] text-left">
+          <tr>
+            <th class="px-4 py-2">OVR #</th>
+            <th class="px-4 py-2">Date</th>
+            <th class="px-4 py-2">Ordinance</th>
+            <th class="px-4 py-2">Offense Level</th>
+            <th class="px-4 py-2">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of history(); track item.violationId) {
+          <tr class="border-t border-[#eef2f8]">
+            <td class="px-4 py-2">{{ item.ovrNumber }}</td>
+            <td class="px-4 py-2">{{ item.dateOfOccurrence }}</td>
+            <td class="px-4 py-2">{{ item.ordinanceShortName }}</td>
+            <td class="px-4 py-2">{{ item.offenseLevel }}</td>
+            <td class="px-4 py-2">{{ item.status }}</td>
+          </tr>
+          } @empty {
+          <tr><td colspan="5" class="px-4 py-4 text-center text-[#7a889c]">No prior violations.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
   </div>
   }
 
-  <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-    <table class="w-full text-[13px]">
+  <div class="bg-white rounded-2xl shadow-sm overflow-x-auto">
+    <table class="w-full min-w-[640px] text-[13px]">
       <thead class="bg-[#f3f5f8] text-[#7a889c] text-left">
         <tr>
           <th class="px-4 py-3">Name</th>

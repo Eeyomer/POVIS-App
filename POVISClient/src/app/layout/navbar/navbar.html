@@ -1,10 +1,16 @@
-<div class="flex items-center justify-between px-9 py-[22px] bg-white border-b border-[#eef2f8] font-inter">
-  <div>
-    <div class="font-poppins font-bold text-[22px] text-[#152238]">{{ greeting }}{{ username ? ', ' + username : '' }}</div>
-    <div class="text-[13.5px] text-[#7a889c] mt-0.5">{{ today }} — here's what's happening in POVIS today.</div>
+<div class="flex items-center justify-between gap-3 px-4 py-4 sm:px-6 sm:py-5 md:px-9 md:py-[22px] bg-white border-b border-[#eef2f8] font-inter">
+  <div class="flex items-center gap-3 min-w-0">
+    <button type="button" (click)="sidebarService.toggle()" title="Menu"
+      class="md:hidden w-9 h-9 shrink-0 rounded-lg flex items-center justify-center text-[#152238] hover:bg-[#eef2f8] transition-colors">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <div class="min-w-0">
+      <div class="font-poppins font-bold text-[17px] sm:text-[19px] md:text-[22px] text-[#152238] truncate">{{ greeting }}{{ username ? ', ' + username : '' }}</div>
+      <div class="text-[12px] sm:text-[13.5px] text-[#7a889c] mt-0.5 truncate">{{ today }} — here's what's happening in POVIS today.</div>
+    </div>
   </div>
-  <div class="flex items-center gap-3.5">
-    <div class="w-10 h-10 rounded-[10px] bg-[#eef2f8] flex items-center justify-center">
+  <div class="flex items-center gap-3.5 shrink-0">
+    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-[10px] bg-[#eef2f8] flex items-center justify-center">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1e3a63" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
     </div>
   </div>

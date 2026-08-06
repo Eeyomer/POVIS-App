@@ -1,17 +1,25 @@
 <div
-  class="w-[264px] shrink-0 h-screen sticky top-0 bg-[#12233f] flex flex-col p-[18px] pt-[26px] gap-1.5 overflow-y-auto font-inter">
+  class="w-[264px] shrink-0 h-screen fixed inset-y-0 left-0 z-40 bg-[#12233f] flex flex-col p-[18px] pt-[26px] gap-1.5 overflow-y-auto font-inter transition-transform duration-200 md:sticky md:top-0 md:translate-x-0 md:z-auto"
+  [class.translate-x-0]="sidebarService.isOpen()"
+  [class.-translate-x-full]="!sidebarService.isOpen()">
 
   <!-- Brand -->
-  <div class="flex items-center gap-2.5 px-2.5 pb-[22px]">
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
-      <path d="M12 2 3 6v6c0 5 4 8.5 9 10 5-1.5 9-5 9-10V6l-9-4Z" />
-    </svg>
-    <div class="font-poppins font-bold text-[16px] text-white truncate">POVIS</div>
+  <div class="flex items-center justify-between gap-2.5 px-2.5 pb-[22px]">
+    <div class="flex items-center gap-2.5 min-w-0">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" class="shrink-0">
+        <path d="M12 2 3 6v6c0 5 4 8.5 9 10 5-1.5 9-5 9-10V6l-9-4Z" />
+      </svg>
+      <div class="font-poppins font-bold text-[16px] text-white truncate">POVIS</div>
+    </div>
+    <button type="button" (click)="sidebarService.close()" title="Close menu"
+      class="md:hidden w-8 h-8 rounded-[8px] flex items-center justify-center text-[#c4cfe0] hover:bg-white/10 hover:text-white transition-colors shrink-0">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
   </div>
 
   <!-- Overview -->
   <div class="text-[11px] font-bold tracking-[0.06em] uppercase text-[#8a9bb8] px-2.5 pt-[10px] pb-1">Overview</div>
-  <a routerLink="/admin" routerLinkActive="bg-[#1e3a63] text-white" [routerLinkActiveOptions]="{ exact: true }"
+  <a routerLink="/admin" routerLinkActive="bg-[#1e3a63] text-white" [routerLinkActiveOptions]="{ exact: true }" (click)="onNavigate()"
     class="flex items-center gap-3 px-3 py-[10px] rounded-[10px] text-[14px] font-semibold text-[#c4cfe0]">
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1" /><rect x="14" y="3" width="7" height="5" rx="1" /><rect x="14" y="12" width="7" height="9" rx="1" /><rect x="3" y="16" width="7" height="5" rx="1" /></svg>
     Dashboard
@@ -19,17 +27,17 @@
 
   <!-- Records -->
   <div class="text-[11px] font-bold tracking-[0.06em] uppercase text-[#8a9bb8] px-2.5 pt-[14px] pb-1">Records</div>
-  <a routerLink="/admin/barangays" routerLinkActive="bg-[#1e3a63] text-white"
+  <a routerLink="/admin/barangays" routerLinkActive="bg-[#1e3a63] text-white" (click)="onNavigate()"
     class="flex items-center gap-3 px-3 py-[10px] rounded-[10px] text-[14px] font-semibold text-[#c4cfe0]">
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6" /></svg>
     Barangays
   </a>
-  <a routerLink="/admin/violators" routerLinkActive="bg-[#1e3a63] text-white"
+  <a routerLink="/admin/violators" routerLinkActive="bg-[#1e3a63] text-white" (click)="onNavigate()"
     class="flex items-center gap-3 px-3 py-[10px] rounded-[10px] text-[14px] font-semibold text-[#c4cfe0]">
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
     Violators
   </a>
-  <a routerLink="/admin/ordinances" routerLinkActive="bg-[#1e3a63] text-white"
+  <a routerLink="/admin/ordinances" routerLinkActive="bg-[#1e3a63] text-white" (click)="onNavigate()"
     class="flex items-center gap-3 px-3 py-[10px] rounded-[10px] text-[14px] font-semibold text-[#c4cfe0]">
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></svg>
     Ordinances
@@ -37,17 +45,17 @@
 
   <!-- Enforcement -->
   <div class="text-[11px] font-bold tracking-[0.06em] uppercase text-[#8a9bb8] px-2.5 pt-[14px] pb-1">Enforcement</div>
-  <a routerLink="/admin/violations" routerLinkActive="bg-[#1e3a63] text-white"
+  <a routerLink="/admin/violations" routerLinkActive="bg-[#1e3a63] text-white" (click)="onNavigate()"
     class="flex items-center gap-3 px-3 py-[10px] rounded-[10px] text-[14px] font-semibold text-[#c4cfe0]">
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><path d="M12 9v4M12 17h.01" /></svg>
     Violations
   </a>
-  <a routerLink="/admin/filed-cases" routerLinkActive="bg-[#1e3a63] text-white"
+  <a routerLink="/admin/filed-cases" routerLinkActive="bg-[#1e3a63] text-white" (click)="onNavigate()"
     class="flex items-center gap-3 px-3 py-[10px] rounded-[10px] text-[14px] font-semibold text-[#c4cfe0]">
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18" /><path d="M18 17V9M13 17V5M8 17v-4" /></svg>
     Filed Cases
   </a>
-  <a routerLink="/admin/payments" routerLinkActive="bg-[#1e3a63] text-white"
+  <a routerLink="/admin/payments" routerLinkActive="bg-[#1e3a63] text-white" (click)="onNavigate()"
     class="flex items-center gap-3 px-3 py-[10px] rounded-[10px] text-[14px] font-semibold text-[#c4cfe0]">
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2" /><path d="M2 10h20" /></svg>
     Payments
@@ -55,17 +63,17 @@
 
   <!-- Compliance -->
   <div class="text-[11px] font-bold tracking-[0.06em] uppercase text-[#8a9bb8] px-2.5 pt-[14px] pb-1">Compliance</div>
-  <a routerLink="/admin/seminar-records" routerLinkActive="bg-[#1e3a63] text-white"
+  <a routerLink="/admin/seminar-records" routerLinkActive="bg-[#1e3a63] text-white" (click)="onNavigate()"
     class="flex items-center gap-3 px-3 py-[10px] rounded-[10px] text-[14px] font-semibold text-[#c4cfe0]">
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5-10-5z" /><path d="M6 12v5c3 3 9 3 12 0v-5" /></svg>
     Seminar Records
   </a>
-  <a routerLink="/admin/counseling-records" routerLinkActive="bg-[#1e3a63] text-white"
+  <a routerLink="/admin/counseling-records" routerLinkActive="bg-[#1e3a63] text-white" (click)="onNavigate()"
     class="flex items-center gap-3 px-3 py-[10px] rounded-[10px] text-[14px] font-semibold text-[#c4cfe0]">
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
     Counseling Records
   </a>
-  <a routerLink="/admin/community-service-records" routerLinkActive="bg-[#1e3a63] text-white"
+  <a routerLink="/admin/community-service-records" routerLinkActive="bg-[#1e3a63] text-white" (click)="onNavigate()"
     class="flex items-center gap-3 px-3 py-[10px] rounded-[10px] text-[14px] font-semibold text-[#c4cfe0]">
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></svg>
     Community Service

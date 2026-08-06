@@ -1,6 +1,6 @@
-<div class="p-8">
-  <div class="flex items-center justify-between mb-6">
-    <h1 class="font-poppins font-bold text-[22px] text-[#152238]">Barangays</h1>
+<div class="p-4 sm:p-6 md:p-8">
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+    <h1 class="font-poppins font-bold text-[19px] sm:text-[22px] text-[#152238]">Barangays</h1>
     <button type="button" (click)="openAdd()"
       class="px-4 py-2 rounded-lg bg-[#1e3a63] text-white text-[13px] font-semibold hover:bg-[#284d82]">
       + Add Barangay
@@ -29,8 +29,8 @@
   </div>
   }
 
-  <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-    <table class="w-full text-[13px]">
+  <div class="bg-white rounded-2xl shadow-sm overflow-x-auto">
+    <table class="w-full min-w-[640px] text-[13px]">
       <thead class="bg-[#f3f5f8] text-[#7a889c] text-left">
         <tr>
           <th class="px-4 py-3">Name</th>

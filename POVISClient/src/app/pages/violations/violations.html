@@ -1,7 +1,7 @@
-<div class="p-8">
-  <div class="flex items-center justify-between mb-6 gap-4">
-    <h1 class="font-poppins font-bold text-[22px] text-[#152238]">Violations</h1>
-    <div class="flex gap-3">
+<div class="p-4 sm:p-6 md:p-8">
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+    <h1 class="font-poppins font-bold text-[19px] sm:text-[22px] text-[#152238]">Violations</h1>
+    <div class="flex flex-wrap gap-3">
       <select [value]="statusFilter()" (change)="onStatusFilterChange($any($event.target).value)"
         class="px-3 py-2 rounded-lg border border-[#d3dae5] text-[13px]">
         <option value="">All statuses</option>
@@ -136,8 +136,8 @@
   </div>
   }
 
-  <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-    <table class="w-full text-[13px]">
+  <div class="bg-white rounded-2xl shadow-sm overflow-x-auto">
+    <table class="w-full min-w-[640px] text-[13px]">
       <thead class="bg-[#f3f5f8] text-[#7a889c] text-left">
         <tr>
           <th class="px-4 py-3">OVR #</th>
