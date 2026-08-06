@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: ''
-};
+  apiUrl: 'https://povis-app.onrender.com'
+};  
