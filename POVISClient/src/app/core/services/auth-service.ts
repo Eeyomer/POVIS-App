@@ -2,7 +2,7 @@ import { Injectable, Inject, PLATFORM_ID, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, map, tap, throwError } from 'rxjs';
-import { LoginDTO, RegisterDTO, Role } from '../models/app-dto';
+import { LoginDTO, RegisterDTO, Role, ROLE_LABELS } from '../models/app-dto';
 import { AuthResponse } from '../models/auth-model';
 import { AuthApi } from './api-service/auth-api';
 
@@ -73,6 +73,36 @@ export class AuthService {
 
   isLoggedIn(): boolean {
     return !!this.getToken();
+  }
+
+  getRoleLabel(): string {
+    const role = this.getRole();
+    return role ? ROLE_LABELS[role] : '';
+  }
+
+  hasRole(...roles: Role[]): boolean {
+    const role = this.getRole();
+    return !!role && roles.includes(role);
+  }
+
+  /** MIS Personnel: manages user accounts and roles, system maintenance. */
+  canManageUsers(): boolean {
+    return this.hasRole('MISPersonnel');
+  }
+
+  /** MIS Personnel and the OVR Supervisor may review/approve, update status, and generate reports. */
+  canApprove(): boolean {
+    return this.hasRole('MISPersonnel', 'OVRSupervisor');
+  }
+
+  /** Everyone except PNP/Barangay Staff (read-only verification) may create/edit records. */
+  canEdit(): boolean {
+    return this.hasRole('MISPersonnel', 'OVRSupervisor', 'ApprehendingOfficer');
+  }
+
+  /** Only MIS Personnel may permanently delete records. */
+  canDelete(): boolean {
+    return this.hasRole('MISPersonnel');
   }
 
   private storeSession(auth: AuthResponse): void {

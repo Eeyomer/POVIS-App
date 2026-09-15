@@ -407,7 +407,14 @@ export interface UpdateCounselingDTO {
 }
 
 // ── Auth ─────────────────────────────────────────────────────────────────
-export type Role = 'Admin' | 'Staff';
+export type Role = 'MISPersonnel' | 'OVRSupervisor' | 'ApprehendingOfficer' | 'PNPBarangayStaff';
+
+export const ROLE_LABELS: Record<Role, string> = {
+  MISPersonnel: 'MIS Personnel',
+  OVRSupervisor: 'Supervisor of the OVR Section',
+  ApprehendingOfficer: 'Apprehending Officer',
+  PNPBarangayStaff: 'PNP/Barangay Staff',
+};
 
 export interface LoginDTO {
   username: string;
@@ -418,4 +425,28 @@ export interface RegisterDTO {
   username: string;
   password: string;
   role: Role;
+}
+
+export interface User {
+  id: string;
+  username: string;
+  role: Role;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface CreateUserDTO {
+  username: string;
+  password: string;
+  role: Role;
+}
+
+export interface UpdateUserDTO {
+  id: string;
+  role: Role;
+  isActive: boolean;
+}
+
+export interface ResetPasswordDTO {
+  newPassword: string;
 }

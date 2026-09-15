@@ -16,10 +16,12 @@
         <option value="DidNotComply">Did Not Comply</option>
         <option value="WarningIssued">Warning Issued</option>
       </select>
+      @if (authService.canEdit()) {
       <button type="button" (click)="openAdd()"
         class="px-4 py-2 rounded-lg bg-[#1e3a63] text-white text-[13px] font-semibold hover:bg-[#284d82]">
         + Record Violation
       </button>
+      }
     </div>
   </div>
 
@@ -161,8 +163,12 @@
           <td class="px-4 py-3">{{ v.apprehendingOfficer }}</td>
           <td class="px-4 py-3">{{ v.status }}</td>
           <td class="px-4 py-3 text-right">
+            @if (authService.canApprove()) {
             <button type="button" (click)="openEdit(v)" class="text-[#1e3a63] font-semibold mr-3">Edit</button>
+            }
+            @if (authService.canDelete()) {
             <button type="button" (click)="remove(v)" class="text-red-500 font-semibold">Delete</button>
+            }
           </td>
         </tr>
         } @empty {

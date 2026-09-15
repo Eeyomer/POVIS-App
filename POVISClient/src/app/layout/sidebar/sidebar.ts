@@ -13,9 +13,10 @@ import { SidebarService } from '../../core/services/sidebar-service';
 export class Sidebar implements OnInit {
   username: string | null = null;
   initials = 'A';
+  roleLabel = '';
 
   constructor(
-    private authService: AuthService,
+    public authService: AuthService,
     private router: Router,
     private cdr: ChangeDetectorRef,
     public sidebarService: SidebarService,
@@ -24,6 +25,7 @@ export class Sidebar implements OnInit {
   ngOnInit(): void {
     this.username = this.authService.getUsername();
     this.initials = this.computeInitials(this.username);
+    this.roleLabel = this.authService.getRoleLabel();
     this.cdr.markForCheck();
   }
 

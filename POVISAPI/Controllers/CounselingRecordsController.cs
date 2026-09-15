@@ -44,6 +44,7 @@ namespace POVISAPI.Controllers
             });
         }
 
+        [Authorize(Roles = "MISPersonnel,OVRSupervisor")]
         [HttpPost]
         public async Task<IActionResult> AddCounselingRecord(AddCounselingDTO dto)
         {
@@ -56,6 +57,7 @@ namespace POVISAPI.Controllers
             });
         }
 
+        [Authorize(Roles = "MISPersonnel,OVRSupervisor")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateCounselingRecord(string id, [FromBody] UpdateCounselingDTO dto)
         {
@@ -75,6 +77,7 @@ namespace POVISAPI.Controllers
             });
         }
 
+        [Authorize(Roles = "MISPersonnel")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCounselingRecord(string id)
         {

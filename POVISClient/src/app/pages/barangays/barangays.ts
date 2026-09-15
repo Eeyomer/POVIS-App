@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@ang
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { BarangaysService } from '../../core/services/barangays-service';
+import { AuthService } from '../../core/services/auth-service';
 import { BarangayDTO } from '../../core/models/app-dto';
 import { ToastService } from '../../shared/toast/toast-service';
 
@@ -25,6 +26,7 @@ export class Barangays implements OnInit {
 
   constructor(
     private barangaysService: BarangaysService,
+    public authService: AuthService,
     private toast: ToastService,
   ) {}
 

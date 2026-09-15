@@ -56,6 +56,7 @@ namespace POVISAPI.Controllers
             });
         }
 
+        [Authorize(Roles = "MISPersonnel,OVRSupervisor,ApprehendingOfficer")]
         [HttpPost]
         public async Task<IActionResult> AddViolation(AddViolationDTO dto)
         {
@@ -68,6 +69,7 @@ namespace POVISAPI.Controllers
             });
         }
 
+        [Authorize(Roles = "MISPersonnel,OVRSupervisor")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateViolation(string id, [FromBody] UpdateViolationDTO dto)
         {
@@ -87,6 +89,7 @@ namespace POVISAPI.Controllers
             });
         }
 
+        [Authorize(Roles = "MISPersonnel")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteViolation(string id)
         {

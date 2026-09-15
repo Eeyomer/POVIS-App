@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@ang
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { OrdinancesService } from '../../core/services/ordinances-service';
+import { AuthService } from '../../core/services/auth-service';
 import { OffenseLevel, OrdinanceDTO, OrdinanceListDTO } from '../../core/models/app-dto';
 import { ToastService } from '../../shared/toast/toast-service';
 
@@ -42,6 +43,7 @@ export class Ordinances implements OnInit {
 
   constructor(
     private ordinancesService: OrdinancesService,
+    public authService: AuthService,
     private toast: ToastService,
   ) {}
 

@@ -5,6 +5,7 @@ import { ViolationsService } from '../../core/services/violations-service';
 import { ViolatorsService } from '../../core/services/violators-service';
 import { OrdinancesService } from '../../core/services/ordinances-service';
 import { BarangaysService } from '../../core/services/barangays-service';
+import { AuthService } from '../../core/services/auth-service';
 import {
   BarangayDTO,
   Division,
@@ -61,6 +62,7 @@ export class Violations implements OnInit {
     private violatorsService: ViolatorsService,
     private ordinancesService: OrdinancesService,
     private barangaysService: BarangaysService,
+    public authService: AuthService,
     private toast: ToastService,
   ) {}
 

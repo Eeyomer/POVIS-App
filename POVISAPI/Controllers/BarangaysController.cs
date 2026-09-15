@@ -43,6 +43,7 @@ namespace POVISAPI.Controllers
             });
         }
 
+        [Authorize(Roles = "MISPersonnel")]
         [HttpPost]
         public async Task<IActionResult> AddBarangay(AddBarangayDTO dto)
         {
@@ -55,6 +56,7 @@ namespace POVISAPI.Controllers
             });
         }
 
+        [Authorize(Roles = "MISPersonnel")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateBarangay(string id, [FromBody] UpdateBarangayDTO dto)
         {
@@ -74,6 +76,7 @@ namespace POVISAPI.Controllers
             });
         }
 
+        [Authorize(Roles = "MISPersonnel")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBarangay(string id)
         {

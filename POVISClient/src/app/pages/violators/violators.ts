@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ViolatorsService } from '../../core/services/violators-service';
 import { BarangaysService } from '../../core/services/barangays-service';
+import { AuthService } from '../../core/services/auth-service';
 import { BarangayDTO, Gender, ViolatorDTO, ViolatorHistoryDTO } from '../../core/models/app-dto';
 import { ToastService } from '../../shared/toast/toast-service';
 
@@ -45,6 +46,7 @@ export class Violators implements OnInit {
   constructor(
     private violatorsService: ViolatorsService,
     private barangaysService: BarangaysService,
+    public authService: AuthService,
     private toast: ToastService,
   ) {}
 

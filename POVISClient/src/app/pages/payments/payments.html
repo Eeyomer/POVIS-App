@@ -1,10 +1,12 @@
 <div class="p-4 sm:p-6 md:p-8">
   <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
     <h1 class="font-poppins font-bold text-[19px] sm:text-[22px] text-[#152238]">Payments</h1>
+    @if (authService.canApprove()) {
     <button type="button" (click)="openAdd()"
       class="px-4 py-2 rounded-lg bg-[#1e3a63] text-white text-[13px] font-semibold hover:bg-[#284d82]">
       + Record Payment
     </button>
+    }
   </div>
 
   @if (showForm()) {
@@ -72,8 +74,12 @@
           <td class="px-4 py-3">₱{{ p.amount }}</td>
           <td class="px-4 py-3">{{ p.receiptNumber ?? '—' }}</td>
           <td class="px-4 py-3 text-right">
+            @if (authService.canApprove()) {
             <button type="button" (click)="openEdit(p)" class="text-[#1e3a63] font-semibold mr-3">Edit</button>
+            }
+            @if (authService.canDelete()) {
             <button type="button" (click)="remove(p)" class="text-red-500 font-semibold">Void</button>
+            }
           </td>
         </tr>
         } @empty {

@@ -27,6 +27,12 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponseDTO> RegisterAsync(RegisterDTO dto)
     {
+        // Public self-registration is only for bootstrapping the very first MIS Personnel
+        // account. Once one exists, additional accounts must be created via the (MIS
+        // Personnel-only) Users management endpoints.
+        if (await AdminExistsAsync())
+            throw new InvalidOperationException("An MIS Personnel account already exists. Ask an MIS Personnel to create your account.");
+
         var usernameTaken = await context.Users.AnyAsync(u => u.Username == dto.Username);
         if (usernameTaken)
             throw new ArgumentException("Username is already taken.");
@@ -35,7 +41,7 @@ public class AuthService : IAuthService
         {
             Username = dto.Username,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
-            Role = dto.Role,
+            Role = Role.MISPersonnel,
             IsActive = true
         };
 
@@ -57,7 +63,7 @@ public class AuthService : IAuthService
 
     public async Task<bool> AdminExistsAsync()
     {
-        return await context.Users.AnyAsync(u => u.Role == Role.Admin && u.IsActive);
+        return await context.Users.AnyAsync(u => u.Role == Role.MISPersonnel && u.IsActive);
     }
 
     private AuthResponseDTO BuildAuthResponse(User user)

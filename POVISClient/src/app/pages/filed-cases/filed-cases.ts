@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FiledCasesService } from '../../core/services/filed-cases-service';
 import { ViolationsService } from '../../core/services/violations-service';
+import { AuthService } from '../../core/services/auth-service';
 import { CaseStatus, FiledCaseDTO, ViolationDTO } from '../../core/models/app-dto';
 import { ToastService } from '../../shared/toast/toast-service';
 
@@ -35,6 +36,7 @@ export class FiledCases implements OnInit {
   constructor(
     private filedCasesService: FiledCasesService,
     private violationsService: ViolationsService,
+    public authService: AuthService,
     private toast: ToastService,
   ) {}
 

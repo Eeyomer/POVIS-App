@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CounselingRecordsService } from '../../core/services/counseling-records-service';
 import { ViolationsService } from '../../core/services/violations-service';
+import { AuthService } from '../../core/services/auth-service';
 import { ComplianceStatus, CounselingDTO, ViolationDTO } from '../../core/models/app-dto';
 import { ToastService } from '../../shared/toast/toast-service';
 
@@ -36,6 +37,7 @@ export class CounselingRecords implements OnInit {
   constructor(
     private recordsService: CounselingRecordsService,
     private violationsService: ViolationsService,
+    public authService: AuthService,
     private toast: ToastService,
   ) {}
 

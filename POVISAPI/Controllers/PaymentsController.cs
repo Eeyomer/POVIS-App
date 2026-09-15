@@ -55,6 +55,7 @@ namespace POVISAPI.Controllers
             });
         }
 
+        [Authorize(Roles = "MISPersonnel,OVRSupervisor")]
         [HttpPost]
         public async Task<IActionResult> AddPayment(AddPaymentDTO dto)
         {
@@ -67,6 +68,7 @@ namespace POVISAPI.Controllers
             });
         }
 
+        [Authorize(Roles = "MISPersonnel,OVRSupervisor")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdatePayment(string id, [FromBody] UpdatePaymentDTO dto)
         {
@@ -86,6 +88,7 @@ namespace POVISAPI.Controllers
             });
         }
 
+        [Authorize(Roles = "MISPersonnel")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePayment(string id)
         {

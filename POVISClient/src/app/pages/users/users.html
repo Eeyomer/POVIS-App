@@ -1,0 +1,92 @@
+<div class="p-4 sm:p-6 md:p-8">
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+    <h1 class="font-poppins font-bold text-[19px] sm:text-[22px] text-[#152238]">Users &amp; Roles</h1>
+    <button type="button" (click)="openAdd()"
+      class="px-4 py-2 rounded-lg bg-[#1e3a63] text-white text-[13px] font-semibold hover:bg-[#284d82]">
+      + Add User
+    </button>
+  </div>
+
+  @if (showForm()) {
+  <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
+    <h2 class="text-[15px] font-semibold text-[#152238] mb-4">{{ editing() ? 'Edit' : 'Add' }} User</h2>
+    <form [formGroup]="form" (ngSubmit)="save()" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-[13px] font-semibold text-[#152238] mb-1">Username</label>
+        <input type="text" formControlName="username" [readonly]="!!editing()"
+          class="w-full px-3 py-2 rounded-lg border border-[#d3dae5] text-[14px] disabled:bg-[#f3f5f8]" />
+      </div>
+      <div>
+        <label class="block text-[13px] font-semibold text-[#152238] mb-1">Role</label>
+        <select formControlName="role" class="w-full px-3 py-2 rounded-lg border border-[#d3dae5] text-[14px]">
+          @for (r of roles; track r) {
+          <option [value]="r">{{ roleLabels[r] }}</option>
+          }
+        </select>
+      </div>
+      @if (!editing()) {
+      <div>
+        <label class="block text-[13px] font-semibold text-[#152238] mb-1">Password</label>
+        <input type="password" formControlName="password" autocomplete="new-password"
+          class="w-full px-3 py-2 rounded-lg border border-[#d3dae5] text-[14px]" />
+      </div>
+      }
+      <div class="sm:col-span-2 flex gap-3">
+        <button type="submit" class="px-4 py-2 rounded-lg bg-[#1e3a63] text-white text-[13px] font-semibold">Save</button>
+        <button type="button" (click)="cancel()" class="px-4 py-2 rounded-lg border border-[#d3dae5] text-[13px] font-semibold text-[#152238]">Cancel</button>
+      </div>
+    </form>
+  </div>
+  }
+
+  @if (resettingId()) {
+  <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
+    <h2 class="text-[15px] font-semibold text-[#152238] mb-4">Reset Password</h2>
+    <form [formGroup]="resetForm" (ngSubmit)="submitResetPassword()" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-[13px] font-semibold text-[#152238] mb-1">New Password</label>
+        <input type="password" formControlName="newPassword" autocomplete="new-password"
+          class="w-full px-3 py-2 rounded-lg border border-[#d3dae5] text-[14px]" />
+      </div>
+      <div class="sm:col-span-2 flex gap-3">
+        <button type="submit" class="px-4 py-2 rounded-lg bg-[#1e3a63] text-white text-[13px] font-semibold">Reset</button>
+        <button type="button" (click)="cancelResetPassword()" class="px-4 py-2 rounded-lg border border-[#d3dae5] text-[13px] font-semibold text-[#152238]">Cancel</button>
+      </div>
+    </form>
+  </div>
+  }
+
+  <div class="bg-white rounded-2xl shadow-sm overflow-x-auto">
+    <table class="w-full min-w-[720px] text-[13px]">
+      <thead class="bg-[#f3f5f8] text-[#7a889c] text-left">
+        <tr>
+          <th class="px-4 py-3">Username</th>
+          <th class="px-4 py-3">Role</th>
+          <th class="px-4 py-3">Status</th>
+          <th class="px-4 py-3"></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (u of users(); track u.id) {
+        <tr class="border-t border-[#eef2f8]">
+          <td class="px-4 py-3 font-medium text-[#152238]">{{ u.username }}</td>
+          <td class="px-4 py-3">{{ roleLabels[u.role] }}</td>
+          <td class="px-4 py-3">
+            <span [class]="u.isActive ? 'text-green-600' : 'text-red-500'">{{ u.isActive ? 'Active' : 'Inactive' }}</span>
+          </td>
+          <td class="px-4 py-3 text-right whitespace-nowrap">
+            <button type="button" (click)="openEdit(u)" class="text-[#1e3a63] font-semibold mr-3">Edit</button>
+            <button type="button" (click)="openResetPassword(u)" class="text-[#7a889c] font-semibold mr-3">Reset Password</button>
+            <button type="button" (click)="toggleActive(u)" class="text-[#7a889c] font-semibold mr-3">
+              {{ u.isActive ? 'Deactivate' : 'Activate' }}
+            </button>
+            <button type="button" (click)="remove(u)" class="text-red-500 font-semibold">Delete</button>
+          </td>
+        </tr>
+        } @empty {
+        <tr><td colspan="4" class="px-4 py-6 text-center text-[#7a889c]">No users yet.</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

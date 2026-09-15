@@ -79,12 +79,22 @@
     Community Service
   </a>
 
+  <!-- Administration -->
+  @if (authService.canManageUsers()) {
+  <div class="text-[11px] font-bold tracking-[0.06em] uppercase text-[#8a9bb8] px-2.5 pt-[14px] pb-1">Administration</div>
+  <a routerLink="/admin/users" routerLinkActive="bg-[#1e3a63] text-white" (click)="onNavigate()"
+    class="flex items-center gap-3 px-3 py-[10px] rounded-[10px] text-[14px] font-semibold text-[#c4cfe0]">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-8h-6M20 10V7" /></svg>
+    Users &amp; Roles
+  </a>
+  }
+
   <!-- Profile -->
   <div class="mt-auto pt-[18px] border-t border-white/10 flex items-center gap-2.5">
     <div class="w-[34px] h-[34px] rounded-full bg-[#1e3a63] flex items-center justify-center text-white text-[13px] font-bold shrink-0">{{ initials }}</div>
     <div class="flex-1 min-w-0">
-      <div class="text-[13px] font-semibold text-white truncate">{{ username || 'Administrator' }}</div>
-      <div class="text-[11.5px] text-[#8a9bb8]">Admin · Full access</div>
+      <div class="text-[13px] font-semibold text-white truncate">{{ username || 'User' }}</div>
+      <div class="text-[11.5px] text-[#8a9bb8]">{{ roleLabel }}</div>
     </div>
     <button type="button" (click)="logout()" title="Log out"
       class="w-8 h-8 rounded-[8px] flex items-center justify-center text-[#c4cfe0] hover:bg-white/10 hover:text-white transition-colors shrink-0">

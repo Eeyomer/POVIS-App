@@ -9,7 +9,7 @@ namespace POVISAPI.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [EnableCors("AllowFrontend")]
-    [Authorize]
+    [Authorize(Roles = "MISPersonnel,OVRSupervisor")]
     public class ReportsController : Controller
     {
         private readonly IReportService reportService;

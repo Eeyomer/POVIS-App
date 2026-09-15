@@ -84,8 +84,17 @@ public enum CaseStatus
     Closed = 3   // e.g. CASE CLOSED / PAID after prosecution decision
 }
 
+/// <summary>
+/// MISPersonnel   - manages user accounts and roles, system maintenance, backups, restoration, technical logs.
+/// OVRSupervisor  - Supervisor of the OVR Section: manages operational records, reviews/approves submissions,
+///                  updates compliance and case status, generates reports.
+/// ApprehendingOfficer - searches records and submits new violation information (mobile-compatible).
+/// PNPBarangayStaff - PNP/Barangay Staff: authorized read-only resident, violation, and compliance verification.
+/// </summary>
 public enum Role
 {
-    Admin = 1,
-    Staff = 2
+    MISPersonnel = 1,
+    OVRSupervisor = 2,
+    ApprehendingOfficer = 3,
+    PNPBarangayStaff = 4
 }

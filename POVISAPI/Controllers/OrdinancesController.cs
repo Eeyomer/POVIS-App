@@ -43,6 +43,7 @@ namespace POVISAPI.Controllers
             });
         }
 
+        [Authorize(Roles = "MISPersonnel")]
         [HttpPost]
         public async Task<IActionResult> AddOrdinance(AddOrdinanceDTO dto)
         {
@@ -55,6 +56,7 @@ namespace POVISAPI.Controllers
             });
         }
 
+        [Authorize(Roles = "MISPersonnel")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateOrdinance(string id, [FromBody] UpdateOrdinanceDTO dto)
         {
@@ -74,6 +76,7 @@ namespace POVISAPI.Controllers
             });
         }
 
+        [Authorize(Roles = "MISPersonnel")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteOrdinance(string id)
         {
@@ -86,6 +89,7 @@ namespace POVISAPI.Controllers
         }
 
         // ----- Sections -----
+        [Authorize(Roles = "MISPersonnel")]
         [HttpPost("{id}/sections")]
         public async Task<IActionResult> AddSection(string id, AddOrdinanceSectionDTO dto)
         {
@@ -98,6 +102,7 @@ namespace POVISAPI.Controllers
             });
         }
 
+        [Authorize(Roles = "MISPersonnel")]
         [HttpDelete("{id}/sections/{sectionId}")]
         public async Task<IActionResult> RemoveSection(string id, string sectionId)
         {
@@ -110,6 +115,7 @@ namespace POVISAPI.Controllers
         }
 
         // ----- Penalties -----
+        [Authorize(Roles = "MISPersonnel")]
         [HttpPost("{id}/penalties")]
         public async Task<IActionResult> AddPenalty(string id, AddOrdinancePenaltyDTO dto)
         {
@@ -122,6 +128,7 @@ namespace POVISAPI.Controllers
             });
         }
 
+        [Authorize(Roles = "MISPersonnel")]
         [HttpDelete("{id}/penalties/{penaltyId}")]
         public async Task<IActionResult> RemovePenalty(string id, string penaltyId)
         {

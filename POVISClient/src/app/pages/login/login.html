@@ -13,9 +13,9 @@
       @if (checkingAdmin()) {
       <div class="py-6 text-center text-[13px] text-[#7a889c]">Checking system status…</div>
       } @else if (!adminExists()) {
-      <!-- Admin registration -->
+      <!-- MIS Personnel registration -->
       <div class="text-[11px] font-bold text-[#5c6b82] tracking-[0.6px] mb-1">FIRST-TIME SETUP</div>
-      <div class="text-[12.5px] text-[#7a889c] mb-3.5 leading-normal">No administrator account exists yet. Create one to get started.</div>
+      <div class="text-[12.5px] text-[#7a889c] mb-3.5 leading-normal">No MIS Personnel account exists yet. Create one to get started.</div>
 
       <form [formGroup]="registerForm" (ngSubmit)="submitRegister()" class="flex flex-col">
         <label for="reg-username" class="block text-[12.5px] font-semibold text-[#2a3958] mb-1.5">Username</label>
@@ -60,7 +60,7 @@
 
         <button type="submit" [disabled]="isSubmitting()"
           class="w-full mt-3 bg-[#1e3a63] text-white border-none rounded py-3 text-[14px] font-bold tracking-[0.3px] cursor-pointer hover:bg-[#284d82] transition-colors disabled:opacity-60">
-          {{ isSubmitting() ? 'Creating account...' : 'Create Admin Account' }}
+          {{ isSubmitting() ? 'Creating account...' : 'Create MIS Personnel Account' }}
         </button>
 
         <div class="mt-[18px] pt-4 border-t border-[#eef1f5] text-[11.5px] text-[#8291a6] text-center leading-[1.6]">

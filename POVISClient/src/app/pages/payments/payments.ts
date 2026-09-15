@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { PaymentsService } from '../../core/services/payments-service';
 import { ViolationsService } from '../../core/services/violations-service';
+import { AuthService } from '../../core/services/auth-service';
 import { PaymentDTO, ViolationDTO } from '../../core/models/app-dto';
 import { ToastService } from '../../shared/toast/toast-service';
 
@@ -34,6 +35,7 @@ export class Payments implements OnInit {
   constructor(
     private paymentsService: PaymentsService,
     private violationsService: ViolationsService,
+    public authService: AuthService,
     private toast: ToastService,
   ) {}
 

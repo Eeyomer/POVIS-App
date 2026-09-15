@@ -105,7 +105,7 @@ export class Login implements OnInit {
     this.isSubmitting.set(true);
 
     const { username, password } = this.registerForm.getRawValue();
-    this.authService.register({ username: username!, password: password!, role: 'Admin' }).subscribe({
+    this.authService.register({ username: username!, password: password!, role: 'MISPersonnel' }).subscribe({
       next: () => {
         this.isSubmitting.set(false);
         this.router.navigate(['/admin']);

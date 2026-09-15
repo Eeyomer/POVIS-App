@@ -1,10 +1,12 @@
 <div class="p-4 sm:p-6 md:p-8">
   <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
     <h1 class="font-poppins font-bold text-[19px] sm:text-[22px] text-[#152238]">Barangays</h1>
+    @if (authService.canManageUsers()) {
     <button type="button" (click)="openAdd()"
       class="px-4 py-2 rounded-lg bg-[#1e3a63] text-white text-[13px] font-semibold hover:bg-[#284d82]">
       + Add Barangay
     </button>
+    }
   </div>
 
   @if (showForm()) {
@@ -48,10 +50,12 @@
             <span [class]="b.isActive ? 'text-green-600' : 'text-red-500'">{{ b.isActive ? 'Active' : 'Inactive' }}</span>
           </td>
           <td class="px-4 py-3 text-right">
+            @if (authService.canManageUsers()) {
             <button type="button" (click)="openEdit(b)" class="text-[#1e3a63] font-semibold mr-3">Edit</button>
             <button type="button" (click)="toggleActive(b)" class="text-[#7a889c] font-semibold">
               {{ b.isActive ? 'Deactivate' : 'Activate' }}
             </button>
+            }
           </td>
         </tr>
         } @empty {
