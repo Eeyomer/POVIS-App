@@ -435,6 +435,46 @@ namespace POVISAPI.Migrations
                     b.ToTable("SeminarRecords");
                 });
 
+            modelBuilder.Entity("POVISAPI.Models.Entity.TechnicalLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<long>("DurationMs")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("IpAddress")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Method")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("Path")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<int>("StatusCode")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("Username")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Timestamp");
+
+                    b.ToTable("TechnicalLogs");
+                });
+
             modelBuilder.Entity("POVISAPI.Models.Entity.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -503,6 +543,9 @@ namespace POVISAPI.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("character varying(30)");
 
+                    b.Property<bool>("IsReviewed")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("IsWarningTicket")
                         .HasColumnType("boolean");
 
@@ -533,6 +576,12 @@ namespace POVISAPI.Migrations
                     b.Property<string>("Remarks2")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime?>("ReviewedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("ReviewedBy")
+                        .HasColumnType("text");
 
                     b.Property<string>("Status")
                         .IsRequired()

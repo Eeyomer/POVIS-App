@@ -1,4 +1,8 @@
-﻿namespace POVISAPI.Middleware.Logger
+using System.Diagnostics;
+using POVISAPI.Data;
+using POVISAPI.Models.Entity;
+
+namespace POVISAPI.Middleware.Logger
 {
     public class LoggerMiddleware
     {
@@ -7,18 +11,41 @@
         {
             _next = next;
         }
-        public async Task InvokeAsync(HttpContext context)
+
+        public async Task InvokeAsync(HttpContext context, AppDbContext db)
         {
             var method = context.Request.Method;
-            var path = context.Request.Path;
-            var time = DateTime.Now.ToString("MMM dd, yyyy hh:mm:ss tt");
-            var ip = context.Connection.RemoteIpAddress;
-
-            Console.WriteLine($"Incoming request: {method} | {path} | {time} | {ip}");
+            var path = context.Request.Path.ToString();
+            var ip = context.Connection.RemoteIpAddress?.ToString();
+            var stopwatch = Stopwatch.StartNew();
 
             await _next(context);
 
-            Console.WriteLine($"Outgoing: {method} | {path} | {time} | {ip} | {context.Response.StatusCode}");
+            stopwatch.Stop();
+
+            // By the time _next(context) returns, downstream auth middleware has
+            // already populated context.User, so the acting user is available here.
+            if (path.StartsWith("/api", StringComparison.OrdinalIgnoreCase))
+            {
+                try
+                {
+                    var username = context.User?.FindFirst("sub")?.Value;
+                    db.TechnicalLogs.Add(new TechnicalLog
+                    {
+                        Method = method,
+                        Path = path,
+                        StatusCode = context.Response.StatusCode,
+                        DurationMs = stopwatch.ElapsedMilliseconds,
+                        Username = username,
+                        IpAddress = ip
+                    });
+                    await db.SaveChangesAsync();
+                }
+                catch
+                {
+                    // Logging must never break the actual response.
+                }
+            }
         }
     }
 }

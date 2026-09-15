@@ -28,6 +28,9 @@ public class AppDbContext : DbContext
     // ----- Auth -----
     public DbSet<User> Users => Set<User>();
 
+    // ----- System -----
+    public DbSet<TechnicalLog> TechnicalLogs => Set<TechnicalLog>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Store every enum as string (your existing convention)
@@ -231,6 +234,16 @@ public class AppDbContext : DbContext
             e.Property(u => u.Username).HasMaxLength(100).IsRequired();
             e.Property(u => u.PasswordHash).HasMaxLength(200).IsRequired();
             e.HasIndex(u => u.Username).IsUnique();
+        });
+
+        // ================= TechnicalLog =================
+        modelBuilder.Entity<TechnicalLog>(e =>
+        {
+            e.Property(t => t.Method).HasMaxLength(10).IsRequired();
+            e.Property(t => t.Path).HasMaxLength(300).IsRequired();
+            e.Property(t => t.Username).HasMaxLength(100);
+            e.Property(t => t.IpAddress).HasMaxLength(50);
+            e.HasIndex(t => t.Timestamp);
         });
     }
 

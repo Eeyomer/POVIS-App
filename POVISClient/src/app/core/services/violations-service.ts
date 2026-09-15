@@ -60,6 +60,13 @@ export class ViolationsService {
     );
   }
 
+  setReviewed(id: string, reviewed: boolean): Observable<ViolationDTO> {
+    return this.api.setReviewed(id, reviewed).pipe(
+      map((res) => res.data as ViolationDTO),
+      catchError((err) => this.rethrowAsError(err)),
+    );
+  }
+
   private rethrowAsError(err: HttpErrorResponse) {
     return throwError(() => new Error(err?.error?.message || 'Something went wrong. Please try again.'));
   }

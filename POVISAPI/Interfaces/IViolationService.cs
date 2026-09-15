@@ -9,6 +9,7 @@ namespace POVISAPI.Interfaces
         Task<ViolationDTO> CreateAsync(AddViolationDTO dto);
         Task<ViolationDTO> UpdateAsync(UpdateViolationDTO dto);
         Task DeleteAsync(string id);
+        Task<ViolationDTO> SetReviewedAsync(string id, bool reviewed, string? reviewerUsername);
 
         /// <summary>Resolves the fine/penalty applicable to a violation from the
         /// ordinance penalty schedule, using the violation's snapshotted offense level.</summary>

@@ -1,0 +1,127 @@
+<div class="p-4 sm:p-6 md:p-8">
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+    <h1 class="font-poppins font-bold text-[19px] sm:text-[22px] text-[#152238]">Reports</h1>
+  </div>
+
+  <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
+    <div class="flex flex-wrap items-end gap-4">
+      <div>
+        <label class="block text-[13px] font-semibold text-[#152238] mb-1">From</label>
+        <input type="date" [ngModel]="from()" (ngModelChange)="setFrom($event)"
+          class="px-3 py-2 rounded-lg border border-[#d3dae5] text-[14px]" />
+      </div>
+      <div>
+        <label class="block text-[13px] font-semibold text-[#152238] mb-1">To</label>
+        <input type="date" [ngModel]="to()" (ngModelChange)="setTo($event)"
+          class="px-3 py-2 rounded-lg border border-[#d3dae5] text-[14px]" />
+      </div>
+      <button type="button" (click)="runOrdinanceSummary()" [disabled]="loading()"
+        class="px-4 py-2 rounded-lg bg-[#1e3a63] text-white text-[13px] font-semibold hover:bg-[#284d82] disabled:opacity-60">
+        Ordinance Summary
+      </button>
+      <button type="button" (click)="runPerBarangay()" [disabled]="loading()"
+        class="px-4 py-2 rounded-lg border border-[#d3dae5] text-[13px] font-semibold text-[#152238] disabled:opacity-60">
+        Per-Barangay Report
+      </button>
+    </div>
+  </div>
+
+  @if (ordinanceSummary(); as summary) {
+  <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
+    <h2 class="text-[15px] font-semibold text-[#152238] mb-4">
+      Ordinance Summary — {{ summary.from }} to {{ summary.to }}
+    </h2>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5">
+      <div class="bg-[#f3f5f8] rounded-lg p-3">
+        <div class="text-[11px] text-[#7a889c] font-semibold uppercase">Total Violators</div>
+        <div class="text-[20px] font-bold text-[#152238]">{{ summary.totalViolators }}</div>
+      </div>
+      <div class="bg-[#f3f5f8] rounded-lg p-3">
+        <div class="text-[11px] text-[#7a889c] font-semibold uppercase">Male / Female</div>
+        <div class="text-[20px] font-bold text-[#152238]">{{ summary.totalMale }} / {{ summary.totalFemale }}</div>
+      </div>
+      <div class="bg-[#f3f5f8] rounded-lg p-3">
+        <div class="text-[11px] text-[#7a889c] font-semibold uppercase">Paid</div>
+        <div class="text-[20px] font-bold text-[#152238]">{{ summary.totalPaid }}</div>
+      </div>
+      <div class="bg-[#f3f5f8] rounded-lg p-3">
+        <div class="text-[11px] text-[#7a889c] font-semibold uppercase">Amount Paid / Unpaid</div>
+        <div class="text-[16px] font-bold text-[#152238]">₱{{ summary.totalAmountPaid }} / ₱{{ summary.totalAmountUnpaid }}</div>
+      </div>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[820px] text-[13px]">
+        <thead class="bg-[#f3f5f8] text-[#7a889c] text-left">
+          <tr>
+            <th class="px-3 py-2">Ordinance</th>
+            <th class="px-3 py-2">Male</th>
+            <th class="px-3 py-2">Female</th>
+            <th class="px-3 py-2">Total</th>
+            <th class="px-3 py-2">Seminar</th>
+            <th class="px-3 py-2">Counseling</th>
+            <th class="px-3 py-2">Comm. Service</th>
+            <th class="px-3 py-2">Did Not Comply</th>
+            <th class="px-3 py-2">Paid</th>
+            <th class="px-3 py-2">Amount Paid</th>
+            <th class="px-3 py-2">Amount Unpaid</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of summary.rows; track row.ordinanceId) {
+          <tr class="border-t border-[#eef2f8]">
+            <td class="px-3 py-2 font-medium text-[#152238]">{{ row.ordinanceShortName }}</td>
+            <td class="px-3 py-2">{{ row.maleCount }}</td>
+            <td class="px-3 py-2">{{ row.femaleCount }}</td>
+            <td class="px-3 py-2">{{ row.totalViolators }}</td>
+            <td class="px-3 py-2">{{ row.seminarCount }}</td>
+            <td class="px-3 py-2">{{ row.counselingCount }}</td>
+            <td class="px-3 py-2">{{ row.communityServiceCount }}</td>
+            <td class="px-3 py-2">{{ row.didNotComplyCount }}</td>
+            <td class="px-3 py-2">{{ row.paidCount }}</td>
+            <td class="px-3 py-2">₱{{ row.totalAmountPaid }}</td>
+            <td class="px-3 py-2">₱{{ row.totalAmountUnpaid }}</td>
+          </tr>
+          } @empty {
+          <tr><td colspan="11" class="px-3 py-6 text-center text-[#7a889c]">No data for this range.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+  }
+
+  @if (perBarangay(); as pb) {
+  <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
+    <h2 class="text-[15px] font-semibold text-[#152238] mb-4">
+      Per-Barangay Ordinance Counts — {{ pb.from }} to {{ pb.to }}
+    </h2>
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[720px] text-[13px]">
+        <thead class="bg-[#f3f5f8] text-[#7a889c] text-left">
+          <tr>
+            <th class="px-3 py-2">Barangay</th>
+            @for (col of pb.ordinanceColumns; track col) {
+            <th class="px-3 py-2">{{ col }}</th>
+            }
+            <th class="px-3 py-2">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of pb.rows; track row.barangayId) {
+          <tr class="border-t border-[#eef2f8]">
+            <td class="px-3 py-2 font-medium text-[#152238]">{{ row.barangayName }}</td>
+            @for (col of pb.ordinanceColumns; track col) {
+            <td class="px-3 py-2">{{ row.countsByOrdinance[col] ?? 0 }}</td>
+            }
+            <td class="px-3 py-2 font-semibold">{{ row.total }}</td>
+          </tr>
+          } @empty {
+          <tr><td [attr.colspan]="pb.ordinanceColumns.length + 2" class="px-3 py-6 text-center text-[#7a889c]">No data for this range.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+  }
+</div>

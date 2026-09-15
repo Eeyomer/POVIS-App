@@ -61,6 +61,12 @@ public class Violation : BaseEntity
     public string? Remarks { get; set; }
     public string? Remarks2 { get; set; }
 
+    /// <summary>Set when the OVR Supervisor (or MIS Personnel) has reviewed/approved
+    /// this submission. Distinct from Status, which tracks case progress.</summary>
+    public bool IsReviewed { get; set; }
+    public DateTime? ReviewedAt { get; set; }
+    public string? ReviewedBy { get; set; }
+
     // ----- Child records -----
     public Payment? Payment { get; set; }
     public FiledCase? FiledCase { get; set; }

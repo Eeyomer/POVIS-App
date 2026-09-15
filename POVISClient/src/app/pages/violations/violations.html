@@ -149,6 +149,7 @@
           <th class="px-4 py-3">Date</th>
           <th class="px-4 py-3">Deputy</th>
           <th class="px-4 py-3">Status</th>
+          <th class="px-4 py-3">Reviewed</th>
           <th class="px-4 py-3"></th>
         </tr>
       </thead>
@@ -162,8 +163,18 @@
           <td class="px-4 py-3">{{ v.dateOfOccurrence }}</td>
           <td class="px-4 py-3">{{ v.apprehendingOfficer }}</td>
           <td class="px-4 py-3">{{ v.status }}</td>
-          <td class="px-4 py-3 text-right">
+          <td class="px-4 py-3">
+            @if (v.isReviewed) {
+            <span class="text-green-600 font-semibold">Reviewed</span>
+            } @else {
+            <span class="text-[#7a889c]">Pending</span>
+            }
+          </td>
+          <td class="px-4 py-3 text-right whitespace-nowrap">
             @if (authService.canApprove()) {
+            <button type="button" (click)="toggleReviewed(v)" class="text-[#1e3a63] font-semibold mr-3">
+              {{ v.isReviewed ? 'Unreview' : 'Approve' }}
+            </button>
             <button type="button" (click)="openEdit(v)" class="text-[#1e3a63] font-semibold mr-3">Edit</button>
             }
             @if (authService.canDelete()) {

@@ -39,7 +39,10 @@ namespace POVISAPI.Services
             Remarks = v.Remarks,
             Remarks2 = v.Remarks2,
             HasPayment = v.Payment != null,
-            HasFiledCase = v.FiledCase != null
+            HasFiledCase = v.FiledCase != null,
+            IsReviewed = v.IsReviewed,
+            ReviewedAt = v.ReviewedAt,
+            ReviewedBy = v.ReviewedBy
         };
 
         private IQueryable<Violation> IncludedQuery() =>
@@ -225,6 +228,16 @@ namespace POVISAPI.Services
             var entity = await GetTrackedViolation(id);
             dbContext.Violations.Remove(entity);
             await dbContext.SaveChangesAsync();
+        }
+
+        public async Task<ViolationDTO> SetReviewedAsync(string id, bool reviewed, string? reviewerUsername)
+        {
+            var entity = await GetTrackedViolation(id);
+            entity.IsReviewed = reviewed;
+            entity.ReviewedAt = reviewed ? DateTime.UtcNow : null;
+            entity.ReviewedBy = reviewed ? reviewerUsername : null;
+            await dbContext.SaveChangesAsync();
+            return await GetByIdAsync(entity.Id.ToString());
         }
 
         public async Task<ApplicablePenaltyDTO> GetApplicablePenaltyAsync(string id)

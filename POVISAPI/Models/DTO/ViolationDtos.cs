@@ -30,6 +30,9 @@ namespace POVISAPI.Models.DTO
         public string? Remarks2 { get; set; }
         public bool HasPayment { get; set; }
         public bool HasFiledCase { get; set; }
+        public bool IsReviewed { get; set; }
+        public DateTime? ReviewedAt { get; set; }
+        public string? ReviewedBy { get; set; }
     }
 
     public class AddViolationDTO
@@ -141,6 +144,11 @@ namespace POVISAPI.Models.DTO
 
         [Range(1, 100, ErrorMessage = "Page size must be between 1 and 100")]
         public int PageSize { get; set; } = 20;
+    }
+
+    public class SetReviewedDTO
+    {
+        public bool Reviewed { get; set; }
     }
 
     public class ApplicablePenaltyDTO

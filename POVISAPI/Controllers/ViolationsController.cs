@@ -89,6 +89,21 @@ namespace POVISAPI.Controllers
             });
         }
 
+        /// <summary>OVR Supervisor review/approval — separate from case status.</summary>
+        [Authorize(Roles = "MISPersonnel,OVRSupervisor")]
+        [HttpPut("{id}/review")]
+        public async Task<IActionResult> SetReviewed(string id, [FromBody] SetReviewedDTO dto)
+        {
+            var username = User.FindFirst("sub")?.Value;
+            var response = await violationService.SetReviewedAsync(id, dto.Reviewed, username);
+            return Ok(new APIResponse<object>
+            {
+                Success = true,
+                Message = dto.Reviewed ? "Violation marked as reviewed" : "Violation review cleared",
+                Data = response
+            });
+        }
+
         [Authorize(Roles = "MISPersonnel")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteViolation(string id)

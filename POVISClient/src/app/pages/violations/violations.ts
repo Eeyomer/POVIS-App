@@ -194,4 +194,14 @@ export class Violations implements OnInit {
       error: (err) => this.toast.error(err.message),
     });
   }
+
+  toggleReviewed(violation: ViolationDTO): void {
+    this.violationsService.setReviewed(violation.violationId, !violation.isReviewed).subscribe({
+      next: () => {
+        this.toast.success(violation.isReviewed ? 'Review cleared.' : 'Violation approved.');
+        this.refresh();
+      },
+      error: (err) => this.toast.error(err.message),
+    });
+  }
 }

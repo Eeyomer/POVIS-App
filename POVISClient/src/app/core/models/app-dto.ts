@@ -103,6 +103,9 @@ export interface ViolationDTO {
   remarks2?: string | null;
   hasPayment: boolean;
   hasFiledCase: boolean;
+  isReviewed: boolean;
+  reviewedAt?: string | null;
+  reviewedBy?: string | null;
 }
 
 export interface AddViolationDTO {
@@ -449,4 +452,78 @@ export interface UpdateUserDTO {
 
 export interface ResetPasswordDTO {
   newPassword: string;
+}
+
+// ── Reports ──────────────────────────────────────────────────────────────
+export interface OrdinanceSummaryRow {
+  ordinanceId: string;
+  ordinanceShortName: string;
+  femaleCount: number;
+  maleCount: number;
+  totalViolators: number;
+  seminarCount: number;
+  counselingCount: number;
+  communityServiceCount: number;
+  didNotComplyCount: number;
+  paidCount: number;
+  totalAmountPaid: number;
+  totalAmountUnpaid: number;
+}
+
+export interface OrdinanceSummaryReport {
+  from: string;
+  to: string;
+  rows: OrdinanceSummaryRow[];
+  totalFemale: number;
+  totalMale: number;
+  totalViolators: number;
+  totalPaid: number;
+  totalAmountPaid: number;
+  totalAmountUnpaid: number;
+}
+
+export interface BarangayOrdinanceRow {
+  barangayId: string;
+  barangayName: string;
+  district?: number | null;
+  countsByOrdinance: Record<string, number>;
+  total: number;
+}
+
+export interface PerBarangayReport {
+  from: string;
+  to: string;
+  ordinanceColumns: string[];
+  rows: BarangayOrdinanceRow[];
+}
+
+// ── System (MIS Personnel) ──────────────────────────────────────────────
+export interface SystemHealth {
+  databaseConnected: boolean;
+  serverTimeUtc: string;
+  totalUsers: number;
+  totalViolators: number;
+  totalViolations: number;
+  totalTechnicalLogs: number;
+}
+
+export interface TechnicalLog {
+  id: string;
+  timestamp: string;
+  method: string;
+  path: string;
+  statusCode: number;
+  durationMs: number;
+  username?: string | null;
+  ipAddress?: string | null;
+}
+
+export interface TechnicalLogFilter {
+  search?: string | null;
+  method?: string | null;
+  statusCode?: number | null;
+  from?: string | null;
+  to?: string | null;
+  page?: number;
+  pageSize?: number;
 }

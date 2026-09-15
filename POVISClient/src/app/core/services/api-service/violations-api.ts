@@ -37,6 +37,10 @@ export class ViolationsApi {
     return this.http.put<APIResponse<ViolationDTO>>(`${this.apiUrl}/${id}`, dto);
   }
 
+  setReviewed(id: string, reviewed: boolean): Observable<APIResponse<ViolationDTO>> {
+    return this.http.put<APIResponse<ViolationDTO>>(`${this.apiUrl}/${id}/review`, { reviewed });
+  }
+
   delete(id: string): Observable<APIResponse<null>> {
     return this.http.delete<APIResponse<null>>(`${this.apiUrl}/${id}`);
   }
