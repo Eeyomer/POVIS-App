@@ -27,7 +27,8 @@ export class ChangePassword {
 
   form = this.fb.group(
     {
-      currentPassword: ['', Validators.required],
+      // Not asked for when forced to replace a temporary password.
+      currentPassword: ['', this.forced ? [] : [Validators.required]],
       newPassword: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(100)]],
       confirmPassword: ['', Validators.required],
     },
@@ -48,7 +49,7 @@ export class ChangePassword {
     this.isSubmitting.set(true);
 
     const { currentPassword, newPassword } = this.form.getRawValue();
-    this.authService.changePassword({ currentPassword: currentPassword!, newPassword: newPassword! }).subscribe({
+    this.authService.changePassword({ currentPassword: this.forced ? '' : currentPassword!, newPassword: newPassword! }).subscribe({
       next: () => {
         this.isSubmitting.set(false);
         this.router.navigate(['/']);

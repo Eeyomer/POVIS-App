@@ -67,13 +67,14 @@ public class AuthService : IAuthService
         var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId && u.IsActive)
             ?? throw new KeyNotFoundException("User does not exist.");
 
-        if (!BCrypt.Net.BCrypt.Verify(dto.CurrentPassword, user.PasswordHash))
+        // A user forced to change a temporary password is already authenticated with it, so they are not asked again.
+        if (!user.MustChangePassword && !BCrypt.Net.BCrypt.Verify(dto.CurrentPassword ?? string.Empty, user.PasswordHash))
             throw new ArgumentException("Current password is incorrect.");
         if (string.IsNullOrEmpty(dto.NewPassword) || dto.NewPassword.Length < 8)
             throw new ArgumentException("New password must be at least 8 characters.");
         if (dto.NewPassword.Length > 100)
             throw new ArgumentException("New password cannot exceed 100 characters.");
-        if (dto.NewPassword == dto.CurrentPassword)
+        if (BCrypt.Net.BCrypt.Verify(dto.NewPassword, user.PasswordHash))
             throw new ArgumentException("New password must be different from the current password.");
 
         user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
