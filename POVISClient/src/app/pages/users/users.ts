@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UsersService } from '../../core/services/users-service';
@@ -14,6 +14,14 @@ import { ToastService } from '../../shared/toast/toast-service';
 })
 export class Users implements OnInit {
   users = signal<User[]>([]);
+  search = signal('');
+  filteredUsers = computed(() => {
+    const term = this.search().trim().toLowerCase();
+    if (!term) return this.users();
+    return this.users().filter((u) =>
+      `${u.username} ${ROLE_LABELS[u.role]} ${u.deputationNumber ?? ''}`.toLowerCase().includes(term),
+    );
+  });
   showForm = signal(false);
   editing = signal<User | null>(null);
   resettingId = signal<string | null>(null);
@@ -27,6 +35,7 @@ export class Users implements OnInit {
     username: ['', Validators.required],
     password: ['', Validators.required],
     role: ['ApprehendingOfficer' as Role, Validators.required],
+    deputationNumber: ['', [Validators.maxLength(50)]],
   });
 
   resetForm = this.fb.group({
@@ -40,6 +49,7 @@ export class Users implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.form.controls.role.valueChanges.subscribe(() => this.syncDeputationValidator());
     this.refresh();
   }
 
@@ -49,18 +59,31 @@ export class Users implements OnInit {
 
   openAdd(): void {
     this.editing.set(null);
-    this.form.reset({ username: '', password: '', role: 'ApprehendingOfficer' });
+    this.form.reset({ username: '', password: '', role: 'ApprehendingOfficer', deputationNumber: '' });
     this.form.get('password')?.setValidators([Validators.required, Validators.minLength(8)]);
     this.form.get('password')?.updateValueAndValidity();
+    this.syncDeputationValidator();
     this.showForm.set(true);
   }
 
   openEdit(user: User): void {
     this.editing.set(user);
-    this.form.reset({ username: user.username, password: '', role: user.role });
+    this.form.reset({ username: user.username, password: '', role: user.role, deputationNumber: user.deputationNumber ?? '' });
     this.form.get('password')?.clearValidators();
     this.form.get('password')?.updateValueAndValidity();
+    this.syncDeputationValidator();
     this.showForm.set(true);
+  }
+
+  isOfficer(): boolean {
+    return this.form.controls.role.value === 'ApprehendingOfficer';
+  }
+
+  /** Deputation number is mandatory for Apprehending Officers only. */
+  private syncDeputationValidator(): void {
+    const control = this.form.controls.deputationNumber;
+    control.setValidators(this.isOfficer() ? [Validators.required, Validators.maxLength(50)] : [Validators.maxLength(50)]);
+    control.updateValueAndValidity();
   }
 
   cancel(): void {
@@ -74,12 +97,13 @@ export class Users implements OnInit {
       return;
     }
 
-    const { username, password, role } = this.form.getRawValue();
+    const { username, password, role, deputationNumber } = this.form.getRawValue();
+    const deputation = role === 'ApprehendingOfficer' ? deputationNumber?.trim() || null : null;
     const current = this.editing();
 
     const request = current
-      ? this.usersService.update(current.id, { id: current.id, role: role!, isActive: current.isActive })
-      : this.usersService.create({ username: username!, password: password!, role: role! });
+      ? this.usersService.update(current.id, { id: current.id, role: role!, isActive: current.isActive, deputationNumber: deputation })
+      : this.usersService.create({ username: username!, password: password!, role: role!, deputationNumber: deputation });
 
     request.subscribe({
       next: () => {
@@ -92,7 +116,7 @@ export class Users implements OnInit {
   }
 
   toggleActive(user: User): void {
-    this.usersService.update(user.id, { id: user.id, role: user.role, isActive: !user.isActive }).subscribe({
+    this.usersService.update(user.id, { id: user.id, role: user.role, isActive: !user.isActive, deputationNumber: user.deputationNumber }).subscribe({
       next: () => this.refresh(),
       error: (err) => this.toast.error(err.message),
     });

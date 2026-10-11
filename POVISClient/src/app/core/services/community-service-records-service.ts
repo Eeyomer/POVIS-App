@@ -16,8 +16,8 @@ const EMPTY_PAGE: PagedResult<CommunityServiceDTO> = { items: [], totalCount: 0,
 export class CommunityServiceRecordsService {
   constructor(private api: CommunityServiceRecordsApi) {}
 
-  list(status?: ComplianceStatus | null, page = 1, pageSize = 20): Observable<PagedResult<CommunityServiceDTO>> {
-    return this.api.getAll(status, page, pageSize).pipe(
+  list(status?: ComplianceStatus | null, page = 1, pageSize = 20, search?: string | null): Observable<PagedResult<CommunityServiceDTO>> {
+    return this.api.getAll(status, page, pageSize, search).pipe(
       map((res) => (res.success ? res.data ?? EMPTY_PAGE : EMPTY_PAGE)),
       catchError(() => of(EMPTY_PAGE)),
     );

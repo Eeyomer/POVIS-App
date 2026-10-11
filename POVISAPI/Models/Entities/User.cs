@@ -8,4 +8,7 @@ public class User : BaseEntity
     public string PasswordHash { get; set; } = string.Empty;
     public Role Role { get; set; }
     public bool IsActive { get; set; } = true;
+
+    /// <summary>Deputation number issued to an Apprehending Officer. Null for other roles.</summary>
+    public string? DeputationNumber { get; set; }
 }

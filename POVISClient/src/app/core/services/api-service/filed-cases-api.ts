@@ -17,6 +17,7 @@ export class FiledCasesApi {
     to?: string | null,
     page = 1,
     pageSize = 20,
+    search?: string | null,
   ): Observable<APIResponse<PagedResult<FiledCaseDTO>>> {
     return this.http.get<APIResponse<PagedResult<FiledCaseDTO>>>(this.apiUrl, {
       params: {
@@ -25,6 +26,7 @@ export class FiledCasesApi {
         ...(to ? { to } : {}),
         page,
         pageSize,
+        ...(search ? { search } : {}),
       },
     });
   }

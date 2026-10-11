@@ -46,8 +46,15 @@ export class CommunityServiceRecords implements OnInit {
     this.refresh();
   }
 
+  search = signal('');
+
+  onSearchChange(value: string): void {
+    this.search.set(value);
+    this.refresh();
+  }
+
   refresh(): void {
-    this.recordsService.list().subscribe((result) => {
+    this.recordsService.list(null, 1, 20, this.search() || null).subscribe((result) => {
       this.records.set(result.items);
       this.totalCount.set(result.totalCount);
     });

@@ -29,11 +29,20 @@ namespace POVISAPI.Services
         private IQueryable<SeminarRecord> IncludedQuery() =>
             dbContext.SeminarRecords.Include(s => s.Violation).ThenInclude(v => v.Violator);
 
-        public async Task<PagedResult<SeminarRecordDTO>> GetAllAsync(SeminarType? type, ComplianceStatus? status, int page = 1, int pageSize = 20)
+        public async Task<PagedResult<SeminarRecordDTO>> GetAllAsync(SeminarType? type, ComplianceStatus? status, int page = 1, int pageSize = 20, string? search = null)
         {
             var query = IncludedQuery().AsNoTracking().AsQueryable();
             if (type.HasValue) query = query.Where(s => s.SeminarType == type);
             if (status.HasValue) query = query.Where(s => s.Status == status);
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var term = $"%{search.Trim()}%";
+                query = query.Where(x =>
+                    EF.Functions.ILike(x.Violation.OvrNumber, term) ||
+                    EF.Functions.ILike(x.Violation.Violator.LastName, term) ||
+                    EF.Functions.ILike(x.Violation.Violator.FirstName, term));
+            }
+
 
             var total = await query.CountAsync();
             var entities = await query.OrderBy(s => s.ScheduledDate)
@@ -139,10 +148,19 @@ namespace POVISAPI.Services
         private IQueryable<CommunityServiceRecord> IncludedQuery() =>
             dbContext.CommunityServiceRecords.Include(c => c.Violation).ThenInclude(v => v.Violator);
 
-        public async Task<PagedResult<CommunityServiceDTO>> GetAllAsync(ComplianceStatus? status, int page = 1, int pageSize = 20)
+        public async Task<PagedResult<CommunityServiceDTO>> GetAllAsync(ComplianceStatus? status, int page = 1, int pageSize = 20, string? search = null)
         {
             var query = IncludedQuery().AsNoTracking().AsQueryable();
             if (status.HasValue) query = query.Where(c => c.Status == status);
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var term = $"%{search.Trim()}%";
+                query = query.Where(x =>
+                    EF.Functions.ILike(x.Violation.OvrNumber, term) ||
+                    EF.Functions.ILike(x.Violation.Violator.LastName, term) ||
+                    EF.Functions.ILike(x.Violation.Violator.FirstName, term));
+            }
+
 
             var total = await query.CountAsync();
             var entities = await query.OrderBy(c => c.ScheduledDate)
@@ -250,10 +268,19 @@ namespace POVISAPI.Services
         private IQueryable<CounselingRecord> IncludedQuery() =>
             dbContext.CounselingRecords.Include(c => c.Violation).ThenInclude(v => v.Violator);
 
-        public async Task<PagedResult<CounselingDTO>> GetAllAsync(ComplianceStatus? status, int page = 1, int pageSize = 20)
+        public async Task<PagedResult<CounselingDTO>> GetAllAsync(ComplianceStatus? status, int page = 1, int pageSize = 20, string? search = null)
         {
             var query = IncludedQuery().AsNoTracking().AsQueryable();
             if (status.HasValue) query = query.Where(c => c.Status == status);
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var term = $"%{search.Trim()}%";
+                query = query.Where(x =>
+                    EF.Functions.ILike(x.Violation.OvrNumber, term) ||
+                    EF.Functions.ILike(x.Violation.Violator.LastName, term) ||
+                    EF.Functions.ILike(x.Violation.Violator.FirstName, term));
+            }
+
 
             var total = await query.CountAsync();
             var entities = await query.OrderBy(c => c.ScheduledDate)

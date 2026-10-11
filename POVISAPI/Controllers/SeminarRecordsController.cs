@@ -21,9 +21,9 @@ namespace POVISAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllSeminarRecords([FromQuery] SeminarType? type, [FromQuery] ComplianceStatus? status, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+        public async Task<IActionResult> GetAllSeminarRecords([FromQuery] SeminarType? type, [FromQuery] ComplianceStatus? status, [FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] string? search = null)
         {
-            var records = await seminarRecordService.GetAllAsync(type, status, page, pageSize);
+            var records = await seminarRecordService.GetAllAsync(type, status, page, pageSize, search);
             return Ok(new APIResponse<object>
             {
                 Success = true,

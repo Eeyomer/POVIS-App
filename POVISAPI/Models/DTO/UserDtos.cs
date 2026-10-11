@@ -8,6 +8,7 @@ public class UserDTO
     public string Username { get; set; } = string.Empty;
     public Role Role { get; set; }
     public bool IsActive { get; set; }
+    public string? DeputationNumber { get; set; }
     public DateTime CreatedAt { get; set; }
 }
 
@@ -16,6 +17,7 @@ public class CreateUserDTO
     public string Username { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
     public Role Role { get; set; }
+    public string? DeputationNumber { get; set; }
 }
 
 public class UpdateUserDTO
@@ -23,6 +25,7 @@ public class UpdateUserDTO
     public Guid Id { get; set; }
     public Role Role { get; set; }
     public bool IsActive { get; set; }
+    public string? DeputationNumber { get; set; }
 }
 
 public class ResetPasswordDTO

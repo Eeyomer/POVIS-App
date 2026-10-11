@@ -2,6 +2,7 @@ import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/services/auth-service';
 import { SidebarService } from '../../core/services/sidebar-service';
+import { MANILA_TZ, manilaHour } from '../../core/utils/manila-time';
 
 @Component({
   selector: 'app-admin-navbar',
@@ -24,6 +25,7 @@ export class Navbar implements OnInit {
     this.username = this.authService.getUsername();
     this.greeting = this.computeGreeting();
     this.today = new Date().toLocaleDateString('en-US', {
+      timeZone: MANILA_TZ,
       weekday: 'long',
       month: 'long',
       day: 'numeric',
@@ -32,7 +34,7 @@ export class Navbar implements OnInit {
   }
 
   private computeGreeting(): string {
-    const hour = new Date().getHours();
+    const hour = manilaHour();
     if (hour < 12) return 'Good morning';
     if (hour < 18) return 'Good afternoon';
     return 'Good evening';

@@ -44,8 +44,15 @@ export class Payments implements OnInit {
     this.refresh();
   }
 
+  search = signal('');
+
+  onSearchChange(value: string): void {
+    this.search.set(value);
+    this.refresh();
+  }
+
   refresh(): void {
-    this.paymentsService.list().subscribe((result) => {
+    this.paymentsService.list(null, null, 1, 20, this.search() || null).subscribe((result) => {
       this.payments.set(result.items);
       this.totalCount.set(result.totalCount);
     });

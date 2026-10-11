@@ -20,9 +20,9 @@ namespace POVISAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllPayments([FromQuery] DateOnly? from, [FromQuery] DateOnly? to, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+        public async Task<IActionResult> GetAllPayments([FromQuery] DateOnly? from, [FromQuery] DateOnly? to, [FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] string? search = null)
         {
-            var payments = await paymentService.GetAllAsync(from, to, page, pageSize);
+            var payments = await paymentService.GetAllAsync(from, to, page, pageSize, search);
             return Ok(new APIResponse<object>
             {
                 Success = true,

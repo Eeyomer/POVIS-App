@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { OrdinancesService } from '../../core/services/ordinances-service';
 import { AuthService } from '../../core/services/auth-service';
 import { OffenseLevel, OrdinanceDTO, OrdinanceImportResultDTO, OrdinanceListDTO } from '../../core/models/app-dto';
+import { manilaYear } from '../../core/utils/manila-time';
 import { ToastService } from '../../shared/toast/toast-service';
 
 @Component({
@@ -16,6 +17,15 @@ export class Ordinances implements OnInit {
   ordinances = signal<OrdinanceListDTO[]>([]);
   selected = signal<OrdinanceDTO | null>(null);
 
+  search = signal('');
+  filteredOrdinances = computed(() => {
+    const term = this.search().trim().toLowerCase();
+    if (!term) return this.ordinances();
+    return this.ordinances().filter((o) =>
+      `${o.ordinanceNumber} ${o.series} ${o.shortName}`.toLowerCase().includes(term),
+    );
+  });
+
   showForm = signal(false);
   editing = signal<OrdinanceListDTO | null>(null);
 
@@ -23,7 +33,7 @@ export class Ordinances implements OnInit {
 
   form = this.fb.group({
     ordinanceNumber: ['', Validators.required],
-    series: [new Date().getFullYear(), Validators.required],
+    series: [manilaYear(), Validators.required],
     title: ['', Validators.required],
     shortName: ['', Validators.required],
     isExecutiveOrder: [false],
@@ -87,7 +97,7 @@ export class Ordinances implements OnInit {
 
   openAdd(): void {
     this.editing.set(null);
-    this.form.reset({ series: new Date().getFullYear(), isExecutiveOrder: false });
+    this.form.reset({ series: manilaYear(), isExecutiveOrder: false });
     this.showForm.set(true);
   }
 

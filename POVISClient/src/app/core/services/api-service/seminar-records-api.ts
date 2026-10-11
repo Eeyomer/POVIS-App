@@ -22,9 +22,10 @@ export class SeminarRecordsApi {
     status?: ComplianceStatus | null,
     page = 1,
     pageSize = 20,
+    search?: string | null,
   ): Observable<APIResponse<PagedResult<SeminarRecordDTO>>> {
     return this.http.get<APIResponse<PagedResult<SeminarRecordDTO>>>(this.apiUrl, {
-      params: { ...(type ? { type } : {}), ...(status ? { status } : {}), page, pageSize },
+      params: { ...(type ? { type } : {}), ...(status ? { status } : {}), page, pageSize, ...(search ? { search } : {}) },
     });
   }
 

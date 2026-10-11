@@ -34,6 +34,7 @@ export class Violations implements OnInit {
   showForm = signal(false);
   editing = signal<ViolationDTO | null>(null);
 
+  search = signal('');
   statusFilter = signal<ViolationStatus | ''>('');
 
   private fb = inject(FormBuilder);
@@ -66,7 +67,11 @@ export class Violations implements OnInit {
     private toast: ToastService,
   ) {}
 
+  ageAuto = signal(false);
+
   ngOnInit(): void {
+    this.form.controls.violatorId.valueChanges.subscribe(() => this.updateAge());
+    this.form.controls.dateOfOccurrence.valueChanges.subscribe(() => this.updateAge());
     this.violatorsService.search(undefined, 1, 200).subscribe((res) => this.violators.set(res.items));
     this.ordinancesService.list().subscribe((data) => this.ordinances.set(data));
     this.barangaysService.list().subscribe((data) => this.barangays.set(data));
@@ -74,10 +79,44 @@ export class Violations implements OnInit {
   }
 
   refresh(): void {
-    this.violationsService.list({ status: this.statusFilter() || undefined }).subscribe((result) => {
+    this.violationsService.list({ status: this.statusFilter() || undefined, search: this.search() || undefined }).subscribe((result) => {
       this.violations.set(result.items);
       this.totalCount.set(result.totalCount);
     });
+  }
+
+  /** Derives the age from the violator's birthday and the date of occurrence; falls back to manual entry. */
+  private updateAge(): void {
+    const control = this.form.controls.ageAtApprehension;
+    const violator = this.violators().find((v) => v.violatorId === this.form.controls.violatorId.value);
+    const occurrence = this.form.controls.dateOfOccurrence.value;
+
+    let age: number | null = null;
+    if (violator?.birthday && occurrence) {
+      const birth = new Date(violator.birthday);
+      const when = new Date(occurrence);
+      age = when.getFullYear() - birth.getFullYear();
+      const hadBirthday =
+        when.getMonth() > birth.getMonth() ||
+        (when.getMonth() === birth.getMonth() && when.getDate() >= birth.getDate());
+      if (!hadBirthday) age--;
+      if (age < 0) age = null;
+    }
+
+    if (age !== null) {
+      control.setValue(age, { emitEvent: false });
+      control.disable({ emitEvent: false });
+      this.ageAuto.set(true);
+    } else {
+      if (this.ageAuto()) control.setValue(null, { emitEvent: false });
+      control.enable({ emitEvent: false });
+      this.ageAuto.set(false);
+    }
+  }
+
+  onSearchChange(value: string): void {
+    this.search.set(value);
+    this.refresh();
   }
 
   onStatusFilterChange(value: string): void {

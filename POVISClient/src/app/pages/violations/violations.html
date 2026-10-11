@@ -2,6 +2,9 @@
   <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
     <h1 class="font-poppins font-bold text-[19px] sm:text-[22px] text-[#152238]">Violations</h1>
     <div class="flex flex-wrap gap-3">
+      <input type="text" placeholder="Search OVR no., name..." [value]="search()"
+        (input)="onSearchChange($any($event.target).value)"
+        class="px-3 py-2 rounded-lg border border-[#d3dae5] text-[13px] w-full sm:w-64" />
       <select [value]="statusFilter()" (change)="onStatusFilterChange($any($event.target).value)"
         class="px-3 py-2 rounded-lg border border-[#d3dae5] text-[13px]">
         <option value="">All statuses</option>
@@ -71,7 +74,8 @@
       </div>
       <div>
         <label class="block text-[13px] font-semibold text-[#152238] mb-1">Age at Apprehension</label>
-        <input type="number" formControlName="ageAtApprehension" class="w-full px-3 py-2 rounded-lg border border-[#d3dae5] text-[14px]" />
+        <input type="number" formControlName="ageAtApprehension" class="w-full px-3 py-2 rounded-lg border border-[#d3dae5] text-[14px] disabled:bg-[#f3f5f8]" />
+        <p class="text-[11px] text-[#7a889c] mt-1">{{ ageAuto() ? 'Calculated from birthday and date of occurrence.' : 'No birthday on record - enter manually.' }}</p>
       </div>
       <div class="sm:col-span-2">
         <label class="block text-[13px] font-semibold text-[#152238] mb-1">Place of Occurrence</label>

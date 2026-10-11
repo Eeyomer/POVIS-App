@@ -450,6 +450,7 @@ export interface User {
   username: string;
   role: Role;
   isActive: boolean;
+  deputationNumber?: string | null;
   createdAt: string;
 }
 
@@ -457,12 +458,14 @@ export interface CreateUserDTO {
   username: string;
   password: string;
   role: Role;
+  deputationNumber?: string | null;
 }
 
 export interface UpdateUserDTO {
   id: string;
   role: Role;
   isActive: boolean;
+  deputationNumber?: string | null;
 }
 
 export interface ResetPasswordDTO {

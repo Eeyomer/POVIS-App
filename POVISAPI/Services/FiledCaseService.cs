@@ -29,12 +29,22 @@ namespace POVISAPI.Services
         private IQueryable<FiledCase> IncludedQuery() =>
             dbContext.FiledCases.Include(f => f.Violation).ThenInclude(v => v.Violator);
 
-        public async Task<PagedResult<FiledCaseDTO>> GetAllAsync(CaseStatus? status, DateOnly? from, DateOnly? to, int page = 1, int pageSize = 20)
+        public async Task<PagedResult<FiledCaseDTO>> GetAllAsync(CaseStatus? status, DateOnly? from, DateOnly? to, int page = 1, int pageSize = 20, string? search = null)
         {
             var query = IncludedQuery().AsNoTracking().AsQueryable();
             if (status.HasValue) query = query.Where(f => f.Status == status);
             if (from.HasValue) query = query.Where(f => f.DateFiled >= from);
             if (to.HasValue) query = query.Where(f => f.DateFiled <= to);
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var term = $"%{search.Trim()}%";
+                query = query.Where(x =>
+                    EF.Functions.ILike(x.Violation.OvrNumber, term) ||
+                    EF.Functions.ILike(x.Violation.Violator.LastName, term) ||
+                    EF.Functions.ILike(x.Violation.Violator.FirstName, term) ||
+                    (x.NpsDocketNumber != null && EF.Functions.ILike(x.NpsDocketNumber, term)));
+            }
 
             var total = await query.CountAsync();
             var entities = await query.OrderByDescending(f => f.DateFiled)

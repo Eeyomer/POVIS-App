@@ -16,9 +16,10 @@ export class PaymentsApi {
     to?: string | null,
     page = 1,
     pageSize = 20,
+    search?: string | null,
   ): Observable<APIResponse<PagedResult<PaymentDTO>>> {
     return this.http.get<APIResponse<PagedResult<PaymentDTO>>>(this.apiUrl, {
-      params: { ...(from ? { from } : {}), ...(to ? { to } : {}), page, pageSize },
+      params: { ...(from ? { from } : {}), ...(to ? { to } : {}), page, pageSize, ...(search ? { search } : {}) },
     });
   }
 

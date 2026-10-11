@@ -28,11 +28,21 @@ namespace POVISAPI.Services
         private IQueryable<Payment> IncludedQuery() =>
             dbContext.Payments.Include(p => p.Violation).ThenInclude(v => v.Violator);
 
-        public async Task<PagedResult<PaymentDTO>> GetAllAsync(DateOnly? from, DateOnly? to, int page = 1, int pageSize = 20)
+        public async Task<PagedResult<PaymentDTO>> GetAllAsync(DateOnly? from, DateOnly? to, int page = 1, int pageSize = 20, string? search = null)
         {
             var query = IncludedQuery().AsNoTracking().AsQueryable();
             if (from.HasValue) query = query.Where(p => p.DateOfPayment >= from);
             if (to.HasValue) query = query.Where(p => p.DateOfPayment <= to);
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var term = $"%{search.Trim()}%";
+                query = query.Where(x =>
+                    EF.Functions.ILike(x.Violation.OvrNumber, term) ||
+                    EF.Functions.ILike(x.Violation.Violator.LastName, term) ||
+                    EF.Functions.ILike(x.Violation.Violator.FirstName, term) ||
+                    (x.ReceiptNumber != null && EF.Functions.ILike(x.ReceiptNumber, term)));
+            }
 
             var total = await query.CountAsync();
             var entities = await query.OrderByDescending(p => p.DateOfPayment)

@@ -21,9 +21,9 @@ namespace POVISAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllFiledCases([FromQuery] CaseStatus? status, [FromQuery] DateOnly? from, [FromQuery] DateOnly? to, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+        public async Task<IActionResult> GetAllFiledCases([FromQuery] CaseStatus? status, [FromQuery] DateOnly? from, [FromQuery] DateOnly? to, [FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] string? search = null)
         {
-            var filedCases = await filedCaseService.GetAllAsync(status, from, to, page, pageSize);
+            var filedCases = await filedCaseService.GetAllAsync(status, from, to, page, pageSize, search);
             return Ok(new APIResponse<object>
             {
                 Success = true,

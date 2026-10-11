@@ -11,8 +11,8 @@ const EMPTY_PAGE: PagedResult<PaymentDTO> = { items: [], totalCount: 0, page: 1,
 export class PaymentsService {
   constructor(private api: PaymentsApi) {}
 
-  list(from?: string | null, to?: string | null, page = 1, pageSize = 20): Observable<PagedResult<PaymentDTO>> {
-    return this.api.getAll(from, to, page, pageSize).pipe(
+  list(from?: string | null, to?: string | null, page = 1, pageSize = 20, search?: string | null): Observable<PagedResult<PaymentDTO>> {
+    return this.api.getAll(from, to, page, pageSize, search).pipe(
       map((res) => (res.success ? res.data ?? EMPTY_PAGE : EMPTY_PAGE)),
       catchError(() => of(EMPTY_PAGE)),
     );

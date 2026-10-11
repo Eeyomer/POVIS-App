@@ -143,6 +143,12 @@
   </div>
   }
 
+  <div class="mb-4">
+    <input type="text" placeholder="Search ordinance no., series, name..." [value]="search()"
+      (input)="search.set($any($event.target).value)"
+      class="px-3 py-2 rounded-lg border border-[#d3dae5] text-[13px] w-full sm:w-72 bg-white" />
+  </div>
+
   <div class="bg-white rounded-2xl shadow-sm overflow-x-auto">
     <table class="w-full min-w-[640px] text-[13px]">
       <thead class="bg-[#f3f5f8] text-[#7a889c] text-left">
@@ -155,7 +161,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (o of ordinances(); track o.ordinanceId) {
+        @for (o of filteredOrdinances(); track o.ordinanceId) {
         <tr class="border-t border-[#eef2f8]">
           <td class="px-4 py-3 font-medium text-[#152238]">{{ o.ordinanceNumber }}</td>
           <td class="px-4 py-3">{{ o.series }}</td>

@@ -234,6 +234,8 @@ public class AppDbContext : DbContext
             e.Property(u => u.Username).HasMaxLength(100).IsRequired();
             e.Property(u => u.PasswordHash).HasMaxLength(200).IsRequired();
             e.HasIndex(u => u.Username).IsUnique();
+            e.Property(u => u.DeputationNumber).HasMaxLength(50);
+            e.HasIndex(u => u.DeputationNumber).IsUnique().HasFilter("\"DeputationNumber\" IS NOT NULL");
         });
 
         // ================= TechnicalLog =================

@@ -17,8 +17,9 @@ export class FiledCasesService {
     to?: string | null,
     page = 1,
     pageSize = 20,
+    search?: string | null,
   ): Observable<PagedResult<FiledCaseDTO>> {
-    return this.api.getAll(status, from, to, page, pageSize).pipe(
+    return this.api.getAll(status, from, to, page, pageSize, search).pipe(
       map((res) => (res.success ? res.data ?? EMPTY_PAGE : EMPTY_PAGE)),
       catchError(() => of(EMPTY_PAGE)),
     );

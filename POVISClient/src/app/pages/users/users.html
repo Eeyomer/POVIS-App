@@ -24,6 +24,16 @@
           }
         </select>
       </div>
+      @if (isOfficer()) {
+      <div>
+        <label class="block text-[13px] font-semibold text-[#152238] mb-1">Deputation Number</label>
+        <input type="text" formControlName="deputationNumber" maxlength="50"
+          class="w-full px-3 py-2 rounded-lg border border-[#d3dae5] text-[14px]" />
+        @if (form.controls.deputationNumber.touched && form.controls.deputationNumber.hasError('required')) {
+        <p class="text-[11px] text-red-500 mt-1">Deputation number is required for an Apprehending Officer.</p>
+        }
+      </div>
+      }
       @if (!editing()) {
       <div>
         <label class="block text-[13px] font-semibold text-[#152238] mb-1">Password</label>
@@ -56,21 +66,29 @@
   </div>
   }
 
+  <div class="mb-4">
+    <input type="text" placeholder="Search username, role, deputation no..." [value]="search()"
+      (input)="search.set($any($event.target).value)"
+      class="px-3 py-2 rounded-lg border border-[#d3dae5] text-[13px] w-full sm:w-72 bg-white" />
+  </div>
+
   <div class="bg-white rounded-2xl shadow-sm overflow-x-auto">
     <table class="w-full min-w-[720px] text-[13px]">
       <thead class="bg-[#f3f5f8] text-[#7a889c] text-left">
         <tr>
           <th class="px-4 py-3">Username</th>
           <th class="px-4 py-3">Role</th>
+          <th class="px-4 py-3">Deputation No.</th>
           <th class="px-4 py-3">Status</th>
           <th class="px-4 py-3"></th>
         </tr>
       </thead>
       <tbody>
-        @for (u of users(); track u.id) {
+        @for (u of filteredUsers(); track u.id) {
         <tr class="border-t border-[#eef2f8]">
           <td class="px-4 py-3 font-medium text-[#152238]">{{ u.username }}</td>
           <td class="px-4 py-3">{{ roleLabels[u.role] }}</td>
+          <td class="px-4 py-3">{{ u.deputationNumber || '-' }}</td>
           <td class="px-4 py-3">
             <span [class]="u.isActive ? 'text-green-600' : 'text-red-500'">{{ u.isActive ? 'Active' : 'Inactive' }}</span>
           </td>
@@ -84,7 +102,7 @@
           </td>
         </tr>
         } @empty {
-        <tr><td colspan="4" class="px-4 py-6 text-center text-[#7a889c]">No users yet.</td></tr>
+        <tr><td colspan="5" class="px-4 py-6 text-center text-[#7a889c]">No users yet.</td></tr>
         }
       </tbody>
     </table>

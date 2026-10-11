@@ -22,8 +22,9 @@ export class SeminarRecordsService {
     status?: ComplianceStatus | null,
     page = 1,
     pageSize = 20,
+    search?: string | null,
   ): Observable<PagedResult<SeminarRecordDTO>> {
-    return this.api.getAll(type, status, page, pageSize).pipe(
+    return this.api.getAll(type, status, page, pageSize, search).pipe(
       map((res) => (res.success ? res.data ?? EMPTY_PAGE : EMPTY_PAGE)),
       catchError(() => of(EMPTY_PAGE)),
     );

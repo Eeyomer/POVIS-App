@@ -4,14 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { ReportsService } from '../../core/services/reports-service';
 import { ToastService } from '../../shared/toast/toast-service';
 import { OrdinanceSummaryReport, PerBarangayReport } from '../../core/models/app-dto';
+import { manilaFirstDayOfMonth, manilaToday } from '../../core/utils/manila-time';
 
 function firstDayOfMonth(): string {
-  const d = new Date();
-  return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().slice(0, 10);
+  return manilaFirstDayOfMonth();
 }
 
 function today(): string {
-  return new Date().toISOString().slice(0, 10);
+  return manilaToday();
 }
 
 @Component({

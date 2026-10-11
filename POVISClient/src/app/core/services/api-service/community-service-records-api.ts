@@ -20,9 +20,10 @@ export class CommunityServiceRecordsApi {
     status?: ComplianceStatus | null,
     page = 1,
     pageSize = 20,
+    search?: string | null,
   ): Observable<APIResponse<PagedResult<CommunityServiceDTO>>> {
     return this.http.get<APIResponse<PagedResult<CommunityServiceDTO>>>(this.apiUrl, {
-      params: { ...(status ? { status } : {}), page, pageSize },
+      params: { ...(status ? { status } : {}), page, pageSize, ...(search ? { search } : {}) },
     });
   }
 

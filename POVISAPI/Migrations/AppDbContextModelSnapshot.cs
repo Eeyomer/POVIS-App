@@ -484,6 +484,10 @@ namespace POVISAPI.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp without time zone");
 
+                    b.Property<string>("DeputationNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
@@ -506,6 +510,10 @@ namespace POVISAPI.Migrations
                         .HasColumnType("character varying(100)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DeputationNumber")
+                        .IsUnique()
+                        .HasFilter("\"DeputationNumber\" IS NOT NULL");
 
                     b.HasIndex("Username")
                         .IsUnique();

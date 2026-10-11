@@ -11,8 +11,8 @@ const EMPTY_PAGE: PagedResult<CounselingDTO> = { items: [], totalCount: 0, page:
 export class CounselingRecordsService {
   constructor(private api: CounselingRecordsApi) {}
 
-  list(status?: ComplianceStatus | null, page = 1, pageSize = 20): Observable<PagedResult<CounselingDTO>> {
-    return this.api.getAll(status, page, pageSize).pipe(
+  list(status?: ComplianceStatus | null, page = 1, pageSize = 20, search?: string | null): Observable<PagedResult<CounselingDTO>> {
+    return this.api.getAll(status, page, pageSize, search).pipe(
       map((res) => (res.success ? res.data ?? EMPTY_PAGE : EMPTY_PAGE)),
       catchError(() => of(EMPTY_PAGE)),
     );

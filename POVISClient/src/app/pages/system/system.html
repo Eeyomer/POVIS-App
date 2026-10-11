@@ -99,7 +99,7 @@
         <tbody>
           @for (log of logsPage().items; track log.id) {
           <tr class="border-t border-[#eef2f8]">
-            <td class="px-3 py-2 whitespace-nowrap">{{ log.timestamp | date: 'short' }}</td>
+            <td class="px-3 py-2 whitespace-nowrap">{{ log.timestamp | date: 'MMM d, y, h:mm:ss a' : '+0800' }}</td>
             <td class="px-3 py-2 font-medium">{{ log.method }}</td>
             <td class="px-3 py-2">{{ log.path }}</td>
             <td class="px-3 py-2" [class]="log.statusCode >= 400 ? 'text-red-500 font-semibold' : 'text-green-600'">

@@ -15,9 +15,10 @@ export class CounselingRecordsApi {
     status?: ComplianceStatus | null,
     page = 1,
     pageSize = 20,
+    search?: string | null,
   ): Observable<APIResponse<PagedResult<CounselingDTO>>> {
     return this.http.get<APIResponse<PagedResult<CounselingDTO>>>(this.apiUrl, {
-      params: { ...(status ? { status } : {}), page, pageSize },
+      params: { ...(status ? { status } : {}), page, pageSize, ...(search ? { search } : {}) },
     });
   }
 

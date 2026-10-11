@@ -134,8 +134,11 @@ namespace POVISAPI.Services
                 barangayOfOccurrenceId = parsedBarangayId;
             }
 
-            bool violatorExists = await dbContext.Violators.AnyAsync(v => v.Id == violatorId);
-            if (!violatorExists)
+            var violator = await dbContext.Violators.AsNoTracking()
+                .Where(v => v.Id == violatorId)
+                .Select(v => new { v.Birthday })
+                .FirstOrDefaultAsync();
+            if (violator == null)
                 throw new KeyNotFoundException("Violator does not exist.");
 
             bool ordinanceExists = await dbContext.Ordinances.AnyAsync(o => o.Id == ordinanceId && o.IsActive);
@@ -164,7 +167,7 @@ namespace POVISAPI.Services
                 OvrNumber = dto.OvrNumber.Trim(),
                 DateOfSubmission = dto.DateOfSubmission,
                 Division = dto.Division,
-                AgeAtApprehension = dto.AgeAtApprehension,
+                AgeAtApprehension = ComputeAge(violator.Birthday, dto.DateOfOccurrence) ?? dto.AgeAtApprehension,
                 DateOfOccurrence = dto.DateOfOccurrence,
                 TimeOfOccurrence = dto.TimeOfOccurrence,
                 PlaceOfOccurrence = dto.PlaceOfOccurrence?.Trim(),
@@ -182,6 +185,15 @@ namespace POVISAPI.Services
             await dbContext.Violations.AddAsync(entity);
             await dbContext.SaveChangesAsync();
             return await GetByIdAsync(entity.Id.ToString());
+        }
+
+        /// <summary>Age on the date of occurrence, or null when the birthday is unknown or invalid for that date.</summary>
+        private static int? ComputeAge(DateOnly? birthday, DateOnly occurrence)
+        {
+            if (birthday == null || birthday > occurrence) return null;
+            int age = occurrence.Year - birthday.Value.Year;
+            if (occurrence < birthday.Value.AddYears(age)) age--;
+            return age;
         }
 
         public async Task<ViolationDTO> UpdateAsync(UpdateViolationDTO dto)
@@ -206,7 +218,11 @@ namespace POVISAPI.Services
 
             entity.DateOfSubmission = dto.DateOfSubmission;
             entity.Division = dto.Division;
-            entity.AgeAtApprehension = dto.AgeAtApprehension;
+            var birthday = await dbContext.Violators.AsNoTracking()
+                .Where(v => v.Id == entity.ViolatorId)
+                .Select(v => v.Birthday)
+                .FirstOrDefaultAsync();
+            entity.AgeAtApprehension = ComputeAge(birthday, dto.DateOfOccurrence) ?? dto.AgeAtApprehension;
             entity.DateOfOccurrence = dto.DateOfOccurrence;
             entity.TimeOfOccurrence = dto.TimeOfOccurrence;
             entity.PlaceOfOccurrence = dto.PlaceOfOccurrence?.Trim();

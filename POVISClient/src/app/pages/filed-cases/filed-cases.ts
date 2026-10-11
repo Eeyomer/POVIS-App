@@ -45,8 +45,15 @@ export class FiledCases implements OnInit {
     this.refresh();
   }
 
+  search = signal('');
+
+  onSearchChange(value: string): void {
+    this.search.set(value);
+    this.refresh();
+  }
+
   refresh(): void {
-    this.filedCasesService.list().subscribe((result) => {
+    this.filedCasesService.list(null, null, null, 1, 20, this.search() || null).subscribe((result) => {
       this.cases.set(result.items);
       this.totalCount.set(result.totalCount);
     });
