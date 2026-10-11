@@ -12,6 +12,6 @@ export function roleGuard(...allowedRoles: Role[]): CanActivateFn {
       return true;
     }
 
-    return router.createUrlTree(['/admin']);
+    return router.createUrlTree(['/app']);
   };
 }

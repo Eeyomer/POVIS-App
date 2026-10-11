@@ -21,7 +21,7 @@ import { roleGuard } from './core/guard/role-guard';
 export const routes: Routes = [
   { path: 'login', component: Login },
   {
-    path: 'admin',
+    path: 'app',
     component: Shell,
     canActivate: [authGuard],
     children: [
@@ -53,6 +53,6 @@ export const routes: Routes = [
       },
     ],
   },
-  { path: '', pathMatch: 'full', redirectTo: 'admin' },
-  { path: '**', redirectTo: 'admin' },
+  { path: '', pathMatch: 'full', redirectTo: 'app' },
+  { path: '**', redirectTo: 'app' },
 ];
