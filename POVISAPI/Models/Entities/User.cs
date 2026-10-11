@@ -9,6 +9,11 @@ public class User : BaseEntity
     public Role Role { get; set; }
     public bool IsActive { get; set; } = true;
 
+    public string? FullName { get; set; }
+    public string? ContactNumber { get; set; }
+    public string? Email { get; set; }
+    public string? Address { get; set; }
+
     /// <summary>True while the user is on a system-generated temporary password and must set their own.</summary>
     public bool MustChangePassword { get; set; }
 

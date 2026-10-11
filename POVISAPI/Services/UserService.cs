@@ -42,11 +42,19 @@ public class UserService : IUserService
 
         var deputationNumber = await ResolveDeputationNumberForCreateAsync(dto.Role, dto.DeputationNumber);
 
+        var profile = ValidateProfile(dto.FullName, dto.ContactNumber, dto.Email, dto.Address);
+        if (profile.FullName == null)
+            throw new ArgumentException("Full name is required.");
+
         var temporaryPassword = PasswordGenerator.GenerateTemporary();
 
         var user = new User
         {
             Username = dto.Username,
+            FullName = profile.FullName,
+            ContactNumber = profile.ContactNumber,
+            Email = profile.Email,
+            Address = profile.Address,
             DeputationNumber = deputationNumber,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(temporaryPassword),
             MustChangePassword = true,
@@ -84,6 +92,13 @@ public class UserService : IUserService
         }
 
         user.DeputationNumber = await ResolveDeputationNumberForUpdateAsync(user, dto);
+        var profile = ValidateProfile(dto.FullName, dto.ContactNumber, dto.Email, dto.Address);
+        // Existing accounts created before these fields existed may have no name; never blank out a name that is set.
+        user.FullName = profile.FullName ?? user.FullName;
+        user.ContactNumber = profile.ContactNumber;
+        user.Email = profile.Email;
+        user.Address = profile.Address;
+
         user.Role = dto.Role;
         user.IsActive = dto.IsActive;
 
@@ -154,6 +169,36 @@ public class UserService : IUserService
         return number;
     }
 
+    private static string? Clean(string? value)
+    {
+        value = value?.Trim();
+        return string.IsNullOrEmpty(value) ? null : value;
+    }
+
+    private static (string? FullName, string? ContactNumber, string? Email, string? Address) ValidateProfile(
+        string? fullName, string? contactNumber, string? email, string? address)
+    {
+        var profile = (FullName: Clean(fullName), ContactNumber: Clean(contactNumber), Email: Clean(email), Address: Clean(address));
+
+        if (profile.FullName is { Length: > 150 })
+            throw new ArgumentException("Full name cannot exceed 150 characters.");
+        if (profile.ContactNumber is { Length: > 30 })
+            throw new ArgumentException("Contact number cannot exceed 30 characters.");
+        if (profile.Address is { Length: > 300 })
+            throw new ArgumentException("Address cannot exceed 300 characters.");
+        if (profile.Email != null)
+        {
+            if (profile.Email.Length > 150)
+                throw new ArgumentException("Email address cannot exceed 150 characters.");
+            bool valid;
+            try { valid = new System.Net.Mail.MailAddress(profile.Email).Address == profile.Email; }
+            catch (FormatException) { valid = false; }
+            if (!valid)
+                throw new ArgumentException("Email address is not valid.");
+        }
+        return profile;
+    }
+
     private static UserDTO ToDto(User u) => new()
     {
         Id = u.Id,
@@ -161,6 +206,10 @@ public class UserService : IUserService
         Role = u.Role,
         IsActive = u.IsActive,
         DeputationNumber = u.DeputationNumber,
+        FullName = u.FullName,
+        ContactNumber = u.ContactNumber,
+        Email = u.Email,
+        Address = u.Address,
         MustChangePassword = u.MustChangePassword,
         CreatedAt = u.CreatedAt
     };

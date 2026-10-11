@@ -39,6 +39,10 @@ public class Violation : BaseEntity
     public string? Witness { get; set; }
     public string? ApprehendingOfficer { get; set; }
 
+    /// <summary>Optional. For apprehending officers who are not registered in the system but already
+    /// recorded violations on actual (paper) tickets.</summary>
+    public string? ApprehendingOfficerDeputationNumber { get; set; }
+
     // ----- Ordinance violated -----
     public Guid OrdinanceId { get; set; }
     public Ordinance Ordinance { get; set; } = null!;

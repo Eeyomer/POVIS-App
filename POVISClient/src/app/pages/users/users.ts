@@ -19,7 +19,7 @@ export class Users implements OnInit {
     const term = this.search().trim().toLowerCase();
     if (!term) return this.users();
     return this.users().filter((u) =>
-      `${u.username} ${ROLE_LABELS[u.role]} ${u.deputationNumber ?? ''}`.toLowerCase().includes(term),
+      `${u.fullName ?? ''} ${u.username} ${ROLE_LABELS[u.role]} ${u.deputationNumber ?? ''} ${u.email ?? ''} ${u.contactNumber ?? ''}`.toLowerCase().includes(term),
     );
   });
   showForm = signal(false);
@@ -34,6 +34,10 @@ export class Users implements OnInit {
 
   form = this.fb.group({
     username: ['', Validators.required],
+    fullName: ['', [Validators.required, Validators.maxLength(150)]],
+    contactNumber: ['', [Validators.maxLength(30)]],
+    email: ['', [Validators.email, Validators.maxLength(150)]],
+    address: ['', [Validators.maxLength(300)]],
     role: ['ApprehendingOfficer' as Role, Validators.required],
     deputationNumber: ['', [Validators.maxLength(50)]],
   });
@@ -55,14 +59,30 @@ export class Users implements OnInit {
 
   openAdd(): void {
     this.editing.set(null);
-    this.form.reset({ username: '', role: 'ApprehendingOfficer', deputationNumber: '' });
+    this.form.reset({
+      username: '',
+      fullName: '',
+      contactNumber: '',
+      email: '',
+      address: '',
+      role: 'ApprehendingOfficer',
+      deputationNumber: '',
+    });
     this.syncDeputationValidator();
     this.showForm.set(true);
   }
 
   openEdit(user: User): void {
     this.editing.set(user);
-    this.form.reset({ username: user.username, role: user.role, deputationNumber: user.deputationNumber ?? '' });
+    this.form.reset({
+      username: user.username,
+      fullName: user.fullName ?? '',
+      contactNumber: user.contactNumber ?? '',
+      email: user.email ?? '',
+      address: user.address ?? '',
+      role: user.role,
+      deputationNumber: user.deputationNumber ?? '',
+    });
     this.syncDeputationValidator();
     this.showForm.set(true);
   }
@@ -89,13 +109,19 @@ export class Users implements OnInit {
       return;
     }
 
-    const { username, role, deputationNumber } = this.form.getRawValue();
+    const { username, fullName, contactNumber, email, address, role, deputationNumber } = this.form.getRawValue();
+    const profile = {
+      fullName: fullName!.trim(),
+      contactNumber: contactNumber?.trim() || null,
+      email: email?.trim() || null,
+      address: address?.trim() || null,
+    };
     const deputation = role === 'ApprehendingOfficer' ? deputationNumber?.trim() || null : null;
     const current = this.editing();
 
     const request = current
-      ? this.usersService.update(current.id, { id: current.id, role: role!, isActive: current.isActive, deputationNumber: deputation })
-      : this.usersService.create({ username: username!, role: role!, deputationNumber: deputation });
+      ? this.usersService.update(current.id, { id: current.id, ...profile, role: role!, isActive: current.isActive, deputationNumber: deputation })
+      : this.usersService.create({ username: username!, ...profile, role: role!, deputationNumber: deputation });
 
     request.subscribe({
       next: (saved) => {
@@ -111,7 +137,16 @@ export class Users implements OnInit {
   }
 
   toggleActive(user: User): void {
-    this.usersService.update(user.id, { id: user.id, role: user.role, isActive: !user.isActive, deputationNumber: user.deputationNumber }).subscribe({
+    this.usersService.update(user.id, {
+        id: user.id,
+        fullName: user.fullName,
+        contactNumber: user.contactNumber,
+        email: user.email,
+        address: user.address,
+        role: user.role,
+        isActive: !user.isActive,
+        deputationNumber: user.deputationNumber,
+      }).subscribe({
       next: () => this.refresh(),
       error: (err) => this.toast.error(err.message),
     });

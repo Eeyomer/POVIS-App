@@ -8,6 +8,10 @@ public class UserDTO
     public string Username { get; set; } = string.Empty;
     public Role Role { get; set; }
     public bool IsActive { get; set; }
+    public string? FullName { get; set; }
+    public string? ContactNumber { get; set; }
+    public string? Email { get; set; }
+    public string? Address { get; set; }
     public string? DeputationNumber { get; set; }
     public bool MustChangePassword { get; set; }
 
@@ -19,6 +23,10 @@ public class UserDTO
 public class CreateUserDTO
 {
     public string Username { get; set; } = string.Empty;
+    public string? FullName { get; set; }
+    public string? ContactNumber { get; set; }
+    public string? Email { get; set; }
+    public string? Address { get; set; }
     public Role Role { get; set; }
     public string? DeputationNumber { get; set; }
 }
@@ -28,6 +36,10 @@ public class UpdateUserDTO
     public Guid Id { get; set; }
     public Role Role { get; set; }
     public bool IsActive { get; set; }
+    public string? FullName { get; set; }
+    public string? ContactNumber { get; set; }
+    public string? Email { get; set; }
+    public string? Address { get; set; }
     public string? DeputationNumber { get; set; }
 }
 

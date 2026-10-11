@@ -92,6 +92,7 @@ export interface ViolationDTO {
   barangayOfOccurrenceName?: string | null;
   witness?: string | null;
   apprehendingOfficer?: string | null;
+  apprehendingOfficerDeputationNumber?: string | null;
   ordinanceId: string;
   ordinanceShortName: string;
   ordinanceSectionId?: string | null;
@@ -120,6 +121,7 @@ export interface AddViolationDTO {
   barangayOfOccurrenceId?: string | null;
   witness?: string | null;
   apprehendingOfficer?: string | null;
+  apprehendingOfficerDeputationNumber?: string | null;
   ordinanceId: string;
   ordinanceSectionId?: string | null;
   isWarningTicket: boolean;
@@ -138,6 +140,7 @@ export interface UpdateViolationDTO {
   barangayOfOccurrenceId?: string | null;
   witness?: string | null;
   apprehendingOfficer?: string | null;
+  apprehendingOfficerDeputationNumber?: string | null;
   ordinanceSectionId?: string | null;
   status: ViolationStatus;
   remarks?: string | null;
@@ -450,6 +453,10 @@ export interface User {
   username: string;
   role: Role;
   isActive: boolean;
+  fullName?: string | null;
+  contactNumber?: string | null;
+  email?: string | null;
+  address?: string | null;
   deputationNumber?: string | null;
   mustChangePassword: boolean;
   /** Only present in the response to create, shown once to MIS Personnel. */
@@ -459,12 +466,20 @@ export interface User {
 
 export interface CreateUserDTO {
   username: string;
+  fullName: string;
+  contactNumber?: string | null;
+  email?: string | null;
+  address?: string | null;
   role: Role;
   deputationNumber?: string | null;
 }
 
 export interface UpdateUserDTO {
   id: string;
+  fullName?: string | null;
+  contactNumber?: string | null;
+  email?: string | null;
+  address?: string | null;
   role: Role;
   isActive: boolean;
   deputationNumber?: string | null;

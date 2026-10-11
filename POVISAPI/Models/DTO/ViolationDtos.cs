@@ -19,6 +19,7 @@ namespace POVISAPI.Models.DTO
         public string? BarangayOfOccurrenceName { get; set; }
         public string? Witness { get; set; }
         public string? ApprehendingOfficer { get; set; }
+        public string? ApprehendingOfficerDeputationNumber { get; set; }
         public string OrdinanceId { get; set; } = string.Empty;
         public string OrdinanceShortName { get; set; } = string.Empty;
         public string? OrdinanceSectionId { get; set; }
@@ -70,6 +71,9 @@ namespace POVISAPI.Models.DTO
         [StringLength(150, ErrorMessage = "Apprehending officer cannot exceed 150 characters")]
         public string? ApprehendingOfficer { get; set; }
 
+        [StringLength(50, ErrorMessage = "Deputation number cannot exceed 50 characters")]
+        public string? ApprehendingOfficerDeputationNumber { get; set; }
+
         [Required(ErrorMessage = "Ordinance is required")]
         public required string OrdinanceId { get; set; }
 
@@ -114,6 +118,9 @@ namespace POVISAPI.Models.DTO
 
         [StringLength(150, ErrorMessage = "Apprehending officer cannot exceed 150 characters")]
         public string? ApprehendingOfficer { get; set; }
+
+        [StringLength(50, ErrorMessage = "Deputation number cannot exceed 50 characters")]
+        public string? ApprehendingOfficerDeputationNumber { get; set; }
 
         public string? OrdinanceSectionId { get; set; }
 

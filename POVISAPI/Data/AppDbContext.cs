@@ -126,6 +126,7 @@ public class AppDbContext : DbContext
             e.Property(v => v.PlaceOfOccurrence).HasMaxLength(300);
             e.Property(v => v.Witness).HasMaxLength(150);
             e.Property(v => v.ApprehendingOfficer).HasMaxLength(150);
+            e.Property(v => v.ApprehendingOfficerDeputationNumber).HasMaxLength(50);
             e.Property(v => v.Remarks).HasMaxLength(500);
             e.Property(v => v.Remarks2).HasMaxLength(500);
 
@@ -235,6 +236,10 @@ public class AppDbContext : DbContext
             e.Property(u => u.PasswordHash).HasMaxLength(200).IsRequired();
             e.HasIndex(u => u.Username).IsUnique();
             e.Property(u => u.DeputationNumber).HasMaxLength(50);
+            e.Property(u => u.FullName).HasMaxLength(150);
+            e.Property(u => u.ContactNumber).HasMaxLength(30);
+            e.Property(u => u.Email).HasMaxLength(150);
+            e.Property(u => u.Address).HasMaxLength(300);
             e.HasIndex(u => u.DeputationNumber).IsUnique().HasFilter("\"DeputationNumber\" IS NOT NULL");
         });
 

@@ -29,6 +29,7 @@ namespace POVISAPI.Services
             BarangayOfOccurrenceName = v.BarangayOfOccurrence?.Name,
             Witness = v.Witness,
             ApprehendingOfficer = v.ApprehendingOfficer,
+            ApprehendingOfficerDeputationNumber = v.ApprehendingOfficerDeputationNumber,
             OrdinanceId = v.OrdinanceId.ToString(),
             OrdinanceShortName = v.Ordinance.ShortName,
             OrdinanceSectionId = v.OrdinanceSectionId?.ToString(),
@@ -174,6 +175,7 @@ namespace POVISAPI.Services
                 BarangayOfOccurrenceId = barangayOfOccurrenceId,
                 Witness = dto.Witness?.Trim(),
                 ApprehendingOfficer = dto.ApprehendingOfficer?.Trim(),
+                ApprehendingOfficerDeputationNumber = string.IsNullOrWhiteSpace(dto.ApprehendingOfficerDeputationNumber) ? null : dto.ApprehendingOfficerDeputationNumber.Trim(),
                 OrdinanceId = ordinanceId,
                 OrdinanceSectionId = ordinanceSectionId,
                 OffenseLevel = offenseLevel,
@@ -229,6 +231,7 @@ namespace POVISAPI.Services
             entity.BarangayOfOccurrenceId = barangayOfOccurrenceId;
             entity.Witness = dto.Witness?.Trim();
             entity.ApprehendingOfficer = dto.ApprehendingOfficer?.Trim();
+            entity.ApprehendingOfficerDeputationNumber = string.IsNullOrWhiteSpace(dto.ApprehendingOfficerDeputationNumber) ? null : dto.ApprehendingOfficerDeputationNumber.Trim();
             entity.OrdinanceSectionId = ordinanceSectionId;
             entity.Status = dto.Status;
             entity.Remarks = dto.Remarks?.Trim();
