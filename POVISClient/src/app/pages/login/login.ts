@@ -86,7 +86,7 @@ export class Login implements OnInit {
     this.authService.login({ username: username!, password: password! }).subscribe({
       next: () => {
         this.isSubmitting.set(false);
-        this.router.navigate(['/app']);
+        this.router.navigate(['/']);
       },
       error: (err: Error) => {
         this.isSubmitting.set(false);
@@ -108,7 +108,7 @@ export class Login implements OnInit {
     this.authService.register({ username: username!, password: password!, role: 'MISPersonnel' }).subscribe({
       next: () => {
         this.isSubmitting.set(false);
-        this.router.navigate(['/app']);
+        this.router.navigate(['/']);
       },
       error: (err: Error) => {
         this.isSubmitting.set(false);
