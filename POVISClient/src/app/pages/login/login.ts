@@ -84,9 +84,9 @@ export class Login implements OnInit {
 
     const { username, password } = this.form.getRawValue();
     this.authService.login({ username: username!, password: password! }).subscribe({
-      next: () => {
+      next: (auth) => {
         this.isSubmitting.set(false);
-        this.router.navigate(['/']);
+        this.router.navigate([auth.mustChangePassword ? '/change-password' : '/']);
       },
       error: (err: Error) => {
         this.isSubmitting.set(false);

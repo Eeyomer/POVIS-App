@@ -2,7 +2,7 @@ import { Injectable, Inject, PLATFORM_ID, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, map, tap, throwError } from 'rxjs';
-import { LoginDTO, RegisterDTO, Role, ROLE_LABELS } from '../models/app-dto';
+import { ChangePasswordDTO, LoginDTO, RegisterDTO, Role, ROLE_LABELS } from '../models/app-dto';
 import { AuthResponse } from '../models/auth-model';
 import { AuthApi } from './api-service/auth-api';
 
@@ -11,6 +11,7 @@ export class AuthService {
   private readonly TOKEN_KEY = 'povis_token';
   private readonly USERNAME_KEY = 'povis_username';
   private readonly ROLE_KEY = 'povis_role';
+  private readonly MUST_CHANGE_KEY = 'povis_must_change_password';
   private readonly isBrowser: boolean;
 
   private readonly _isLoggedIn = signal(false);
@@ -40,6 +41,25 @@ export class AuthService {
     );
   }
 
+  changePassword(dto: ChangePasswordDTO): Observable<AuthResponse> {
+    return this.api.changePassword(dto).pipe(
+      map((res) => res.data as AuthResponse),
+      tap((auth) => this.storeSession(auth)),
+      catchError((err) => this.rethrowAsError(err)),
+    );
+  }
+
+  /** True while the signed-in user is on a temporary password and must set their own. */
+  mustChangePassword(): boolean {
+    if (!this.isBrowser) return false;
+    return localStorage.getItem(this.MUST_CHANGE_KEY) === 'true';
+  }
+
+  /** Called when the API reports a stale session that still requires a password change. */
+  flagMustChangePassword(): void {
+    if (this.isBrowser) localStorage.setItem(this.MUST_CHANGE_KEY, 'true');
+  }
+
   adminExists(): Observable<boolean> {
     return this.api.adminExists().pipe(
       map((res) => !!res.data?.exists),
@@ -52,6 +72,7 @@ export class AuthService {
       localStorage.removeItem(this.TOKEN_KEY);
       localStorage.removeItem(this.USERNAME_KEY);
       localStorage.removeItem(this.ROLE_KEY);
+      localStorage.removeItem(this.MUST_CHANGE_KEY);
     }
     this._isLoggedIn.set(false);
   }
@@ -115,6 +136,7 @@ export class AuthService {
       localStorage.setItem(this.TOKEN_KEY, auth.token);
       localStorage.setItem(this.USERNAME_KEY, auth.username);
       localStorage.setItem(this.ROLE_KEY, auth.role);
+      localStorage.setItem(this.MUST_CHANGE_KEY, String(!!auth.mustChangePassword));
     }
     this._isLoggedIn.set(true);
   }

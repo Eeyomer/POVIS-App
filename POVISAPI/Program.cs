@@ -177,6 +177,7 @@ if (app.Environment.IsDevelopment())
 app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<PasswordChangeRequiredMiddleware>();
 app.MapControllers();
 
 app.Run();

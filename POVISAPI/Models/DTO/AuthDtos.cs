@@ -21,4 +21,5 @@ public class AuthResponseDTO
     public string Username { get; set; } = string.Empty;
     public Role Role { get; set; }
     public DateTime ExpiresAt { get; set; }
+    public bool MustChangePassword { get; set; }
 }

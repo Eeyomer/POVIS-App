@@ -15,6 +15,7 @@ import {
   ViolationStatus,
   ViolatorDTO,
 } from '../../core/models/app-dto';
+import { manilaToday } from '../../core/utils/manila-time';
 import { ToastService } from '../../shared/toast/toast-service';
 
 @Component({
@@ -85,21 +86,46 @@ export class Violations implements OnInit {
     });
   }
 
-  /** Derives the age from the violator's birthday and the date of occurrence; falls back to manual entry. */
+  /** Birthdays looked up for violators that are not in the preloaded list. */
+  private birthdayCache = new Map<string, string | null>();
+
+  /**
+   * Derives the age from the selected violator's birthday. Uses the date of occurrence when entered,
+   * otherwise today (Manila). Falls back to manual entry when no birthday is on record.
+   */
   private updateAge(): void {
+    const violatorId = this.form.controls.violatorId.value;
+    if (!violatorId) {
+      this.applyAge(null);
+      return;
+    }
+
+    const listed = this.violators().find((v) => v.violatorId === violatorId);
+    if (listed) {
+      this.birthdayCache.set(violatorId, listed.birthday ?? null);
+    }
+    if (this.birthdayCache.has(violatorId)) {
+      this.applyAge(this.birthdayCache.get(violatorId) ?? null);
+      return;
+    }
+
+    this.violatorsService.getById(violatorId).subscribe((violator) => {
+      this.birthdayCache.set(violatorId, violator?.birthday ?? null);
+      if (this.form.controls.violatorId.value === violatorId) {
+        this.applyAge(violator?.birthday ?? null);
+      }
+    });
+  }
+
+  private applyAge(birthday: string | null): void {
     const control = this.form.controls.ageAtApprehension;
-    const violator = this.violators().find((v) => v.violatorId === this.form.controls.violatorId.value);
-    const occurrence = this.form.controls.dateOfOccurrence.value;
+    const asOf = this.form.controls.dateOfOccurrence.value || manilaToday();
 
     let age: number | null = null;
-    if (violator?.birthday && occurrence) {
-      const birth = new Date(violator.birthday);
-      const when = new Date(occurrence);
-      age = when.getFullYear() - birth.getFullYear();
-      const hadBirthday =
-        when.getMonth() > birth.getMonth() ||
-        (when.getMonth() === birth.getMonth() && when.getDate() >= birth.getDate());
-      if (!hadBirthday) age--;
+    if (birthday) {
+      const [by, bm, bd] = birthday.split('-').map(Number);
+      const [ay, am, ad] = asOf.split('-').map(Number);
+      age = ay - by - (am < bm || (am === bm && ad < bd) ? 1 : 0);
       if (age < 0) age = null;
     }
 

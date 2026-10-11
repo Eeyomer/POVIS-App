@@ -24,7 +24,8 @@ export class Users implements OnInit {
   });
   showForm = signal(false);
   editing = signal<User | null>(null);
-  resettingId = signal<string | null>(null);
+  /** Temporary password issued by the system; shown once so MIS Personnel can hand it over. */
+  issuedPassword = signal<{ username: string; password: string } | null>(null);
 
   roles: Role[] = ['MISPersonnel', 'OVRSupervisor', 'ApprehendingOfficer', 'PNPBarangayStaff'];
   roleLabels = ROLE_LABELS;
@@ -33,13 +34,8 @@ export class Users implements OnInit {
 
   form = this.fb.group({
     username: ['', Validators.required],
-    password: ['', Validators.required],
     role: ['ApprehendingOfficer' as Role, Validators.required],
     deputationNumber: ['', [Validators.maxLength(50)]],
-  });
-
-  resetForm = this.fb.group({
-    newPassword: ['', [Validators.required, Validators.minLength(8)]],
   });
 
   constructor(
@@ -59,18 +55,14 @@ export class Users implements OnInit {
 
   openAdd(): void {
     this.editing.set(null);
-    this.form.reset({ username: '', password: '', role: 'ApprehendingOfficer', deputationNumber: '' });
-    this.form.get('password')?.setValidators([Validators.required, Validators.minLength(8)]);
-    this.form.get('password')?.updateValueAndValidity();
+    this.form.reset({ username: '', role: 'ApprehendingOfficer', deputationNumber: '' });
     this.syncDeputationValidator();
     this.showForm.set(true);
   }
 
   openEdit(user: User): void {
     this.editing.set(user);
-    this.form.reset({ username: user.username, password: '', role: user.role, deputationNumber: user.deputationNumber ?? '' });
-    this.form.get('password')?.clearValidators();
-    this.form.get('password')?.updateValueAndValidity();
+    this.form.reset({ username: user.username, role: user.role, deputationNumber: user.deputationNumber ?? '' });
     this.syncDeputationValidator();
     this.showForm.set(true);
   }
@@ -97,17 +89,20 @@ export class Users implements OnInit {
       return;
     }
 
-    const { username, password, role, deputationNumber } = this.form.getRawValue();
+    const { username, role, deputationNumber } = this.form.getRawValue();
     const deputation = role === 'ApprehendingOfficer' ? deputationNumber?.trim() || null : null;
     const current = this.editing();
 
     const request = current
       ? this.usersService.update(current.id, { id: current.id, role: role!, isActive: current.isActive, deputationNumber: deputation })
-      : this.usersService.create({ username: username!, password: password!, role: role!, deputationNumber: deputation });
+      : this.usersService.create({ username: username!, role: role!, deputationNumber: deputation });
 
     request.subscribe({
-      next: () => {
+      next: (saved) => {
         this.toast.success(current ? 'User updated.' : 'User created.');
+        if (!current && saved.temporaryPassword) {
+          this.issuedPassword.set({ username: saved.username, password: saved.temporaryPassword });
+        }
         this.cancel();
         this.refresh();
       },
@@ -122,31 +117,29 @@ export class Users implements OnInit {
     });
   }
 
-  openResetPassword(user: User): void {
-    this.resettingId.set(user.id);
-    this.resetForm.reset({ newPassword: '' });
-  }
-
-  cancelResetPassword(): void {
-    this.resettingId.set(null);
-  }
-
-  submitResetPassword(): void {
-    if (this.resetForm.invalid) {
-      this.resetForm.markAllAsTouched();
-      return;
-    }
-
-    const id = this.resettingId();
-    if (!id) return;
-
-    this.usersService.resetPassword(id, { newPassword: this.resetForm.getRawValue().newPassword! }).subscribe({
-      next: () => {
-        this.toast.success('Password reset.');
-        this.cancelResetPassword();
+  resetPassword(user: User): void {
+    if (!confirm(`Reset the password of ${user.username}? They will have to change it on their next login.`)) return;
+    this.usersService.resetPassword(user.id).subscribe({
+      next: (temporaryPassword) => {
+        this.issuedPassword.set({ username: user.username, password: temporaryPassword });
+        this.toast.success('Temporary password generated.');
+        this.refresh();
       },
       error: (err) => this.toast.error(err.message),
     });
+  }
+
+  copyIssuedPassword(): void {
+    const issued = this.issuedPassword();
+    if (!issued) return;
+    navigator.clipboard?.writeText(issued.password).then(
+      () => this.toast.success('Password copied.'),
+      () => this.toast.error('Could not copy. Please copy it manually.'),
+    );
+  }
+
+  dismissIssuedPassword(): void {
+    this.issuedPassword.set(null);
   }
 
   remove(user: User): void {

@@ -52,10 +52,10 @@ namespace POVISAPI.Controllers
         }
 
         [HttpPut("{id}/reset-password")]
-        public async Task<IActionResult> ResetPassword(Guid id, [FromBody] ResetPasswordDTO dto)
+        public async Task<IActionResult> ResetPassword(Guid id)
         {
-            await userService.ResetPasswordAsync(id, dto);
-            return Ok(new APIResponse<object> { Success = true, Message = "Password reset successfully" });
+            var temporaryPassword = await userService.ResetPasswordAsync(id);
+            return Ok(new APIResponse<object> { Success = true, Message = "Password reset successfully", Data = new { temporaryPassword } });
         }
 
         [HttpDelete("{id}")]

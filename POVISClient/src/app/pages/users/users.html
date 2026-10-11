@@ -10,6 +10,9 @@
   @if (showForm()) {
   <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
     <h2 class="text-[15px] font-semibold text-[#152238] mb-4">{{ editing() ? 'Edit' : 'Add' }} User</h2>
+    @if (!editing()) {
+    <p class="text-[12.5px] text-[#7a889c] mb-4">A temporary password is generated automatically. The user must change it on first login.</p>
+    }
     <form [formGroup]="form" (ngSubmit)="save()" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div>
         <label class="block text-[13px] font-semibold text-[#152238] mb-1">Username</label>
@@ -34,13 +37,6 @@
         }
       </div>
       }
-      @if (!editing()) {
-      <div>
-        <label class="block text-[13px] font-semibold text-[#152238] mb-1">Password</label>
-        <input type="password" formControlName="password" autocomplete="new-password"
-          class="w-full px-3 py-2 rounded-lg border border-[#d3dae5] text-[14px]" />
-      </div>
-      }
       <div class="sm:col-span-2 flex gap-3">
         <button type="submit" class="px-4 py-2 rounded-lg bg-[#1e3a63] text-white text-[13px] font-semibold">Save</button>
         <button type="button" (click)="cancel()" class="px-4 py-2 rounded-lg border border-[#d3dae5] text-[13px] font-semibold text-[#152238]">Cancel</button>
@@ -48,29 +44,6 @@
     </form>
   </div>
   }
-
-  @if (resettingId()) {
-  <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
-    <h2 class="text-[15px] font-semibold text-[#152238] mb-4">Reset Password</h2>
-    <form [formGroup]="resetForm" (ngSubmit)="submitResetPassword()" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <div>
-        <label class="block text-[13px] font-semibold text-[#152238] mb-1">New Password</label>
-        <input type="password" formControlName="newPassword" autocomplete="new-password"
-          class="w-full px-3 py-2 rounded-lg border border-[#d3dae5] text-[14px]" />
-      </div>
-      <div class="sm:col-span-2 flex gap-3">
-        <button type="submit" class="px-4 py-2 rounded-lg bg-[#1e3a63] text-white text-[13px] font-semibold">Reset</button>
-        <button type="button" (click)="cancelResetPassword()" class="px-4 py-2 rounded-lg border border-[#d3dae5] text-[13px] font-semibold text-[#152238]">Cancel</button>
-      </div>
-    </form>
-  </div>
-  }
-
-  <div class="mb-4">
-    <input type="text" placeholder="Search username, role, deputation no..." [value]="search()"
-      (input)="search.set($any($event.target).value)"
-      class="px-3 py-2 rounded-lg border border-[#d3dae5] text-[13px] w-full sm:w-72 bg-white" />
-  </div>
 
   <div class="bg-white rounded-2xl shadow-sm overflow-x-auto">
     <table class="w-full min-w-[720px] text-[13px]">
@@ -91,10 +64,13 @@
           <td class="px-4 py-3">{{ u.deputationNumber || '-' }}</td>
           <td class="px-4 py-3">
             <span [class]="u.isActive ? 'text-green-600' : 'text-red-500'">{{ u.isActive ? 'Active' : 'Inactive' }}</span>
+            @if (u.mustChangePassword) {
+            <span class="ml-2 text-[11px] text-amber-600">Temp password</span>
+            }
           </td>
           <td class="px-4 py-3 text-right whitespace-nowrap">
             <button type="button" (click)="openEdit(u)" class="text-[#1e3a63] font-semibold mr-3">Edit</button>
-            <button type="button" (click)="openResetPassword(u)" class="text-[#7a889c] font-semibold mr-3">Reset Password</button>
+            <button type="button" (click)="resetPassword(u)" class="text-[#7a889c] font-semibold mr-3">Reset Password</button>
             <button type="button" (click)="toggleActive(u)" class="text-[#7a889c] font-semibold mr-3">
               {{ u.isActive ? 'Deactivate' : 'Activate' }}
             </button>

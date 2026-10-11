@@ -15,7 +15,8 @@ import { Users } from './pages/users/users';
 import { Reports } from './pages/reports/reports';
 import { System } from './pages/system/system';
 import { Verify } from './pages/verify/verify';
-import { authGuard } from './core/guard/auth-guard';
+import { authGuard, loggedInGuard } from './core/guard/auth-guard';
+import { ChangePassword } from './pages/change-password/change-password';
 import { roleGuard } from './core/guard/role-guard';
 
 // Everyone except Apprehending Officers (who only get Dashboard, Violators, Ordinances and Violations).
@@ -23,6 +24,7 @@ const notOfficer = roleGuard('MISPersonnel', 'OVRSupervisor', 'PNPBarangayStaff'
 
 export const routes: Routes = [
   { path: 'login', component: Login },
+  { path: 'change-password', component: ChangePassword, canActivate: [loggedInGuard] },
   {
     path: '',
     component: Shell,

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, map, of, throwError } from 'rxjs';
-import { CreateUserDTO, ResetPasswordDTO, UpdateUserDTO, User } from '../models/app-dto';
+import { CreateUserDTO, UpdateUserDTO, User } from '../models/app-dto';
 import { UsersApi } from './api-service/users-api';
 
 @Injectable({ providedIn: 'root' })
@@ -29,9 +29,10 @@ export class UsersService {
     );
   }
 
-  resetPassword(id: string, dto: ResetPasswordDTO): Observable<void> {
-    return this.api.resetPassword(id, dto).pipe(
-      map(() => void 0),
+  /** Resolves with the new system-generated temporary password. */
+  resetPassword(id: string): Observable<string> {
+    return this.api.resetPassword(id).pipe(
+      map((res) => res.data?.temporaryPassword as string),
       catchError((err) => this.rethrowAsError(err)),
     );
   }

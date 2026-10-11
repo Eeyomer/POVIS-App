@@ -26,6 +26,10 @@ export const authInterceptor: HttpInterceptorFn = (
         authService.logout();
         router.navigate(['/login']);
       }
+      if (error.status === 403 && error.error?.errorCode === 'PasswordChangeRequired') {
+        authService.flagMustChangePassword();
+        router.navigate(['/change-password']);
+      }
       return throwError(() => error);
     }),
   );

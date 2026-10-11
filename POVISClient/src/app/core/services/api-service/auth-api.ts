@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environment/environment';
 import { APIResponse } from '../../models/app-model';
-import { LoginDTO, RegisterDTO } from '../../models/app-dto';
+import { ChangePasswordDTO, LoginDTO, RegisterDTO } from '../../models/app-dto';
 import { AuthResponse } from '../../models/auth-model';
 
 @Injectable({ providedIn: 'root' })
@@ -18,6 +18,10 @@ export class AuthApi {
 
   register(dto: RegisterDTO): Observable<APIResponse<AuthResponse>> {
     return this.http.post<APIResponse<AuthResponse>>(`${this.apiUrl}/register`, dto);
+  }
+
+  changePassword(dto: ChangePasswordDTO): Observable<APIResponse<AuthResponse>> {
+    return this.http.post<APIResponse<AuthResponse>>(`${this.apiUrl}/change-password`, dto);
   }
 
   adminExists(): Observable<APIResponse<{ exists: boolean }>> {

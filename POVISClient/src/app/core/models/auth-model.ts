@@ -5,4 +5,5 @@ export interface AuthResponse {
   username: string;
   role: Role;
   expiresAt: string;
+  mustChangePassword: boolean;
 }

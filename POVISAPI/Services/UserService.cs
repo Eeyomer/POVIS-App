@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using POVISAPI.Common;
 using POVISAPI.Data;
 using POVISAPI.Interfaces;
 using POVISAPI.Models.DTO;
@@ -41,11 +42,14 @@ public class UserService : IUserService
 
         var deputationNumber = await ResolveDeputationNumberForCreateAsync(dto.Role, dto.DeputationNumber);
 
+        var temporaryPassword = PasswordGenerator.GenerateTemporary();
+
         var user = new User
         {
             Username = dto.Username,
             DeputationNumber = deputationNumber,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(temporaryPassword),
+            MustChangePassword = true,
             Role = dto.Role,
             IsActive = true
         };
@@ -53,7 +57,9 @@ public class UserService : IUserService
         context.Users.Add(user);
         await context.SaveChangesAsync();
 
-        return ToDto(user);
+        var created = ToDto(user);
+        created.TemporaryPassword = temporaryPassword;
+        return created;
     }
 
     public async Task<UserDTO> UpdateAsync(UpdateUserDTO dto)
@@ -86,13 +92,16 @@ public class UserService : IUserService
         return ToDto(user);
     }
 
-    public async Task ResetPasswordAsync(Guid id, ResetPasswordDTO dto)
+    public async Task<string> ResetPasswordAsync(Guid id)
     {
         var user = await context.Users.FindAsync(id)
             ?? throw new KeyNotFoundException("User does not exist.");
 
-        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+        var temporaryPassword = PasswordGenerator.GenerateTemporary();
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(temporaryPassword);
+        user.MustChangePassword = true;
         await context.SaveChangesAsync();
+        return temporaryPassword;
     }
 
     public async Task DeleteAsync(Guid id)
@@ -152,6 +161,7 @@ public class UserService : IUserService
         Role = u.Role,
         IsActive = u.IsActive,
         DeputationNumber = u.DeputationNumber,
+        MustChangePassword = u.MustChangePassword,
         CreatedAt = u.CreatedAt
     };
 }

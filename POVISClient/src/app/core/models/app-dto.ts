@@ -451,12 +451,14 @@ export interface User {
   role: Role;
   isActive: boolean;
   deputationNumber?: string | null;
+  mustChangePassword: boolean;
+  /** Only present in the response to create, shown once to MIS Personnel. */
+  temporaryPassword?: string | null;
   createdAt: string;
 }
 
 export interface CreateUserDTO {
   username: string;
-  password: string;
   role: Role;
   deputationNumber?: string | null;
 }
@@ -468,8 +470,13 @@ export interface UpdateUserDTO {
   deputationNumber?: string | null;
 }
 
-export interface ResetPasswordDTO {
+export interface ChangePasswordDTO {
+  currentPassword: string;
   newPassword: string;
+}
+
+export interface ResetPasswordResult {
+  temporaryPassword: string;
 }
 
 // ── Reports ──────────────────────────────────────────────────────────────

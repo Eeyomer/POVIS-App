@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using POVISAPI.Data;
+using POVISAPI.Middleware;
 using POVISAPI.Interfaces;
 using POVISAPI.Models.DTO;
 using POVISAPI.Models.Entity;
@@ -61,6 +62,27 @@ public class AuthService : IAuthService
         return BuildAuthResponse(user);
     }
 
+    public async Task<AuthResponseDTO> ChangePasswordAsync(Guid userId, ChangePasswordDTO dto)
+    {
+        var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId && u.IsActive)
+            ?? throw new KeyNotFoundException("User does not exist.");
+
+        if (!BCrypt.Net.BCrypt.Verify(dto.CurrentPassword, user.PasswordHash))
+            throw new ArgumentException("Current password is incorrect.");
+        if (string.IsNullOrEmpty(dto.NewPassword) || dto.NewPassword.Length < 8)
+            throw new ArgumentException("New password must be at least 8 characters.");
+        if (dto.NewPassword.Length > 100)
+            throw new ArgumentException("New password cannot exceed 100 characters.");
+        if (dto.NewPassword == dto.CurrentPassword)
+            throw new ArgumentException("New password must be different from the current password.");
+
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+        user.MustChangePassword = false;
+        await context.SaveChangesAsync();
+
+        return BuildAuthResponse(user);
+    }
+
     public async Task<bool> AdminExistsAsync()
     {
         return await context.Users.AnyAsync(u => u.Role == Role.MISPersonnel && u.IsActive);
@@ -70,13 +92,15 @@ public class AuthService : IAuthService
     {
         var expiresAt = DateTime.UtcNow.AddMinutes(jwtSettings.ExpiryInMinutes);
 
-        var claims = new[]
+        var claims = new List<Claim>
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Username),
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(ClaimTypes.Role, user.Role.ToString()),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
+        if (user.MustChangePassword)
+            claims.Add(new Claim(PasswordChangeRequiredMiddleware.ClaimType, "true"));
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Key));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -93,7 +117,8 @@ public class AuthService : IAuthService
             Token = new JwtSecurityTokenHandler().WriteToken(token),
             Username = user.Username,
             Role = user.Role,
-            ExpiresAt = expiresAt
+            ExpiresAt = expiresAt,
+            MustChangePassword = user.MustChangePassword
         };
     }
 }

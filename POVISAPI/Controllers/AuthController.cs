@@ -41,5 +41,17 @@ namespace POVISAPI.Controllers
             var response = await authService.LoginAsync(dto);
             return Ok(new APIResponse<object> { Success = true, Message = "Login successful", Data = response });
         }
+
+        [Authorize]
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword(ChangePasswordDTO dto)
+        {
+            var idClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (!Guid.TryParse(idClaim, out var userId))
+                return Unauthorized();
+
+            var response = await authService.ChangePasswordAsync(userId, dto);
+            return Ok(new APIResponse<object> { Success = true, Message = "Password changed successfully", Data = response });
+        }
     }
 }
