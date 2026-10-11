@@ -8,6 +8,7 @@ import {
   AddOrdinancePenaltyDTO,
   AddOrdinanceSectionDTO,
   OrdinanceDTO,
+  OrdinanceImportResultDTO,
   OrdinanceListDTO,
   OrdinancePenaltyDTO,
   OrdinanceSectionDTO,
@@ -50,6 +51,12 @@ export class OrdinancesApi {
 
   addPenalty(id: string, dto: AddOrdinancePenaltyDTO): Observable<APIResponse<OrdinancePenaltyDTO>> {
     return this.http.post<APIResponse<OrdinancePenaltyDTO>>(`${this.apiUrl}/${id}/penalties`, dto);
+  }
+
+  bulkUpload(file: File): Observable<APIResponse<OrdinanceImportResultDTO>> {
+    const body = new FormData();
+    body.append('file', file);
+    return this.http.post<APIResponse<OrdinanceImportResultDTO>>(`${this.apiUrl}/bulk-upload`, body);
   }
 
   removePenalty(id: string, penaltyId: string): Observable<APIResponse<null>> {

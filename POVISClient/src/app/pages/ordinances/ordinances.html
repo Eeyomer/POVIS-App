@@ -2,12 +2,51 @@
   <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
     <h1 class="font-poppins font-bold text-[19px] sm:text-[22px] text-[#152238]">Ordinances</h1>
     @if (authService.canManageUsers()) {
-    <button type="button" (click)="openAdd()"
-      class="px-4 py-2 rounded-lg bg-[#1e3a63] text-white text-[13px] font-semibold hover:bg-[#284d82]">
-      + Add Ordinance
-    </button>
+    <div class="flex flex-wrap items-center gap-2">
+      <a href="templates/ordinance-bulk-upload-template.xlsx" download
+        class="px-4 py-2 rounded-lg border border-[#d3dae5] text-[#152238] text-[13px] font-semibold hover:bg-[#f3f5f8]">
+        Download Template
+      </a>
+      <label
+        class="px-4 py-2 rounded-lg border border-[#1e3a63] text-[#1e3a63] text-[13px] font-semibold hover:bg-[#f3f5f8] cursor-pointer"
+        [class.opacity-50]="uploading()" [class.pointer-events-none]="uploading()">
+        {{ uploading() ? 'Uploading...' : 'Bulk Upload' }}
+        <input type="file" accept=".xlsx" class="hidden" (change)="onFileSelected($event)" [disabled]="uploading()" />
+      </label>
+      <button type="button" (click)="openAdd()"
+        class="px-4 py-2 rounded-lg bg-[#1e3a63] text-white text-[13px] font-semibold hover:bg-[#284d82]">
+        + Add Ordinance
+      </button>
+    </div>
     }
   </div>
+
+  @if (importResult(); as r) {
+  <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-[15px] font-semibold text-[#152238]">
+        {{ r.errors.length ? 'Bulk upload failed - nothing was imported' : 'Bulk upload complete' }}
+      </h2>
+      <button type="button" (click)="dismissImportResult()" class="text-[#7a889c] font-semibold text-[13px]">Dismiss</button>
+    </div>
+    @if (r.errors.length) {
+    <ul class="space-y-1 max-h-64 overflow-y-auto text-[13px]">
+      @for (e of r.errors; track $index) {
+      <li class="text-red-600"><span class="font-semibold">Row {{ e.row }}:</span> {{ e.message }}</li>
+      }
+    </ul>
+    } @else {
+    <ul class="text-[13px] text-[#152238] grid grid-cols-2 sm:grid-cols-3 gap-2">
+      <li>Rows read: <b>{{ r.rowsRead }}</b></li>
+      <li>Ordinances added: <b>{{ r.ordinancesCreated }}</b></li>
+      <li>Ordinances already existing: <b>{{ r.ordinancesExisting }}</b></li>
+      <li>Sections added: <b>{{ r.sectionsCreated }}</b></li>
+      <li>Penalties added: <b>{{ r.penaltiesCreated }}</b></li>
+      <li>Penalties skipped (duplicates): <b>{{ r.penaltiesSkipped }}</b></li>
+    </ul>
+    }
+  </div>
+  }
 
   @if (showForm()) {
   <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">

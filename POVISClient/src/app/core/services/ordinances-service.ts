@@ -6,6 +6,7 @@ import {
   AddOrdinancePenaltyDTO,
   AddOrdinanceSectionDTO,
   OrdinanceDTO,
+  OrdinanceImportResultDTO,
   OrdinanceListDTO,
   OrdinancePenaltyDTO,
   OrdinanceSectionDTO,
@@ -77,6 +78,20 @@ export class OrdinancesService {
     return this.api.removePenalty(id, penaltyId).pipe(
       map(() => void 0),
       catchError((err) => this.rethrowAsError(err)),
+    );
+  }
+
+  /** Resolves with the import summary. On validation errors the thrown error carries the per-row list in `result`. */
+  bulkUpload(file: File): Observable<OrdinanceImportResultDTO> {
+    return this.api.bulkUpload(file).pipe(
+      map((res) => res.data as OrdinanceImportResultDTO),
+      catchError((err: HttpErrorResponse) => {
+        const error = new Error(err?.error?.message || 'Something went wrong. Please try again.') as Error & {
+          result?: OrdinanceImportResultDTO;
+        };
+        error.result = err?.error?.data;
+        return throwError(() => error);
+      }),
     );
   }
 

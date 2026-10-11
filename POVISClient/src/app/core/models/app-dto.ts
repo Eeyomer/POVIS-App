@@ -227,6 +227,21 @@ export interface OrdinanceListDTO {
   isActive: boolean;
 }
 
+export interface OrdinanceImportErrorDTO {
+  row: number;
+  message: string;
+}
+
+export interface OrdinanceImportResultDTO {
+  rowsRead: number;
+  ordinancesCreated: number;
+  ordinancesExisting: number;
+  sectionsCreated: number;
+  penaltiesCreated: number;
+  penaltiesSkipped: number;
+  errors: OrdinanceImportErrorDTO[];
+}
+
 export interface AddOrdinanceDTO {
   ordinanceNumber: string;
   series: number;

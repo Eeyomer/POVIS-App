@@ -14,9 +14,40 @@ namespace POVISAPI.Controllers
     public class OrdinancesController : Controller
     {
         private readonly IOrdinanceService ordinanceService;
-        public OrdinancesController(IOrdinanceService ordinanceService)
+        private readonly IOrdinanceImportService importService;
+        public OrdinancesController(IOrdinanceService ordinanceService, IOrdinanceImportService importService)
         {
             this.ordinanceService = ordinanceService;
+            this.importService = importService;
+        }
+
+        [Authorize(Roles = "MISPersonnel")]
+        [HttpPost("bulk-upload")]
+        [RequestSizeLimit(5_000_000)]
+        public async Task<IActionResult> BulkUpload(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                throw new ArgumentException("No file was uploaded.");
+            if (!file.FileName.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
+                throw new ArgumentException("Only .xlsx files are supported. Please use the provided template.");
+
+            await using var stream = file.OpenReadStream();
+            var result = await importService.ImportAsync(stream);
+
+            if (result.Errors.Count > 0)
+                return BadRequest(new APIResponse<object>
+                {
+                    Success = false,
+                    Message = $"The file has {result.Errors.Count} error(s). Nothing was imported.",
+                    Data = result
+                });
+
+            return Ok(new APIResponse<object>
+            {
+                Success = true,
+                Message = "Ordinances imported successfully",
+                Data = result
+            });
         }
 
         [HttpGet]

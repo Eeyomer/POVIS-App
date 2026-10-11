@@ -146,4 +146,21 @@ namespace POVISAPI.Models.DTO
 
         public bool IsActive { get; set; } = true;
     }
+
+    public class OrdinanceImportErrorDTO
+    {
+        public int Row { get; set; }
+        public string Message { get; set; } = string.Empty;
+    }
+
+    public class OrdinanceImportResultDTO
+    {
+        public int RowsRead { get; set; }
+        public int OrdinancesCreated { get; set; }
+        public int OrdinancesExisting { get; set; }
+        public int SectionsCreated { get; set; }
+        public int PenaltiesCreated { get; set; }
+        public int PenaltiesSkipped { get; set; }
+        public List<OrdinanceImportErrorDTO> Errors { get; set; } = new();
+    }
 }

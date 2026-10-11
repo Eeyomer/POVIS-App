@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { OrdinancesService } from '../../core/services/ordinances-service';
 import { AuthService } from '../../core/services/auth-service';
-import { OffenseLevel, OrdinanceDTO, OrdinanceListDTO } from '../../core/models/app-dto';
+import { OffenseLevel, OrdinanceDTO, OrdinanceImportResultDTO, OrdinanceListDTO } from '../../core/models/app-dto';
 import { ToastService } from '../../shared/toast/toast-service';
 
 @Component({
@@ -49,6 +49,36 @@ export class Ordinances implements OnInit {
 
   ngOnInit(): void {
     this.refresh();
+  }
+
+  uploading = signal(false);
+  importResult = signal<OrdinanceImportResultDTO | null>(null);
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+
+    this.uploading.set(true);
+    this.importResult.set(null);
+    this.ordinancesService.bulkUpload(file).subscribe({
+      next: (result) => {
+        this.uploading.set(false);
+        this.importResult.set(result);
+        this.toast.success('Ordinances imported.');
+        this.refresh();
+      },
+      error: (err: Error & { result?: OrdinanceImportResultDTO }) => {
+        this.uploading.set(false);
+        this.importResult.set(err.result ?? null);
+        this.toast.error(err.message);
+      },
+    });
+  }
+
+  dismissImportResult(): void {
+    this.importResult.set(null);
   }
 
   refresh(): void {
