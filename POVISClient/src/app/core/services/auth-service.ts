@@ -100,6 +100,11 @@ export class AuthService {
     return this.hasRole('MISPersonnel', 'OVRSupervisor', 'ApprehendingOfficer');
   }
 
+  /** Apprehending Officers get a reduced menu: Dashboard, Violators, Ordinances and Violations only. */
+  isApprehendingOfficer(): boolean {
+    return this.hasRole('ApprehendingOfficer');
+  }
+
   /** Only MIS Personnel may permanently delete records. */
   canDelete(): boolean {
     return this.hasRole('MISPersonnel');

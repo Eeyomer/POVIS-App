@@ -18,6 +18,9 @@ import { Verify } from './pages/verify/verify';
 import { authGuard } from './core/guard/auth-guard';
 import { roleGuard } from './core/guard/role-guard';
 
+// Everyone except Apprehending Officers (who only get Dashboard, Violators, Ordinances and Violations).
+const notOfficer = roleGuard('MISPersonnel', 'OVRSupervisor', 'PNPBarangayStaff');
+
 export const routes: Routes = [
   { path: 'login', component: Login },
   {
@@ -26,16 +29,16 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { path: '', component: Dashboard },
-      { path: 'barangays', component: Barangays },
+      { path: 'barangays', component: Barangays, canActivate: [notOfficer] },
       { path: 'violators', component: Violators },
       { path: 'ordinances', component: Ordinances },
       { path: 'violations', component: Violations },
-      { path: 'filed-cases', component: FiledCases },
-      { path: 'payments', component: Payments },
-      { path: 'seminar-records', component: SeminarRecords },
-      { path: 'counseling-records', component: CounselingRecords },
-      { path: 'community-service-records', component: CommunityServiceRecords },
-      { path: 'verify', component: Verify },
+      { path: 'filed-cases', component: FiledCases, canActivate: [notOfficer] },
+      { path: 'payments', component: Payments, canActivate: [notOfficer] },
+      { path: 'seminar-records', component: SeminarRecords, canActivate: [notOfficer] },
+      { path: 'counseling-records', component: CounselingRecords, canActivate: [notOfficer] },
+      { path: 'community-service-records', component: CommunityServiceRecords, canActivate: [notOfficer] },
+      { path: 'verify', component: Verify, canActivate: [notOfficer] },
       {
         path: 'reports',
         component: Reports,
