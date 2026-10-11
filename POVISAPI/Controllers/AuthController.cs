@@ -46,11 +46,16 @@ namespace POVISAPI.Controllers
         [HttpPost("change-password")]
         public async Task<IActionResult> ChangePassword(ChangePasswordDTO dto)
         {
-            var idClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            if (!Guid.TryParse(idClaim, out var userId))
+            // The JWT's "sub" (username) is mapped to the same claim type as the user id, so FindFirst may
+            // return the username. Pick the first claim of those types that is actually a Guid.
+            var userId = User.Claims
+                .Where(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier || c.Type == "nameid")
+                .Select(c => Guid.TryParse(c.Value, out var g) ? g : (Guid?)null)
+                .FirstOrDefault(g => g.HasValue);
+            if (userId is null)
                 return Unauthorized();
 
-            var response = await authService.ChangePasswordAsync(userId, dto);
+            var response = await authService.ChangePasswordAsync(userId.Value, dto);
             return Ok(new APIResponse<object> { Success = true, Message = "Password changed successfully", Data = response });
         }
     }
