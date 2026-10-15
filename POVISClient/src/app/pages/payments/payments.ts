@@ -4,12 +4,13 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { PaymentsService } from '../../core/services/payments-service';
 import { ViolationsService } from '../../core/services/violations-service';
 import { AuthService } from '../../core/services/auth-service';
+import { BulkUpload } from '../../shared/components/bulk-upload/bulk-upload';
 import { PaymentDTO, ViolationDTO } from '../../core/models/app-dto';
 import { ToastService } from '../../shared/toast/toast-service';
 
 @Component({
   selector: 'app-payments',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, BulkUpload],
   templateUrl: './payments.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

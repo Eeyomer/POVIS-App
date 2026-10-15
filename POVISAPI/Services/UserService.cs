@@ -55,6 +55,8 @@ public class UserService : IUserService
             ContactNumber = profile.ContactNumber,
             Email = profile.Email,
             Address = profile.Address,
+            MaritalStatus = dto.MaritalStatus,
+            Photo = ValidatePhoto(dto.Photo),
             DeputationNumber = deputationNumber,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(temporaryPassword),
             MustChangePassword = true,
@@ -98,6 +100,9 @@ public class UserService : IUserService
         user.ContactNumber = profile.ContactNumber;
         user.Email = profile.Email;
         user.Address = profile.Address;
+        user.MaritalStatus = dto.MaritalStatus;
+        if (dto.Photo != null)
+            user.Photo = ValidatePhoto(dto.Photo); // "" clears it
 
         user.Role = dto.Role;
         user.IsActive = dto.IsActive;
@@ -169,6 +174,14 @@ public class UserService : IUserService
         return number;
     }
 
+    private const int MaxPhotoBytes = 1_000_000;
+
+    private static string? ValidatePhoto(string? photo)
+    {
+        if (string.IsNullOrWhiteSpace(photo)) return null;
+        return ImageDataValidator.Validate(photo, MaxPhotoBytes, "Photo").DataUrl;
+    }
+
     private static string? Clean(string? value)
     {
         value = value?.Trim();
@@ -210,6 +223,8 @@ public class UserService : IUserService
         ContactNumber = u.ContactNumber,
         Email = u.Email,
         Address = u.Address,
+        MaritalStatus = u.MaritalStatus,
+        Photo = u.Photo,
         MustChangePassword = u.MustChangePassword,
         CreatedAt = u.CreatedAt
     };

@@ -27,6 +27,7 @@ public class AppDbContext : DbContext
 
     // ----- Auth -----
     public DbSet<User> Users => Set<User>();
+    public DbSet<ViolationEvidence> ViolationEvidence => Set<ViolationEvidence>();
 
     // ----- System -----
     public DbSet<TechnicalLog> TechnicalLogs => Set<TechnicalLog>();
@@ -240,7 +241,20 @@ public class AppDbContext : DbContext
             e.Property(u => u.ContactNumber).HasMaxLength(30);
             e.Property(u => u.Email).HasMaxLength(150);
             e.Property(u => u.Address).HasMaxLength(300);
+            e.Property(u => u.Photo).HasColumnType("text");
             e.HasIndex(u => u.DeputationNumber).IsUnique().HasFilter("\"DeputationNumber\" IS NOT NULL");
+        });
+
+        // ================= ViolationEvidence =================
+        modelBuilder.Entity<ViolationEvidence>(e =>
+        {
+            e.Property(v => v.ContentType).HasMaxLength(20).IsRequired();
+            e.Property(v => v.ImageData).HasColumnType("text").IsRequired();
+            e.HasOne(v => v.Violation)
+             .WithMany(v => v.Evidence)
+             .HasForeignKey(v => v.ViolationId)
+             .OnDelete(DeleteBehavior.Cascade);
+            e.HasIndex(v => v.ViolationId);
         });
 
         // ================= TechnicalLog =================

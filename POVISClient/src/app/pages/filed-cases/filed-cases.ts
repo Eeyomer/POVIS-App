@@ -4,12 +4,13 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FiledCasesService } from '../../core/services/filed-cases-service';
 import { ViolationsService } from '../../core/services/violations-service';
 import { AuthService } from '../../core/services/auth-service';
+import { BulkUpload } from '../../shared/components/bulk-upload/bulk-upload';
 import { CaseStatus, FiledCaseDTO, ViolationDTO } from '../../core/models/app-dto';
 import { ToastService } from '../../shared/toast/toast-service';
 
 @Component({
   selector: 'app-filed-cases',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, BulkUpload],
   templateUrl: './filed-cases.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

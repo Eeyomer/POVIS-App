@@ -19,6 +19,7 @@
         <option value="DidNotComply">Did Not Comply</option>
         <option value="WarningIssued">Warning Issued</option>
       </select>
+      <app-bulk-upload module="violations" title="Violations" (imported)="refresh()" />
       @if (authService.canEdit()) {
       <button type="button" (click)="openAdd()"
         class="px-4 py-2 rounded-lg bg-[#1e3a63] text-white text-[13px] font-semibold hover:bg-[#284d82]">
@@ -140,6 +141,30 @@
         <input type="text" formControlName="remarks2" class="w-full px-3 py-2 rounded-lg border border-[#d3dae5] text-[14px]" />
       </div>
 
+      <div class="sm:col-span-3">
+        <label class="block text-[13px] font-semibold text-[#152238] mb-1">
+          Evidence Photos <span class="font-normal text-[#7a889c]">({{ evidence().length }}/{{ maxEvidence }} - JPEG, JPG or PNG)</span>
+        </label>
+        <div class="flex flex-wrap items-center gap-3">
+          @for (e of evidence(); track $index) {
+          <div class="relative">
+            <button type="button" (click)="previewImage.set(e.data)" title="View">
+              <img [src]="e.data" alt="Evidence {{ $index + 1 }}" class="w-24 h-24 object-cover rounded-lg border border-[#d3dae5]" />
+            </button>
+            <button type="button" (click)="removeEvidence($index)" title="Remove"
+              class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-500 text-white text-[13px] leading-none flex items-center justify-center">&times;</button>
+          </div>
+          }
+          @if (evidence().length < maxEvidence) {
+          <label class="w-24 h-24 rounded-lg border-2 border-dashed border-[#d3dae5] text-[#7a889c] text-[12px] font-semibold flex flex-col items-center justify-center cursor-pointer hover:bg-[#f3f5f8]">
+            <span class="text-[22px] leading-none">+</span>
+            Add photo
+            <input type="file" multiple [accept]="imageAccept" class="hidden" (change)="onEvidenceSelected($event)" />
+          </label>
+          }
+        </div>
+      </div>
+
       <div class="sm:col-span-3 flex gap-3">
         <button type="submit" class="px-4 py-2 rounded-lg bg-[#1e3a63] text-white text-[13px] font-semibold">Save</button>
         <button type="button" (click)="cancel()" class="px-4 py-2 rounded-lg border border-[#d3dae5] text-[13px] font-semibold text-[#152238]">Cancel</button>
@@ -166,7 +191,7 @@
       <tbody>
         @for (v of violations(); track v.violationId) {
         <tr class="border-t border-[#eef2f8]">
-          <td class="px-4 py-3 font-medium text-[#152238]">{{ v.ovrNumber }}</td>
+          <td class="px-4 py-3 font-medium text-[#152238]">{{ v.ovrNumber }}@if (v.evidenceCount) { <span class="block text-[11px] font-normal text-[#7a889c]">{{ v.evidenceCount }} photo{{ v.evidenceCount === 1 ? '' : 's' }}</span> }</td>
           <td class="px-4 py-3">{{ v.violatorFullName }}</td>
           <td class="px-4 py-3">{{ v.barangayOfOccurrenceName }}</td>
           <td class="px-4 py-3">{{ v.ordinanceShortName }}</td>
@@ -198,4 +223,10 @@
       </tbody>
     </table>
   </div>
+
+@if (previewImage(); as img) {
+<div class="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" (click)="previewImage.set(null)">
+  <img [src]="img" alt="Evidence" class="max-w-full max-h-full rounded-lg" />
+</div>
+}
 </div>

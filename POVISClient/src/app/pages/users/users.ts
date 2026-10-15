@@ -3,12 +3,14 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UsersService } from '../../core/services/users-service';
 import { AuthService } from '../../core/services/auth-service';
-import { ROLE_LABELS, Role, User } from '../../core/models/app-dto';
+import { BulkUpload } from '../../shared/components/bulk-upload/bulk-upload';
+import { MaritalStatus, ROLE_LABELS, Role, User } from '../../core/models/app-dto';
+import { IMAGE_ACCEPT, readImageAsDataUrl } from '../../core/utils/image-upload';
 import { ToastService } from '../../shared/toast/toast-service';
 
 @Component({
   selector: 'app-users',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, BulkUpload],
   templateUrl: './users.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -27,6 +29,13 @@ export class Users implements OnInit {
   /** Temporary password issued by the system; shown once so MIS Personnel can hand it over. */
   issuedPassword = signal<{ username: string; password: string } | null>(null);
 
+  maritalStatuses: MaritalStatus[] = ['Single', 'Married', 'Widowed', 'Separated', 'Divorced'];
+  imageAccept = IMAGE_ACCEPT;
+
+  /** Profile photo shown in the form (base64 data URL). */
+  photo = signal<string | null>(null);
+  private photoChanged = false;
+
   roles: Role[] = ['MISPersonnel', 'OVRSupervisor', 'ApprehendingOfficer', 'PNPBarangayStaff'];
   roleLabels = ROLE_LABELS;
 
@@ -38,6 +47,7 @@ export class Users implements OnInit {
     contactNumber: ['', [Validators.maxLength(30)]],
     email: ['', [Validators.email, Validators.maxLength(150)]],
     address: ['', [Validators.maxLength(300)]],
+    maritalStatus: [''],
     role: ['ApprehendingOfficer' as Role, Validators.required],
     deputationNumber: ['', [Validators.maxLength(50)]],
   });
@@ -59,12 +69,15 @@ export class Users implements OnInit {
 
   openAdd(): void {
     this.editing.set(null);
+    this.photo.set(null);
+    this.photoChanged = false;
     this.form.reset({
       username: '',
       fullName: '',
       contactNumber: '',
       email: '',
       address: '',
+      maritalStatus: '',
       role: 'ApprehendingOfficer',
       deputationNumber: '',
     });
@@ -74,17 +87,48 @@ export class Users implements OnInit {
 
   openEdit(user: User): void {
     this.editing.set(user);
+    this.photo.set(user.photo ?? null);
+    this.photoChanged = false;
     this.form.reset({
       username: user.username,
       fullName: user.fullName ?? '',
       contactNumber: user.contactNumber ?? '',
       email: user.email ?? '',
       address: user.address ?? '',
+      maritalStatus: user.maritalStatus ?? '',
       role: user.role,
       deputationNumber: user.deputationNumber ?? '',
     });
     this.syncDeputationValidator();
     this.showForm.set(true);
+  }
+
+  async onPhotoSelected(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+
+    try {
+      this.photo.set(await readImageAsDataUrl(file, { maxDimension: 400, maxBytes: 900_000 }));
+      this.photoChanged = true;
+    } catch (e) {
+      this.toast.error((e as Error).message);
+    }
+  }
+
+  removePhoto(): void {
+    this.photo.set(null);
+    this.photoChanged = true;
+  }
+
+  initials(user: User): string {
+    const name = (user.fullName || user.username).trim();
+    return name
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((p) => p[0]?.toUpperCase() ?? '')
+      .join('');
   }
 
   isOfficer(): boolean {
@@ -109,19 +153,28 @@ export class Users implements OnInit {
       return;
     }
 
-    const { username, fullName, contactNumber, email, address, role, deputationNumber } = this.form.getRawValue();
+    const { username, fullName, contactNumber, email, address, maritalStatus, role, deputationNumber } = this.form.getRawValue();
     const profile = {
       fullName: fullName!.trim(),
       contactNumber: contactNumber?.trim() || null,
       email: email?.trim() || null,
       address: address?.trim() || null,
+      maritalStatus: (maritalStatus || null) as MaritalStatus | null,
     };
     const deputation = role === 'ApprehendingOfficer' ? deputationNumber?.trim() || null : null;
     const current = this.editing();
 
     const request = current
-      ? this.usersService.update(current.id, { id: current.id, ...profile, role: role!, isActive: current.isActive, deputationNumber: deputation })
-      : this.usersService.create({ username: username!, ...profile, role: role!, deputationNumber: deputation });
+      ? this.usersService.update(current.id, {
+          id: current.id,
+          ...profile,
+          // null keeps the stored photo; "" removes it.
+          photo: this.photoChanged ? (this.photo() ?? '') : null,
+          role: role!,
+          isActive: current.isActive,
+          deputationNumber: deputation,
+        })
+      : this.usersService.create({ username: username!, ...profile, photo: this.photo(), role: role!, deputationNumber: deputation });
 
     request.subscribe({
       next: (saved) => {
@@ -143,6 +196,8 @@ export class Users implements OnInit {
         contactNumber: user.contactNumber,
         email: user.email,
         address: user.address,
+        maritalStatus: user.maritalStatus,
+        photo: null,
         role: user.role,
         isActive: !user.isActive,
         deputationNumber: user.deputationNumber,

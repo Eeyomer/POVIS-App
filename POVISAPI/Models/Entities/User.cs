@@ -13,6 +13,10 @@ public class User : BaseEntity
     public string? ContactNumber { get; set; }
     public string? Email { get; set; }
     public string? Address { get; set; }
+    public MaritalStatus? MaritalStatus { get; set; }
+
+    /// <summary>Profile photo as a base64 data URL (JPEG or PNG).</summary>
+    public string? Photo { get; set; }
 
     /// <summary>True while the user is on a system-generated temporary password and must set their own.</summary>
     public bool MustChangePassword { get; set; }

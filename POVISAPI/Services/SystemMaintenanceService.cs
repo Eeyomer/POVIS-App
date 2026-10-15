@@ -23,6 +23,7 @@ public class SystemMaintenanceService : ISystemMaintenanceService
         typeof(OrdinancePenalty),
         typeof(Violator),
         typeof(Violation),
+        typeof(ViolationEvidence),
         typeof(Payment),
         typeof(FiledCase),
         typeof(SeminarRecord),

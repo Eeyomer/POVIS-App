@@ -4,12 +4,13 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SeminarRecordsService } from '../../core/services/seminar-records-service';
 import { ViolationsService } from '../../core/services/violations-service';
 import { AuthService } from '../../core/services/auth-service';
+import { BulkUpload } from '../../shared/components/bulk-upload/bulk-upload';
 import { ComplianceStatus, SeminarRecordDTO, SeminarType, ViolationDTO } from '../../core/models/app-dto';
 import { ToastService } from '../../shared/toast/toast-service';
 
 @Component({
   selector: 'app-seminar-records',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, BulkUpload],
   templateUrl: './seminar-records.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -26,6 +26,56 @@
     </div>
   </div>
 
+  <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
+    <h2 class="text-[15px] font-semibold text-[#152238] mb-1">Download Report</h2>
+    <p class="text-[12px] text-[#7a889c] mb-4">
+      Generates a PDF or Excel file (with the Pasig City logo and POD header) from the records in POVIS for the dates selected above.
+    </p>
+    <div class="flex flex-wrap items-end gap-4">
+      <div>
+        <label class="block text-[13px] font-semibold text-[#152238] mb-1">Report</label>
+        <select [ngModel]="exportType()" (ngModelChange)="exportType.set($event)"
+          class="px-3 py-2 rounded-lg border border-[#d3dae5] text-[14px] bg-white">
+          @for (opt of exportOptions; track opt.value) {
+          <option [value]="opt.value">{{ opt.label }}</option>
+          }
+        </select>
+      </div>
+      @if (exportType() === 'seminar') {
+      <div>
+        <label class="block text-[13px] font-semibold text-[#152238] mb-1">Barangay</label>
+        <select [ngModel]="exportBarangayId()" (ngModelChange)="exportBarangayId.set($event)"
+          class="px-3 py-2 rounded-lg border border-[#d3dae5] text-[14px] bg-white">
+          <option value="">All barangays</option>
+          @for (b of barangays(); track b.barangayId) {
+          <option [value]="b.barangayId">{{ b.name }}</option>
+          }
+        </select>
+      </div>
+      }
+      @if (exportType() === 'incentives') {
+      <div>
+        <label class="block text-[13px] font-semibold text-[#152238] mb-1">Division</label>
+        <select [ngModel]="exportDivision()" (ngModelChange)="exportDivision.set($event)"
+          class="px-3 py-2 rounded-lg border border-[#d3dae5] text-[14px] bg-white">
+          <option value="">All divisions</option>
+          @for (d of divisions; track d) {
+          <option [value]="d">{{ d }}</option>
+          }
+        </select>
+      </div>
+      }
+      <button type="button" (click)="download('pdf')" [disabled]="exporting() !== null"
+        class="px-4 py-2 rounded-lg bg-[#1e3a63] text-white text-[13px] font-semibold hover:bg-[#284d82] disabled:opacity-60">
+        {{ exporting() === 'pdf' ? 'Generating…' : 'Download PDF' }}
+      </button>
+      <button type="button" (click)="download('xlsx')" [disabled]="exporting() !== null"
+        class="px-4 py-2 rounded-lg border border-[#d3dae5] text-[13px] font-semibold text-[#152238] disabled:opacity-60">
+        {{ exporting() === 'xlsx' ? 'Generating…' : 'Download Excel' }}
+      </button>
+    </div>
+  </div>
+
   @if (ordinanceSummary(); as summary) {
   <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
     <h2 class="text-[15px] font-semibold text-[#152238] mb-4">
@@ -70,7 +120,7 @@
         <tbody>
           @for (row of summary.rows; track row.ordinanceId) {
           <tr class="border-t border-[#eef2f8]">
-            <td class="px-3 py-2 font-medium text-[#152238]">{{ row.ordinanceShortName }}</td>
+            <td class="px-3 py-2 font-medium text-[#152238]">{{ row.label }}</td>
             <td class="px-3 py-2">{{ row.maleCount }}</td>
             <td class="px-3 py-2">{{ row.femaleCount }}</td>
             <td class="px-3 py-2">{{ row.totalViolators }}</td>

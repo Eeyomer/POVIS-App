@@ -93,6 +93,9 @@ export interface ViolationDTO {
   witness?: string | null;
   apprehendingOfficer?: string | null;
   apprehendingOfficerDeputationNumber?: string | null;
+  evidenceCount?: number;
+  /** Only present when a single violation is fetched. */
+  evidence?: ViolationEvidenceDTO[];
   ordinanceId: string;
   ordinanceShortName: string;
   ordinanceSectionId?: string | null;
@@ -122,6 +125,8 @@ export interface AddViolationDTO {
   witness?: string | null;
   apprehendingOfficer?: string | null;
   apprehendingOfficerDeputationNumber?: string | null;
+  /** Evidence photos as base64 data URLs (JPEG/PNG), at most 5. */
+  evidencePhotos?: string[];
   ordinanceId: string;
   ordinanceSectionId?: string | null;
   isWarningTicket: boolean;
@@ -141,10 +146,19 @@ export interface UpdateViolationDTO {
   witness?: string | null;
   apprehendingOfficer?: string | null;
   apprehendingOfficerDeputationNumber?: string | null;
+  /** New evidence photos as base64 data URLs; the total per violation is capped at 5. */
+  newEvidencePhotos?: string[];
+  removeEvidenceIds?: string[];
   ordinanceSectionId?: string | null;
   status: ViolationStatus;
   remarks?: string | null;
   remarks2?: string | null;
+}
+
+export interface ViolationEvidenceDTO {
+  evidenceId: string;
+  contentType: string;
+  imageData: string;
 }
 
 export interface ViolationFilterDTO {
@@ -428,6 +442,8 @@ export interface UpdateCounselingDTO {
 }
 
 // ── Auth ─────────────────────────────────────────────────────────────────
+export type MaritalStatus = 'Single' | 'Married' | 'Widowed' | 'Separated' | 'Divorced';
+
 export type Role = 'MISPersonnel' | 'OVRSupervisor' | 'ApprehendingOfficer' | 'PNPBarangayStaff';
 
 export const ROLE_LABELS: Record<Role, string> = {
@@ -457,6 +473,8 @@ export interface User {
   contactNumber?: string | null;
   email?: string | null;
   address?: string | null;
+  maritalStatus?: MaritalStatus | null;
+  photo?: string | null;
   deputationNumber?: string | null;
   mustChangePassword: boolean;
   /** Only present in the response to create, shown once to MIS Personnel. */
@@ -470,6 +488,9 @@ export interface CreateUserDTO {
   contactNumber?: string | null;
   email?: string | null;
   address?: string | null;
+  maritalStatus?: MaritalStatus | null;
+  /** Base64 data URL (JPEG/PNG). */
+  photo?: string | null;
   role: Role;
   deputationNumber?: string | null;
 }
@@ -480,6 +501,9 @@ export interface UpdateUserDTO {
   contactNumber?: string | null;
   email?: string | null;
   address?: string | null;
+  maritalStatus?: MaritalStatus | null;
+  /** null keeps the current photo, "" removes it, a data URL replaces it. */
+  photo?: string | null;
   role: Role;
   isActive: boolean;
   deputationNumber?: string | null;
@@ -498,6 +522,7 @@ export interface ResetPasswordResult {
 export interface OrdinanceSummaryRow {
   ordinanceId: string;
   ordinanceShortName: string;
+  label: string;
   femaleCount: number;
   maleCount: number;
   totalViolators: number;
@@ -506,6 +531,7 @@ export interface OrdinanceSummaryRow {
   communityServiceCount: number;
   didNotComplyCount: number;
   paidCount: number;
+  fineAmount?: number | null;
   totalAmountPaid: number;
   totalAmountUnpaid: number;
 }
@@ -517,6 +543,10 @@ export interface OrdinanceSummaryReport {
   totalFemale: number;
   totalMale: number;
   totalViolators: number;
+  totalSeminar: number;
+  totalCounseling: number;
+  totalCommunityService: number;
+  totalDidNotComply: number;
   totalPaid: number;
   totalAmountPaid: number;
   totalAmountUnpaid: number;
@@ -528,6 +558,7 @@ export interface BarangayOrdinanceRow {
   district?: number | null;
   countsByOrdinance: Record<string, number>;
   total: number;
+  share: number;
 }
 
 export interface PerBarangayReport {
@@ -535,6 +566,8 @@ export interface PerBarangayReport {
   to: string;
   ordinanceColumns: string[];
   rows: BarangayOrdinanceRow[];
+  totalsByOrdinance: Record<string, number>;
+  grandTotal: number;
 }
 
 // ── System (MIS Personnel) ──────────────────────────────────────────────
@@ -566,4 +599,31 @@ export interface TechnicalLogFilter {
   to?: string | null;
   page?: number;
   pageSize?: number;
+}
+
+export type ReportExportType = 'overall' | 'per-barangay' | 'seminar' | 'incentives' | 'enforcers';
+export type ReportExportFormat = 'pdf' | 'xlsx';
+
+// -- Bulk upload (MIS Personnel) ------------------------------------------
+export interface BulkImportError {
+  row: number;
+  message: string;
+}
+
+export interface BulkImportCount {
+  label: string;
+  count: number;
+}
+
+export interface BulkImportCredential {
+  username: string;
+  temporaryPassword: string;
+}
+
+export interface BulkImportResult {
+  module: string;
+  rowsRead: number;
+  counts: BulkImportCount[];
+  errors: BulkImportError[];
+  credentials: BulkImportCredential[];
 }

@@ -3,12 +3,13 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { BarangaysService } from '../../core/services/barangays-service';
 import { AuthService } from '../../core/services/auth-service';
+import { BulkUpload } from '../../shared/components/bulk-upload/bulk-upload';
 import { BarangayDTO } from '../../core/models/app-dto';
 import { ToastService } from '../../shared/toast/toast-service';
 
 @Component({
   selector: 'app-barangays',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, BulkUpload],
   templateUrl: './barangays.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

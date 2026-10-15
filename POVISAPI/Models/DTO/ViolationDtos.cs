@@ -3,6 +3,13 @@ using System.ComponentModel.DataAnnotations;
 
 namespace POVISAPI.Models.DTO
 {
+    public class ViolationEvidenceDTO
+    {
+        public string EvidenceId { get; set; } = string.Empty;
+        public string ContentType { get; set; } = string.Empty;
+        public string ImageData { get; set; } = string.Empty;
+    }
+
     public class ViolationDTO
     {
         public string ViolationId { get; set; } = string.Empty;
@@ -20,6 +27,10 @@ namespace POVISAPI.Models.DTO
         public string? Witness { get; set; }
         public string? ApprehendingOfficer { get; set; }
         public string? ApprehendingOfficerDeputationNumber { get; set; }
+        public int EvidenceCount { get; set; }
+
+        /// <summary>Only populated when a single violation is fetched, not in lists.</summary>
+        public List<ViolationEvidenceDTO> Evidence { get; set; } = new();
         public string OrdinanceId { get; set; } = string.Empty;
         public string OrdinanceShortName { get; set; } = string.Empty;
         public string? OrdinanceSectionId { get; set; }
@@ -74,6 +85,9 @@ namespace POVISAPI.Models.DTO
         [StringLength(50, ErrorMessage = "Deputation number cannot exceed 50 characters")]
         public string? ApprehendingOfficerDeputationNumber { get; set; }
 
+        /// <summary>Evidence photos as base64 data URLs (JPEG/JPG/PNG), at most 5.</summary>
+        public List<string>? EvidencePhotos { get; set; }
+
         [Required(ErrorMessage = "Ordinance is required")]
         public required string OrdinanceId { get; set; }
 
@@ -121,6 +135,12 @@ namespace POVISAPI.Models.DTO
 
         [StringLength(50, ErrorMessage = "Deputation number cannot exceed 50 characters")]
         public string? ApprehendingOfficerDeputationNumber { get; set; }
+
+        /// <summary>New evidence photos as base64 data URLs (JPEG/JPG/PNG). Total per violation is capped at 5.</summary>
+        public List<string>? NewEvidencePhotos { get; set; }
+
+        /// <summary>Ids of existing evidence photos to delete.</summary>
+        public List<string>? RemoveEvidenceIds { get; set; }
 
         public string? OrdinanceSectionId { get; set; }
 

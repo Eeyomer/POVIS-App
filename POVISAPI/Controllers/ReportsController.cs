@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using POVISAPI.Interfaces;
+using POVISAPI.Models.Entity.Enums;
 using POVISAPI.Models.System_Models;
 
 namespace POVISAPI.Controllers
@@ -13,9 +14,27 @@ namespace POVISAPI.Controllers
     public class ReportsController : Controller
     {
         private readonly IReportService reportService;
-        public ReportsController(IReportService reportService)
+        private readonly IReportExportService exportService;
+        public ReportsController(IReportService reportService, IReportExportService exportService)
         {
             this.reportService = reportService;
+            this.exportService = exportService;
+        }
+
+        /// <summary>
+        /// Downloadable PDF / Excel version of a report, laid out like the POVIS.xlsx sample (logos and headings included).
+        /// report: overall | per-barangay | seminar | incentives | enforcers. format: pdf | xlsx.
+        /// barangayId only applies to "seminar" (omit for all barangays); division only to "incentives" (omit for all).
+        /// </summary>
+        [HttpGet("export/{report}")]
+        public async Task<IActionResult> Export(string report, [FromQuery] string format, [FromQuery] DateOnly from, [FromQuery] DateOnly to,
+            [FromQuery] Guid? barangayId, [FromQuery] Division? division)
+        {
+            if (to < from)
+                throw new ArgumentException("'to' must be on or after 'from'.");
+
+            var file = await exportService.ExportAsync(report, format, from, to, barangayId, division);
+            return File(file.Content, file.ContentType, file.FileName);
         }
 
         /// <summary>MONTHLY sheet equivalent: pass the first and last day of the month.</summary>

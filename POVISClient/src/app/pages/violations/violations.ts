@@ -6,6 +6,7 @@ import { ViolatorsService } from '../../core/services/violators-service';
 import { OrdinancesService } from '../../core/services/ordinances-service';
 import { BarangaysService } from '../../core/services/barangays-service';
 import { AuthService } from '../../core/services/auth-service';
+import { BulkUpload } from '../../shared/components/bulk-upload/bulk-upload';
 import {
   BarangayDTO,
   Division,
@@ -16,11 +17,12 @@ import {
   ViolatorDTO,
 } from '../../core/models/app-dto';
 import { manilaToday } from '../../core/utils/manila-time';
+import { IMAGE_ACCEPT, readImageAsDataUrl } from '../../core/utils/image-upload';
 import { ToastService } from '../../shared/toast/toast-service';
 
 @Component({
   selector: 'app-violations',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, BulkUpload],
   templateUrl: './violations.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -70,6 +72,47 @@ export class Violations implements OnInit {
   ) {}
 
   ageAuto = signal(false);
+
+  // ----- Evidence photos (max 5, JPEG/PNG, stored as base64) -----
+  readonly maxEvidence = 5;
+  readonly imageAccept = IMAGE_ACCEPT;
+  /** Photos shown in the form: existing ones carry an id, newly picked ones do not. */
+  evidence = signal<{ id?: string; data: string }[]>([]);
+  private removedEvidenceIds: string[] = [];
+  previewImage = signal<string | null>(null);
+
+  async onEvidenceSelected(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const files = Array.from(input.files ?? []);
+    input.value = '';
+    if (!files.length) return;
+
+    const room = this.maxEvidence - this.evidence().length;
+    if (files.length > room) {
+      this.toast.error(`You can attach at most ${this.maxEvidence} photos per violation.`);
+    }
+    for (const file of files.slice(0, Math.max(room, 0))) {
+      try {
+        const data = await readImageAsDataUrl(file, { maxDimension: 1600, maxBytes: 2_500_000 });
+        this.evidence.update((list) => [...list, { data }]);
+      } catch (e) {
+        this.toast.error((e as Error).message);
+      }
+    }
+  }
+
+  removeEvidence(index: number): void {
+    const item = this.evidence()[index];
+    if (!item) return;
+    if (item.id) this.removedEvidenceIds.push(item.id);
+    this.evidence.update((list) => list.filter((_, i) => i !== index));
+  }
+
+  private resetEvidence(): void {
+    this.evidence.set([]);
+    this.removedEvidenceIds = [];
+    this.previewImage.set(null);
+  }
 
   ngOnInit(): void {
     this.form.controls.violatorId.valueChanges.subscribe(() => this.updateAge());
@@ -161,6 +204,7 @@ export class Violations implements OnInit {
 
   openAdd(): void {
     this.editing.set(null);
+    this.resetEvidence();
     this.selectedOrdinanceDetail.set(null);
     this.form.reset({ division: 'Bpd', isWarningTicket: false });
     this.showForm.set(true);
@@ -168,6 +212,12 @@ export class Violations implements OnInit {
 
   openEdit(violation: ViolationDTO): void {
     this.editing.set(violation);
+    this.resetEvidence();
+    // The list does not carry the photos; load them with the full record.
+    this.violationsService.getById(violation.violationId).subscribe((full) => {
+      if (this.editing()?.violationId !== violation.violationId) return;
+      this.evidence.set((full?.evidence ?? []).map((e) => ({ id: e.evidenceId, data: e.imageData })));
+    });
     this.onOrdinanceChange(violation.ordinanceId);
     this.form.reset({
       violatorId: violation.violatorId,
@@ -194,6 +244,7 @@ export class Violations implements OnInit {
   cancel(): void {
     this.showForm.set(false);
     this.editing.set(null);
+    this.resetEvidence();
   }
 
   save(): void {
@@ -219,6 +270,8 @@ export class Violations implements OnInit {
           apprehendingOfficer: raw.apprehendingOfficer || null,
           apprehendingOfficerDeputationNumber: raw.apprehendingOfficerDeputationNumber?.trim() || null,
           ordinanceSectionId: raw.ordinanceSectionId || null,
+          newEvidencePhotos: this.evidence().filter((e) => !e.id).map((e) => e.data),
+          removeEvidenceIds: this.removedEvidenceIds,
           status: current.status,
           remarks: raw.remarks || null,
           remarks2: raw.remarks2 || null,
@@ -239,6 +292,7 @@ export class Violations implements OnInit {
           ordinanceId: raw.ordinanceId!,
           ordinanceSectionId: raw.ordinanceSectionId || null,
           isWarningTicket: !!raw.isWarningTicket,
+          evidencePhotos: this.evidence().map((e) => e.data),
           remarks: raw.remarks || null,
           remarks2: raw.remarks2 || null,
         });

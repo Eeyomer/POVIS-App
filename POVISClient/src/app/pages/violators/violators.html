@@ -5,6 +5,7 @@
       <input type="text" placeholder="Search violators..." [value]="search()"
         (input)="onSearchChange($any($event.target).value)"
         class="px-3 py-2 rounded-lg border border-[#d3dae5] text-[13px] w-full sm:w-64" />
+      <app-bulk-upload module="violators" title="Violators" (imported)="refresh()" />
       @if (authService.canEdit()) {
       <button type="button" (click)="openAdd()"
         class="px-4 py-2 rounded-lg bg-[#1e3a63] text-white text-[13px] font-semibold hover:bg-[#284d82]">

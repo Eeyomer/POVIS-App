@@ -6,6 +6,15 @@ public enum Gender
     Female = 2
 }
 
+public enum MaritalStatus
+{
+    Single = 1,
+    Married = 2,
+    Widowed = 3,
+    Separated = 4,
+    Divorced = 5
+}
+
 /// <summary>Apprehending unit (DIVISION column: BPD, PNP, etc.)</summary>
 public enum Division
 {

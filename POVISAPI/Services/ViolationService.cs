@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using POVISAPI.Common;
 using POVISAPI.Data;
 using POVISAPI.Interfaces;
 using POVISAPI.Models.DTO;
@@ -97,9 +98,19 @@ namespace POVISAPI.Services
                 .Skip((page - 1) * pageSize).Take(pageSize)
                 .ToListAsync();
 
+            var items = entities.Select(MapToDTO).ToList();
+            var ids = entities.Select(e => e.Id).ToList();
+            var counts = await dbContext.ViolationEvidence.AsNoTracking()
+                .Where(e => ids.Contains(e.ViolationId))
+                .GroupBy(e => e.ViolationId)
+                .Select(g => new { g.Key, Count = g.Count() })
+                .ToDictionaryAsync(x => x.Key, x => x.Count);
+            foreach (var item in items)
+                item.EvidenceCount = counts.GetValueOrDefault(Guid.Parse(item.ViolationId));
+
             return new PagedResult<ViolationDTO>
             {
-                Items = entities.Select(MapToDTO).ToList(),
+                Items = items,
                 TotalCount = total,
                 Page = page,
                 PageSize = pageSize
@@ -109,7 +120,30 @@ namespace POVISAPI.Services
         public async Task<ViolationDTO> GetByIdAsync(string id)
         {
             var entity = await GetTrackedViolation(id);
-            return MapToDTO(entity);
+            var dto = MapToDTO(entity);
+            dto.Evidence = await dbContext.ViolationEvidence.AsNoTracking()
+                .Where(e => e.ViolationId == entity.Id)
+                .OrderBy(e => e.CreatedAt)
+                .Select(e => new ViolationEvidenceDTO { EvidenceId = e.Id.ToString(), ContentType = e.ContentType, ImageData = e.ImageData })
+                .ToListAsync();
+            dto.EvidenceCount = dto.Evidence.Count;
+            return dto;
+        }
+
+        private const int MaxEvidencePhotos = 5;
+        private const int MaxEvidenceBytes = 3_000_000;
+
+        private static List<ViolationEvidence> BuildEvidence(IEnumerable<string>? photos)
+        {
+            var list = new List<ViolationEvidence>();
+            int n = 0;
+            foreach (var photo in photos ?? Enumerable.Empty<string>())
+            {
+                n++;
+                var (dataUrl, contentType) = ImageDataValidator.Validate(photo, MaxEvidenceBytes, $"Evidence photo {n}");
+                list.Add(new ViolationEvidence { ContentType = contentType, ImageData = dataUrl });
+            }
+            return list;
         }
 
         public async Task<ViolationDTO> CreateAsync(AddViolationDTO dto)
@@ -162,8 +196,13 @@ namespace POVISAPI.Services
                 _ => OffenseLevel.Fourth
             };
 
+            if ((dto.EvidencePhotos?.Count ?? 0) > MaxEvidencePhotos)
+                throw new ArgumentException($"A violation can have at most {MaxEvidencePhotos} evidence photos.");
+            var evidence = BuildEvidence(dto.EvidencePhotos);
+
             var entity = new Violation
             {
+                Evidence = evidence,
                 ViolatorId = violatorId,
                 OvrNumber = dto.OvrNumber.Trim(),
                 DateOfSubmission = dto.DateOfSubmission,
@@ -236,10 +275,37 @@ namespace POVISAPI.Services
             entity.Status = dto.Status;
             entity.Remarks = dto.Remarks?.Trim();
             entity.Remarks2 = dto.Remarks2?.Trim();
+            await ApplyEvidenceChangesAsync(entity, dto);
+
             // OffenseLevel and OrdinanceId are intentionally NOT updatable —
             // they were snapshotted at ticketing time (same rule as locked cost fields).
             await dbContext.SaveChangesAsync();
             return await GetByIdAsync(entity.Id.ToString());
+        }
+
+        private async Task ApplyEvidenceChangesAsync(Violation entity, UpdateViolationDTO dto)
+        {
+            var existing = await dbContext.ViolationEvidence.Where(e => e.ViolationId == entity.Id).ToListAsync();
+
+            var removeIds = new HashSet<Guid>();
+            foreach (var raw in dto.RemoveEvidenceIds ?? new List<string>())
+            {
+                if (!Guid.TryParse(raw, out var evidenceId))
+                    throw new ArgumentException("Invalid evidence Id format.");
+                removeIds.Add(evidenceId);
+            }
+            var toRemove = existing.Where(e => removeIds.Contains(e.Id)).ToList();
+            var added = BuildEvidence(dto.NewEvidencePhotos);
+
+            if (existing.Count - toRemove.Count + added.Count > MaxEvidencePhotos)
+                throw new ArgumentException($"A violation can have at most {MaxEvidencePhotos} evidence photos.");
+
+            dbContext.ViolationEvidence.RemoveRange(toRemove);
+            foreach (var item in added)
+            {
+                item.ViolationId = entity.Id;
+                dbContext.ViolationEvidence.Add(item);
+            }
         }
 
         public async Task DeleteAsync(string id)

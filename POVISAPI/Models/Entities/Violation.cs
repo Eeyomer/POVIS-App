@@ -74,6 +74,7 @@ public class Violation : BaseEntity
     // ----- Child records -----
     public Payment? Payment { get; set; }
     public FiledCase? FiledCase { get; set; }
+    public ICollection<ViolationEvidence> Evidence { get; set; } = new List<ViolationEvidence>();
     public ICollection<SeminarRecord> SeminarRecords { get; set; } = new List<SeminarRecord>();
     public ICollection<CommunityServiceRecord> CommunityServiceRecords { get; set; } = new List<CommunityServiceRecord>();
     public ICollection<CounselingRecord> CounselingRecords { get; set; } = new List<CounselingRecord>();

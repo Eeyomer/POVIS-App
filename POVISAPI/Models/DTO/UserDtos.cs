@@ -12,6 +12,8 @@ public class UserDTO
     public string? ContactNumber { get; set; }
     public string? Email { get; set; }
     public string? Address { get; set; }
+    public MaritalStatus? MaritalStatus { get; set; }
+    public string? Photo { get; set; }
     public string? DeputationNumber { get; set; }
     public bool MustChangePassword { get; set; }
 
@@ -27,6 +29,10 @@ public class CreateUserDTO
     public string? ContactNumber { get; set; }
     public string? Email { get; set; }
     public string? Address { get; set; }
+    public MaritalStatus? MaritalStatus { get; set; }
+
+    /// <summary>Base64 data URL (JPEG or PNG).</summary>
+    public string? Photo { get; set; }
     public Role Role { get; set; }
     public string? DeputationNumber { get; set; }
 }
@@ -40,6 +46,10 @@ public class UpdateUserDTO
     public string? ContactNumber { get; set; }
     public string? Email { get; set; }
     public string? Address { get; set; }
+    public MaritalStatus? MaritalStatus { get; set; }
+
+    /// <summary>Null keeps the current photo, an empty string removes it, a base64 data URL replaces it.</summary>
+    public string? Photo { get; set; }
     public string? DeputationNumber { get; set; }
 }
 

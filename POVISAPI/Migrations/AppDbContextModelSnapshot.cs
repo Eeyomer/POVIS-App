@@ -507,6 +507,9 @@ namespace POVISAPI.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
+                    b.Property<int?>("MaritalStatus")
+                        .HasColumnType("integer");
+
                     b.Property<bool>("MustChangePassword")
                         .HasColumnType("boolean");
 
@@ -514,6 +517,9 @@ namespace POVISAPI.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Photo")
+                        .HasColumnType("text");
 
                     b.Property<string>("Role")
                         .IsRequired()
@@ -650,6 +656,37 @@ namespace POVISAPI.Migrations
                         .IsUnique();
 
                     b.ToTable("Violations");
+                });
+
+            modelBuilder.Entity("POVISAPI.Models.Entity.ViolationEvidence", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("ImageData")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<Guid>("ViolationId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ViolationId");
+
+                    b.ToTable("ViolationEvidence");
                 });
 
             modelBuilder.Entity("POVISAPI.Models.Entity.Violator", b =>
@@ -835,6 +872,17 @@ namespace POVISAPI.Migrations
                     b.Navigation("Violator");
                 });
 
+            modelBuilder.Entity("POVISAPI.Models.Entity.ViolationEvidence", b =>
+                {
+                    b.HasOne("POVISAPI.Models.Entity.Violation", "Violation")
+                        .WithMany("Evidence")
+                        .HasForeignKey("ViolationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Violation");
+                });
+
             modelBuilder.Entity("POVISAPI.Models.Entity.Violator", b =>
                 {
                     b.HasOne("POVISAPI.Models.Entity.Barangay", "Barangay")
@@ -873,6 +921,8 @@ namespace POVISAPI.Migrations
                     b.Navigation("CommunityServiceRecords");
 
                     b.Navigation("CounselingRecords");
+
+                    b.Navigation("Evidence");
 
                     b.Navigation("FiledCase");
 
