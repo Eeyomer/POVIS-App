@@ -168,9 +168,9 @@ namespace POVISAPI.Services
                         else Err("Fine Amount must be a number between 0 and 1,000,000.");
                     }
 
-                    row.SeminarDays = ParseInt(Text(xr, "seminardays"), "Seminar Days", 1, 365, Err);
-                    row.CommunityServiceHours = ParseInt(Text(xr, "communityservicehours"), "Community Service Hours", 1, 1000, Err);
-                    row.CommunityServiceDays = ParseInt(Text(xr, "communityservicedays"), "Community Service Days", 1, 365, Err);
+                    row.SeminarDays = ParseInt(Text(xr, "seminardays"), "Seminar Days", 0, 365, Err);
+                    row.CommunityServiceHours = ParseInt(Text(xr, "communityservicehours"), "Community Service Hours", 0, 1000, Err);
+                    row.CommunityServiceDays = ParseInt(Text(xr, "communityservicedays"), "Community Service Days", 0, 365, Err);
                     row.RequiresCounseling = ParseBool(Text(xr, "requirescounseling"), "Requires Counseling", Err);
                     row.HasImprisonment = ParseBool(Text(xr, "hasimprisonment"), "Has Imprisonment", Err);
                     row.ImprisonmentTerm = Text(xr, "imprisonmentterm");

@@ -35,13 +35,13 @@ namespace POVISAPI.Models.DTO
         [Range(0, 1000000, ErrorMessage = "Fine amount must be between 0 and 1,000,000")]
         public decimal? FineAmount { get; set; }
 
-        [Range(1, 365, ErrorMessage = "Seminar days must be between 1 and 365")]
+        [Range(0, 365, ErrorMessage = "Seminar days must be between 0 and 365")]
         public int? SeminarDays { get; set; }
 
-        [Range(1, 1000, ErrorMessage = "Community service hours must be between 1 and 1,000")]
+        [Range(0, 1000, ErrorMessage = "Community service hours must be between 0 and 1,000")]
         public int? CommunityServiceHours { get; set; }
 
-        [Range(1, 365, ErrorMessage = "Community service days must be between 1 and 365")]
+        [Range(0, 365, ErrorMessage = "Community service days must be between 0 and 365")]
         public int? CommunityServiceDays { get; set; }
 
         public bool RequiresCounseling { get; set; }
