@@ -4,13 +4,14 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ViolatorsService } from '../../core/services/violators-service';
 import { BarangaysService } from '../../core/services/barangays-service';
 import { AuthService } from '../../core/services/auth-service';
+import { Pagination } from '../../shared/components/pagination/pagination';
 import { BulkUpload } from '../../shared/components/bulk-upload/bulk-upload';
 import { BarangayDTO, Gender, ViolatorDTO, ViolatorHistoryDTO } from '../../core/models/app-dto';
 import { ToastService } from '../../shared/toast/toast-service';
 
 @Component({
   selector: 'app-violators',
-  imports: [CommonModule, ReactiveFormsModule, BulkUpload],
+  imports: [CommonModule, ReactiveFormsModule, BulkUpload, Pagination],
   templateUrl: './violators.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -53,6 +54,11 @@ export class Violators implements OnInit {
 
   ngOnInit(): void {
     this.barangaysService.list().subscribe((data) => this.barangays.set(data));
+    this.refresh();
+  }
+
+  onPageChange(page: number): void {
+    this.page.set(page);
     this.refresh();
   }
 

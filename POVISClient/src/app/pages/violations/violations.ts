@@ -6,6 +6,7 @@ import { ViolatorsService } from '../../core/services/violators-service';
 import { OrdinancesService } from '../../core/services/ordinances-service';
 import { BarangaysService } from '../../core/services/barangays-service';
 import { AuthService } from '../../core/services/auth-service';
+import { Pagination } from '../../shared/components/pagination/pagination';
 import { BulkUpload } from '../../shared/components/bulk-upload/bulk-upload';
 import {
   BarangayDTO,
@@ -22,13 +23,15 @@ import { ToastService } from '../../shared/toast/toast-service';
 
 @Component({
   selector: 'app-violations',
-  imports: [CommonModule, ReactiveFormsModule, BulkUpload],
+  imports: [CommonModule, ReactiveFormsModule, BulkUpload, Pagination],
   templateUrl: './violations.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Violations implements OnInit {
   violations = signal<ViolationDTO[]>([]);
   totalCount = signal(0);
+  page = signal(1);
+  readonly pageSize = 20;
   violators = signal<ViolatorDTO[]>([]);
   ordinances = signal<OrdinanceListDTO[]>([]);
   barangays = signal<BarangayDTO[]>([]);
@@ -123,8 +126,13 @@ export class Violations implements OnInit {
     this.refresh();
   }
 
+  onPageChange(page: number): void {
+    this.page.set(page);
+    this.refresh();
+  }
+
   refresh(): void {
-    this.violationsService.list({ status: this.statusFilter() || undefined, search: this.search() || undefined }).subscribe((result) => {
+    this.violationsService.list({ status: this.statusFilter() || undefined, search: this.search() || undefined, page: this.page(), pageSize: this.pageSize }).subscribe((result) => {
       this.violations.set(result.items);
       this.totalCount.set(result.totalCount);
     });
@@ -186,11 +194,13 @@ export class Violations implements OnInit {
 
   onSearchChange(value: string): void {
     this.search.set(value);
+    this.page.set(1);
     this.refresh();
   }
 
   onStatusFilterChange(value: string): void {
     this.statusFilter.set(value as ViolationStatus | '');
+    this.page.set(1);
     this.refresh();
   }
 

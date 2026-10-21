@@ -92,4 +92,5 @@
       </tbody>
     </table>
   </div>
+  <app-pagination [page]="page()" [pageSize]="pageSize" [total]="totalCount()" (pageChange)="onPageChange($event)" />
 </div>

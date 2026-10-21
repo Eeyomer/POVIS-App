@@ -18,7 +18,14 @@ export class ViolationsApi {
   constructor(private http: HttpClient) {}
 
   getAll(filter: Partial<ViolationFilterDTO>): Observable<APIResponse<PagedResult<ViolationDTO>>> {
-    return this.http.get<APIResponse<PagedResult<ViolationDTO>>>(this.apiUrl, { params: filter as any });
+    return this.http.get<APIResponse<PagedResult<ViolationDTO>>>(this.apiUrl, { params: this.toParams(filter) });
+  }
+
+  /** Drops unset filters; Angular would otherwise send undefined as the string "undefined". */
+  private toParams(filter: Partial<ViolationFilterDTO>): Record<string, string | number | boolean> {
+    return Object.fromEntries(
+      Object.entries(filter).filter(([, v]) => v !== undefined && v !== null && v !== ""),
+    ) as Record<string, string | number | boolean>;
   }
 
   getById(id: string): Observable<APIResponse<ViolationDTO>> {

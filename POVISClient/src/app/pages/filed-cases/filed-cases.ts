@@ -4,19 +4,22 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FiledCasesService } from '../../core/services/filed-cases-service';
 import { ViolationsService } from '../../core/services/violations-service';
 import { AuthService } from '../../core/services/auth-service';
+import { Pagination } from '../../shared/components/pagination/pagination';
 import { BulkUpload } from '../../shared/components/bulk-upload/bulk-upload';
 import { CaseStatus, FiledCaseDTO, ViolationDTO } from '../../core/models/app-dto';
 import { ToastService } from '../../shared/toast/toast-service';
 
 @Component({
   selector: 'app-filed-cases',
-  imports: [CommonModule, ReactiveFormsModule, BulkUpload],
+  imports: [CommonModule, ReactiveFormsModule, BulkUpload, Pagination],
   templateUrl: './filed-cases.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FiledCases implements OnInit {
   cases = signal<FiledCaseDTO[]>([]);
   totalCount = signal(0);
+  page = signal(1);
+  readonly pageSize = 20;
   violations = signal<ViolationDTO[]>([]);
 
   showForm = signal(false);
@@ -50,11 +53,17 @@ export class FiledCases implements OnInit {
 
   onSearchChange(value: string): void {
     this.search.set(value);
+    this.page.set(1);
+    this.refresh();
+  }
+
+  onPageChange(page: number): void {
+    this.page.set(page);
     this.refresh();
   }
 
   refresh(): void {
-    this.filedCasesService.list(null, null, null, 1, 20, this.search() || null).subscribe((result) => {
+    this.filedCasesService.list(null, null, null, this.page(), this.pageSize, this.search() || null).subscribe((result) => {
       this.cases.set(result.items);
       this.totalCount.set(result.totalCount);
     });
