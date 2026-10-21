@@ -14,7 +14,7 @@
   </div>
 
   @if (showForm()) {
-  <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
+  <app-form-panel (dismissed)="cancel()">
     <h2 class="text-[15px] font-semibold text-[#152238] mb-4">{{ editing() ? 'Edit' : 'Add' }} Seminar Record</h2>
     <form [formGroup]="form" (ngSubmit)="save()" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       @if (!editing()) {
@@ -69,7 +69,7 @@
         <button type="button" (click)="cancel()" class="px-4 py-2 rounded-lg border border-[#d3dae5] text-[13px] font-semibold text-[#152238]">Cancel</button>
       </div>
     </form>
-  </div>
+  </app-form-panel>
   }
 
   <div class="bg-white rounded-2xl shadow-sm overflow-x-auto">

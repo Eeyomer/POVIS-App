@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { FormPanel } from '../../shared/components/form-panel/form-panel';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FiledCasesService } from '../../core/services/filed-cases-service';
@@ -11,7 +12,7 @@ import { ToastService } from '../../shared/toast/toast-service';
 
 @Component({
   selector: 'app-filed-cases',
-  imports: [CommonModule, ReactiveFormsModule, BulkUpload, Pagination],
+  imports: [CommonModule, ReactiveFormsModule, BulkUpload, Pagination, FormPanel],
   templateUrl: './filed-cases.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

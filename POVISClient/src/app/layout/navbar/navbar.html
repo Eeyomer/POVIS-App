@@ -10,6 +10,12 @@
     </div>
   </div>
   <div class="flex items-center gap-3.5 shrink-0">
+    @if (authService.canManageUsers()) {
+    <label class="hidden sm:flex items-center gap-2 text-[12.5px] font-semibold text-[#152238] cursor-pointer select-none" title="Open create/edit/view forms in a modal instead of inline">
+      <input type="checkbox" class="accent-[#1e3a63] w-4 h-4" [checked]="viewMode.modalForms()" (change)="viewMode.toggle()" />
+      Modal forms
+    </label>
+    }
     <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-[10px] bg-[#eef2f8] flex items-center justify-center">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1e3a63" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
     </div>

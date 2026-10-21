@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { FormPanel } from '../../shared/components/form-panel/form-panel';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ViolationsService } from '../../core/services/violations-service';
@@ -23,7 +24,7 @@ import { ToastService } from '../../shared/toast/toast-service';
 
 @Component({
   selector: 'app-violations',
-  imports: [CommonModule, ReactiveFormsModule, BulkUpload, Pagination],
+  imports: [CommonModule, ReactiveFormsModule, BulkUpload, Pagination, FormPanel],
   templateUrl: './violations.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

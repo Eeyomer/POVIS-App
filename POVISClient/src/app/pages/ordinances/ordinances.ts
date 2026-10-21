@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { FormPanel } from '../../shared/components/form-panel/form-panel';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { OrdinancesService } from '../../core/services/ordinances-service';
@@ -9,7 +10,7 @@ import { ToastService } from '../../shared/toast/toast-service';
 
 @Component({
   selector: 'app-ordinances',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormPanel],
   templateUrl: './ordinances.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

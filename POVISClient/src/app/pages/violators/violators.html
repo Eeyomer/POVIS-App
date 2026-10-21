@@ -16,7 +16,7 @@
   </div>
 
   @if (showForm()) {
-  <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
+  <app-form-panel (dismissed)="cancel()">
     <h2 class="text-[15px] font-semibold text-[#152238] mb-4">{{ editing() ? 'Edit' : 'Add' }} Violator</h2>
     <form [formGroup]="form" (ngSubmit)="save()" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <div>
@@ -76,11 +76,11 @@
         <button type="button" (click)="cancel()" class="px-4 py-2 rounded-lg border border-[#d3dae5] text-[13px] font-semibold text-[#152238]">Cancel</button>
       </div>
     </form>
-  </div>
+  </app-form-panel>
   }
 
   @if (historyFor(); as h) {
-  <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
+  <app-form-panel (dismissed)="closeHistory()">
     <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
       <h2 class="text-[15px] font-semibold text-[#152238]">Violation history — {{ h.firstName }} {{ h.lastName }}</h2>
       <button type="button" (click)="closeHistory()" class="text-[#7a889c] font-semibold text-[13px]">Close</button>
@@ -111,7 +111,7 @@
         </tbody>
       </table>
     </div>
-  </div>
+  </app-form-panel>
   }
 
   <div class="bg-white rounded-2xl shadow-sm overflow-x-auto">

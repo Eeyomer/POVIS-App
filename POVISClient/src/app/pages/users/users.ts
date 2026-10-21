@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { FormPanel } from '../../shared/components/form-panel/form-panel';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UsersService } from '../../core/services/users-service';
@@ -10,7 +11,7 @@ import { ToastService } from '../../shared/toast/toast-service';
 
 @Component({
   selector: 'app-users',
-  imports: [CommonModule, ReactiveFormsModule, BulkUpload],
+  imports: [CommonModule, ReactiveFormsModule, BulkUpload, FormPanel],
   templateUrl: './users.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

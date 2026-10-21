@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { FormPanel } from '../../shared/components/form-panel/form-panel';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { BarangaysService } from '../../core/services/barangays-service';
@@ -9,7 +10,7 @@ import { ToastService } from '../../shared/toast/toast-service';
 
 @Component({
   selector: 'app-barangays',
-  imports: [CommonModule, ReactiveFormsModule, BulkUpload],
+  imports: [CommonModule, ReactiveFormsModule, BulkUpload, FormPanel],
   templateUrl: './barangays.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
