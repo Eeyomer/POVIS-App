@@ -31,6 +31,7 @@ public class AppDbContext : DbContext
 
     // ----- System -----
     public DbSet<TechnicalLog> TechnicalLogs => Set<TechnicalLog>();
+    public DbSet<AppSetting> AppSettings => Set<AppSetting>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -255,6 +256,14 @@ public class AppDbContext : DbContext
              .HasForeignKey(v => v.ViolationId)
              .OnDelete(DeleteBehavior.Cascade);
             e.HasIndex(v => v.ViolationId);
+        });
+
+        // ================= AppSetting =================
+        modelBuilder.Entity<AppSetting>(e =>
+        {
+            e.HasKey(s => s.Key);
+            e.Property(s => s.Key).HasMaxLength(100);
+            e.Property(s => s.Value).HasMaxLength(500).IsRequired();
         });
 
         // ================= TechnicalLog =================

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ViewModeService } from '../../core/services/view-mode-service';
 import { SystemService } from '../../core/services/system-service';
 import { ToastService } from '../../shared/toast/toast-service';
 import { SystemHealth, TechnicalLog } from '../../core/models/app-dto';
@@ -31,7 +32,15 @@ export class System implements OnInit {
   constructor(
     private systemService: SystemService,
     private toast: ToastService,
+    public viewMode: ViewModeService,
   ) {}
+
+  onModalFormsChange(enabled: boolean): void {
+    this.viewMode.setModalForms(enabled).subscribe({
+      next: () => this.toast.success(enabled ? 'Modal forms enabled for all users.' : 'Modal forms disabled for all users.'),
+      error: (err) => this.toast.error(err?.error?.message || 'Could not update the setting.'),
+    });
+  }
 
   ngOnInit(): void {
     this.refreshHealth();

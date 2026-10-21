@@ -27,6 +27,21 @@
   }
 
   <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
+    <h2 class="text-[15px] font-semibold text-[#152238] mb-1">Display Settings</h2>
+    <p class="text-[12.5px] text-[#7a889c] mb-4">
+      Applies to all users of the system.
+    </p>
+    <label class="flex items-start gap-3 cursor-pointer">
+      <input type="checkbox" class="accent-[#1e3a63] w-4 h-4 mt-0.5" [checked]="viewMode.modalForms()"
+        (change)="onModalFormsChange($any($event.target).checked)" />
+      <span class="text-[13px] text-[#152238]">
+        <span class="font-semibold">Open forms in a modal</span><br />
+        <span class="text-[#7a889c]">Create, edit and view panels open in a pop-up dialog instead of expanding inline on the page.</span>
+      </span>
+    </label>
+  </div>
+
+  <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
     <h2 class="text-[15px] font-semibold text-[#152238] mb-1">Backup &amp; Restore</h2>
     <p class="text-[12.5px] text-[#7a889c] mb-4">
       Backups include all operational records (barangays, ordinances, violators, violations, payments,

@@ -2,6 +2,7 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Sidebar } from '../sidebar/sidebar';
 import { Navbar } from '../navbar/navbar';
+import { ViewModeService } from '../../core/services/view-mode-service';
 import { SidebarService } from '../../core/services/sidebar-service';
 
 @Component({
@@ -11,5 +12,10 @@ import { SidebarService } from '../../core/services/sidebar-service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Shell {
-  constructor(public sidebarService: SidebarService) {}
+  constructor(
+    public sidebarService: SidebarService,
+    viewMode: ViewModeService,
+  ) {
+    viewMode.load();
+  }
 }

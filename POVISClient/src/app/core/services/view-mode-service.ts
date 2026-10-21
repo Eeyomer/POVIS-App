@@ -1,27 +1,34 @@
 import { Injectable, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, tap } from 'rxjs';
+import { environment } from '../environment/environment';
+import { APIResponse } from '../models/app-model';
 
-const STORAGE_KEY = 'povis.modalForms';
+interface AppSettings {
+  modalForms: boolean;
+}
 
-/** Whether create/edit/view panels open in a modal instead of inline. Toggled by MIS Personnel. */
+/**
+ * System-wide setting (managed by MIS Personnel on the System page): when on, create/edit/view
+ * panels open in a modal instead of inline for every user.
+ */
 @Injectable({ providedIn: 'root' })
 export class ViewModeService {
-  readonly modalForms = signal(this.load());
+  private apiUrl = `${environment.apiUrl}/api/settings`;
+  readonly modalForms = signal(false);
 
-  toggle(): void {
-    const next = !this.modalForms();
-    this.modalForms.set(next);
-    try {
-      localStorage.setItem(STORAGE_KEY, next ? '1' : '0');
-    } catch {
-      // storage unavailable; the choice only lasts for this session
-    }
+  constructor(private http: HttpClient) {}
+
+  load(): void {
+    this.http.get<APIResponse<AppSettings>>(this.apiUrl).subscribe({
+      next: (res) => this.modalForms.set(!!res.data?.modalForms),
+      error: () => {},
+    });
   }
 
-  private load(): boolean {
-    try {
-      return localStorage.getItem(STORAGE_KEY) === '1';
-    } catch {
-      return false;
-    }
+  setModalForms(enabled: boolean): Observable<APIResponse<AppSettings>> {
+    return this.http
+      .put<APIResponse<AppSettings>>(this.apiUrl, { modalForms: enabled })
+      .pipe(tap((res) => this.modalForms.set(!!res.data?.modalForms)));
   }
 }

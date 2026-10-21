@@ -1,7 +1,6 @@
 import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/services/auth-service';
-import { ViewModeService } from '../../core/services/view-mode-service';
 import { SidebarService } from '../../core/services/sidebar-service';
 import { MANILA_TZ, manilaHour } from '../../core/utils/manila-time';
 
@@ -17,8 +16,7 @@ export class Navbar implements OnInit {
   today = '';
 
   constructor(
-    public authService: AuthService,
-    public viewMode: ViewModeService,
+    private authService: AuthService,
     private cdr: ChangeDetectorRef,
     public sidebarService: SidebarService,
   ) {}

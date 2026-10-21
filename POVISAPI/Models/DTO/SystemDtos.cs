@@ -38,3 +38,9 @@ public class SystemHealthDTO
     public int TotalViolations { get; set; }
     public int TotalTechnicalLogs { get; set; }
 }
+
+public class AppSettingsDTO
+{
+    /// <summary>When true, create/edit/view panels open in a modal for every user.</summary>
+    public bool ModalForms { get; set; }
+}
