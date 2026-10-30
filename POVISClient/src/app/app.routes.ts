@@ -18,16 +18,21 @@ import { Verify } from './pages/verify/verify';
 import { authGuard, loggedInGuard } from './core/guard/auth-guard';
 import { ChangePassword } from './pages/change-password/change-password';
 import { roleGuard } from './core/guard/role-guard';
+import { availableGuard, unavailablePageGuard } from './core/guard/availability-guard';
+import { ServiceUnavailable } from './pages/service-unavailable/service-unavailable';
 
 // Everyone except Apprehending Officers (who only get Dashboard, Violators, Ordinances and Violations).
 const notOfficer = roleGuard('MISPersonnel', 'OVRSupervisor', 'PNPBarangayStaff');
 
 export const routes: Routes = [
-  { path: 'login', component: Login },
-  { path: 'change-password', component: ChangePassword, canActivate: [loggedInGuard] },
+  { path: 'service-unavailable', component: ServiceUnavailable, canActivate: [unavailablePageGuard] },
+  // Nothing below is reachable while environment.isAvailable is false.
+  { path: 'login', component: Login, canMatch: [availableGuard] },
+  { path: 'change-password', component: ChangePassword, canActivate: [loggedInGuard], canMatch: [availableGuard] },
   {
     path: '',
     component: Shell,
+    canMatch: [availableGuard],
     canActivate: [authGuard],
     children: [
       { path: '', component: Dashboard },
@@ -58,5 +63,5 @@ export const routes: Routes = [
       },
     ],
   },
-  { path: '**', redirectTo: '' },
+  { path: '**', canMatch: [availableGuard], redirectTo: '' },
 ];
