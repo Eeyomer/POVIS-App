@@ -20,6 +20,146 @@
     </div>
   </div>
 
+  @if (authService.canApprove()) {
+  @if (summaryFailed()) {
+  <p class="mt-8 text-[13px] text-red-500">The summary could not be loaded. Please refresh the page.</p>
+  } @else if (summary(); as s) {
+  <div class="mt-8">
+    <h2 class="font-poppins font-bold text-[18px] sm:text-[20px] text-[#152238] text-center mb-4">As of {{ s.asOf | date: 'longDate' }}</h2>
+
+    <!-- Headline numbers -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-white rounded-2xl shadow-sm border border-[#d3dae5] p-5 text-center">
+        <div class="text-[28px] font-bold text-[#1e3a63]">{{ s.totalViolators | number }}</div>
+        <div class="text-[14px] font-semibold text-[#1e3a63]">Total Violators</div>
+        <div class="text-[11.5px] text-[#7a889c] mt-0.5">{{ s.totalViolations | number }} violations recorded</div>
+      </div>
+      <div class="bg-white rounded-2xl shadow-sm border border-[#d3dae5] p-5 text-center">
+        <div class="text-[28px] font-bold text-[#1e3a63]">{{ s.paidCount | number }}</div>
+        <div class="text-[14px] font-semibold text-[#1e3a63]">Paid Fines</div>
+        <div class="text-[12px] font-bold text-red-600 mt-0.5">{{ s.paidPercent | number: '1.2-2' }}%</div>
+      </div>
+      <div class="bg-white rounded-2xl shadow-sm border border-[#d3dae5] p-5 text-center">
+        <div class="text-[28px] font-bold text-[#1e3a63]">{{ s.seminarCount | number }}</div>
+        <div class="text-[12.5px] font-semibold text-[#1e3a63]">
+          Seminar:
+          @for (b of s.seminarBreakdown; track b.label; let last = $last) {
+          {{ b.count | number }} {{ b.label }}@if (!last) { | }
+          } @empty {
+          none yet
+          }
+        </div>
+        <div class="text-[12px] font-bold text-red-600 mt-0.5">{{ s.seminarPercent | number: '1.2-2' }}%</div>
+      </div>
+      <div class="bg-white rounded-2xl shadow-sm border border-[#d3dae5] p-5 text-center">
+        <div class="text-[28px] font-bold text-[#1e3a63]">₱{{ s.totalCollection | number: '1.0-0' }}</div>
+        <div class="text-[14px] font-semibold text-[#1e3a63]">Total Collection</div>
+      </div>
+    </div>
+
+    <!-- Cases and revenue -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
+      <div class="bg-white rounded-2xl shadow-sm border border-[#d3dae5] overflow-hidden">
+        <div class="bg-[#2f6fa8] text-white text-center font-bold tracking-wide py-3">CASE FILED</div>
+        <ul class="p-5 space-y-2.5 text-[13.5px] text-[#152238]">
+          @for (c of s.casesByOrdinance; track c.label) {
+          <li>{{ c.label }}: <b>{{ c.count | number }}</b></li>
+          } @empty {
+          <li class="text-[#7a889c]">No cases filed.</li>
+          }
+          <li class="pt-1 font-bold">TOTAL: {{ s.totalCasesFiled | number }}</li>
+        </ul>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm border border-[#d3dae5] overflow-hidden">
+        <div class="bg-[#2f6fa8] text-white text-center font-bold tracking-wide py-3">CASE STATUS</div>
+        <ul class="p-5 space-y-4 text-[13.5px] text-[#152238]">
+          <li>On-going: <b>{{ s.ongoingCases.count | number }}</b> ({{ s.ongoingCases.percent | number: '1.2-2' }}%)</li>
+          <li>Case closed: <b>{{ s.closedCases.count | number }}</b> ({{ s.closedCases.percent | number: '1.2-2' }}%)</li>
+          @if (s.dismissedCases.count > 0) {
+          <li>Dismissed: <b>{{ s.dismissedCases.count | number }}</b> ({{ s.dismissedCases.percent | number: '1.2-2' }}%)</li>
+          }
+        </ul>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm border border-[#d3dae5] overflow-hidden">
+        <div class="bg-[#2f6fa8] text-white text-center font-bold tracking-wide py-3">REVENUE COLLECTION</div>
+        <div class="p-4">
+          <table class="w-full text-[13px] border border-[#d3dae5]">
+            <thead class="bg-[#dbe7f3] text-[#1e3a63]">
+              <tr>
+                <th class="px-3 py-2 text-left">YEAR</th>
+                <th class="px-3 py-2 text-right">COLLECTION</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (y of s.collectionByYear; track y.year) {
+              <tr class="border-t border-[#d3dae5]">
+                <td class="px-3 py-2">{{ y.year }}</td>
+                <td class="px-3 py-2 text-right">{{ y.collection | number: '1.2-2' }}</td>
+              </tr>
+              } @empty {
+              <tr><td colspan="2" class="px-3 py-3 text-center text-[#7a889c]">No payments yet.</td></tr>
+              }
+              <tr class="border-t border-[#d3dae5] font-bold bg-[#f3f5f8]">
+                <td class="px-3 py-2">TOTAL</td>
+                <td class="px-3 py-2 text-right">{{ s.totalCollection | number: '1.2-2' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Apprehending officers -->
+    <div class="flex flex-wrap items-stretch mt-4 rounded-xl overflow-hidden border border-[#d3dae5] bg-white shadow-sm">
+      <div class="bg-[#2f6fa8] text-white font-bold text-[16px] px-5 py-3">Apprehending Officer: {{ s.enforcerCount | number }}</div>
+      <div class="px-5 py-3 font-bold text-[#152238] text-[14px] flex items-center">
+        @for (o of s.enforcersByOffice; track o.label; let last = $last) {
+        {{ o.label }} {{ o.count | number }}@if (!last) {,&nbsp;}
+        }
+      </div>
+    </div>
+
+    <!-- Rankings -->
+    <h3 class="font-poppins font-bold text-[16px] text-[#152238] mt-8 mb-3">Top 10 Barangays with Highest Recorded Violations</h3>
+    <div class="bg-white rounded-2xl shadow-sm border border-[#d3dae5] overflow-x-auto">
+      <table class="w-full min-w-[480px] text-[13px]">
+        <thead class="bg-[#2f6fa8] text-white text-left">
+          <tr>
+            <th class="px-4 py-3">RANK</th>
+            <th class="px-4 py-3">BARANGAY</th>
+            <th class="px-4 py-3 text-right">RECORDED VIOLATION</th>
+            <th class="px-4 py-3 text-right">APPREHENSION</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (b of s.topBarangays; track b.label; let i = $index) {
+          <tr class="border-t border-[#eef2f8]" [class.bg-[#eef4fb]]="i % 2 === 0">
+            <td class="px-4 py-2.5">{{ i + 1 }}</td>
+            <td class="px-4 py-2.5">{{ b.label }}</td>
+            <td class="px-4 py-2.5 text-right">{{ b.count | number }}</td>
+            <td class="px-4 py-2.5 text-right">{{ b.percent | number: '1.0-0' }}%</td>
+          </tr>
+          } @empty {
+          <tr><td colspan="4" class="px-4 py-6 text-center text-[#7a889c]">No violations with a barangay yet.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="font-poppins font-bold text-[16px] text-[#152238] mt-6 mb-2">Top 3 Violated City Ordinance</h3>
+    <ul class="text-[13.5px] text-[#152238] space-y-1">
+      @for (o of s.topOrdinances; track o.label) {
+      <li>{{ o.label }} – {{ o.count | number }} ({{ o.percent | number: '1.0-0' }}%)</li>
+      } @empty {
+      <li class="text-[#7a889c]">No violations yet.</li>
+      }
+    </ul>
+  </div>
+  }
+  }
+
   <h2 class="font-poppins font-bold text-[16px] text-[#152238] mt-8 mb-3">Downloadable Forms</h2>
   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
     <a href="templates/pledge-of-commitment.docx" download="Pledge of Commitment (English and Tagalog).docx"

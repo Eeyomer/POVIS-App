@@ -148,4 +148,54 @@ namespace POVISAPI.Models.DTO
     {
         public List<EnforcerRowDTO> Rows { get; set; } = new();
     }
+
+    // ── EXECUTIVE DASHBOARD (MIS Personnel / OVR Supervisor) ────────────────
+    public class DashboardCountDTO
+    {
+        public string Label { get; set; } = string.Empty;
+        public int Count { get; set; }
+        /// <summary>Share of the relevant total, 0–100, two decimals.</summary>
+        public double Percent { get; set; }
+    }
+
+    public class DashboardYearCollectionDTO
+    {
+        public int Year { get; set; }
+        public decimal Collection { get; set; }
+    }
+
+    public class DashboardSummaryDTO
+    {
+        public DateOnly AsOf { get; set; }
+
+        public int TotalViolators { get; set; }
+        public int TotalViolations { get; set; }
+
+        /// <summary>Violations with a recorded payment.</summary>
+        public int PaidCount { get; set; }
+        public double PaidPercent { get; set; }
+
+        /// <summary>Violations referred to a seminar, with the per-seminar-type breakdown.</summary>
+        public int SeminarCount { get; set; }
+        public double SeminarPercent { get; set; }
+        public List<DashboardCountDTO> SeminarBreakdown { get; set; } = new();
+
+        public decimal TotalCollection { get; set; }
+
+        /// <summary>Filed cases per ordinance (top few, the rest grouped as "Other violations").</summary>
+        public List<DashboardCountDTO> CasesByOrdinance { get; set; } = new();
+        public int TotalCasesFiled { get; set; }
+        public DashboardCountDTO OngoingCases { get; set; } = new();
+        public DashboardCountDTO ClosedCases { get; set; } = new();
+        public DashboardCountDTO DismissedCases { get; set; } = new();
+
+        public List<DashboardYearCollectionDTO> CollectionByYear { get; set; } = new();
+
+        public int EnforcerCount { get; set; }
+        public List<DashboardCountDTO> EnforcersByOffice { get; set; } = new();
+
+        /// <summary>Barangays with the most recorded violations; Percent is the share of all violations.</summary>
+        public List<DashboardCountDTO> TopBarangays { get; set; } = new();
+        public List<DashboardCountDTO> TopOrdinances { get; set; } = new();
+    }
 }

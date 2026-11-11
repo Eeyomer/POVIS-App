@@ -3,13 +3,17 @@ import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environment/environment';
 import { APIResponse } from '../../models/app-model';
-import { OrdinanceSummaryReport, PerBarangayReport, ReportExportFormat, ReportExportType } from '../../models/app-dto';
+import { DashboardSummary, OrdinanceSummaryReport, PerBarangayReport, ReportExportFormat, ReportExportType } from '../../models/app-dto';
 
 @Injectable({ providedIn: 'root' })
 export class ReportsApi {
   private apiUrl = `${environment.apiUrl}/api/Reports`;
 
   constructor(private http: HttpClient) {}
+
+  getDashboard(): Observable<APIResponse<DashboardSummary>> {
+    return this.http.get<APIResponse<DashboardSummary>>(`${this.apiUrl}/dashboard`);
+  }
 
   getOrdinanceSummary(from: string, to: string): Observable<APIResponse<OrdinanceSummaryReport>> {
     return this.http.get<APIResponse<OrdinanceSummaryReport>>(`${this.apiUrl}/ordinance-summary`, {

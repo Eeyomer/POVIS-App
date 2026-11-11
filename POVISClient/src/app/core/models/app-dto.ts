@@ -631,3 +631,38 @@ export interface BulkImportResult {
   errors: BulkImportError[];
   credentials: BulkImportCredential[];
 }
+
+// ── Executive dashboard ──────────────────────────────────────────────────
+export interface DashboardCount {
+  label: string;
+  count: number;
+  /** 0–100 */
+  percent: number;
+}
+
+export interface DashboardYearCollection {
+  year: number;
+  collection: number;
+}
+
+export interface DashboardSummary {
+  asOf: string;
+  totalViolators: number;
+  totalViolations: number;
+  paidCount: number;
+  paidPercent: number;
+  seminarCount: number;
+  seminarPercent: number;
+  seminarBreakdown: DashboardCount[];
+  totalCollection: number;
+  casesByOrdinance: DashboardCount[];
+  totalCasesFiled: number;
+  ongoingCases: DashboardCount;
+  closedCases: DashboardCount;
+  dismissedCases: DashboardCount;
+  collectionByYear: DashboardYearCollection[];
+  enforcerCount: number;
+  enforcersByOffice: DashboardCount[];
+  topBarangays: DashboardCount[];
+  topOrdinances: DashboardCount[];
+}

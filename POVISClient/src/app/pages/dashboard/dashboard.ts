@@ -5,6 +5,9 @@ import { BarangaysService } from '../../core/services/barangays-service';
 import { ViolationsService } from '../../core/services/violations-service';
 import { OrdinancesService } from '../../core/services/ordinances-service';
 import { FiledCasesService } from '../../core/services/filed-cases-service';
+import { AuthService } from '../../core/services/auth-service';
+import { ReportsService } from '../../core/services/reports-service';
+import { DashboardSummary } from '../../core/models/app-dto';
 
 @Component({
   selector: 'app-dashboard',
@@ -18,7 +21,13 @@ export class Dashboard implements OnInit {
   pendingViolationCount = signal(0);
   openCaseCount = signal(0);
 
+  /** Executive summary; only loaded for MIS Personnel and OVR Supervisor. */
+  summary = signal<DashboardSummary | null>(null);
+  summaryFailed = signal(false);
+
   constructor(
+    public authService: AuthService,
+    private reportsService: ReportsService,
     private barangaysService: BarangaysService,
     private violationsService: ViolationsService,
     private ordinancesService: OrdinancesService,
@@ -26,6 +35,13 @@ export class Dashboard implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    if (this.authService.canApprove()) {
+      this.reportsService.dashboard().subscribe({
+        next: (data) => this.summary.set(data),
+        error: () => this.summaryFailed.set(true),
+      });
+    }
+
     forkJoin({
       barangays: this.barangaysService.list(),
       ordinances: this.ordinancesService.list(),

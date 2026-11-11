@@ -1,12 +1,19 @@
 import { Injectable } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, from, map, throwError } from 'rxjs';
-import { OrdinanceSummaryReport, PerBarangayReport, ReportExportFormat, ReportExportType } from '../models/app-dto';
+import { DashboardSummary, OrdinanceSummaryReport, PerBarangayReport, ReportExportFormat, ReportExportType } from '../models/app-dto';
 import { ReportsApi } from './api-service/reports-api';
 
 @Injectable({ providedIn: 'root' })
 export class ReportsService {
   constructor(private api: ReportsApi) {}
+
+  dashboard(): Observable<DashboardSummary> {
+    return this.api.getDashboard().pipe(
+      map((res) => res.data as DashboardSummary),
+      catchError((err) => this.rethrowAsError(err)),
+    );
+  }
 
   ordinanceSummary(from: string, to: string): Observable<OrdinanceSummaryReport> {
     return this.api.getOrdinanceSummary(from, to).pipe(

@@ -72,6 +72,19 @@ namespace POVISAPI.Controllers
             });
         }
 
+        /// <summary>Executive summary for the dashboard: totals, collection, cases, top barangays and ordinances.</summary>
+        [HttpGet("dashboard")]
+        public async Task<IActionResult> GetDashboard()
+        {
+            var summary = await reportService.GetDashboardSummaryAsync();
+            return Ok(new APIResponse<object>
+            {
+                Success = true,
+                Message = "Dashboard summary retrieved successfully",
+                Data = summary
+            });
+        }
+
         /// <summary>PER BRGY ORDINANCES sheet: barangay x ordinance count matrix.</summary>
         [HttpGet("per-barangay")]
         public async Task<IActionResult> GetPerBarangay([FromQuery] DateOnly from, [FromQuery] DateOnly to)

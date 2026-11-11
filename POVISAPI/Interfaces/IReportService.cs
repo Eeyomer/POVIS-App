@@ -10,5 +10,6 @@ namespace POVISAPI.Interfaces
         Task<SeminarBarangayReportDTO> GetSeminarPerBarangayAsync(DateOnly from, DateOnly to, Guid? barangayId);
         Task<IncentiveReportDTO> GetIncentivesAsync(DateOnly from, DateOnly to, Division? division);
         Task<EnforcerListDTO> GetEnforcersAsync();
+        Task<DashboardSummaryDTO> GetDashboardSummaryAsync();
     }
 }

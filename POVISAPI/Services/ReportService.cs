@@ -397,5 +397,110 @@ namespace POVISAPI.Services
                 Rows = rows.OrderBy(r => r.Office == string.Empty ? 1 : 0).ThenBy(r => r.Office).ThenBy(r => r.Name).ToList()
             };
         }
+
+        private static double Percent(int part, int whole) => whole == 0 ? 0 : Math.Round(part * 100.0 / whole, 2);
+
+        public async Task<DashboardSummaryDTO> GetDashboardSummaryAsync()
+        {
+            var totalViolators = await _db.Violators.CountAsync();
+            var totalViolations = await _db.Violations.CountAsync();
+
+            var paidCount = await _db.Payments.Select(p => p.ViolationId).Distinct().CountAsync();
+            var totalCollection = await _db.Payments.SumAsync(p => (decimal?)p.Amount) ?? 0m;
+
+            // Seminars: one violation counts once, per seminar type and overall.
+            var seminarCount = await _db.SeminarRecords.Select(s => s.ViolationId).Distinct().CountAsync();
+            var seminarByType = await _db.SeminarRecords
+                .GroupBy(s => s.SeminarType)
+                .Select(g => new { Type = g.Key, Count = g.Select(s => s.ViolationId).Distinct().Count() })
+                .ToListAsync();
+            string SeminarLabel(SeminarType t) => t switch
+            {
+                SeminarType.SmokingCessation => "Smoking",
+                SeminarType.VapingCessation => "Vaping",
+                _ => "Solid Waste Management"
+            };
+
+            // Filed cases
+            var casesByOrdinance = await _db.FiledCases
+                .GroupBy(f => f.Violation.Ordinance.ShortName)
+                .Select(g => new { Label = g.Key, Count = g.Count() })
+                .OrderByDescending(x => x.Count)
+                .ToListAsync();
+            var totalCases = casesByOrdinance.Sum(x => x.Count);
+            var caseRows = casesByOrdinance.Take(4)
+                .Select(x => new DashboardCountDTO { Label = x.Label, Count = x.Count, Percent = Percent(x.Count, totalCases) })
+                .ToList();
+            var otherCases = casesByOrdinance.Skip(4).Sum(x => x.Count);
+            if (otherCases > 0)
+                caseRows.Add(new DashboardCountDTO { Label = "Other violations", Count = otherCases, Percent = Percent(otherCases, totalCases) });
+
+            var caseStatus = await _db.FiledCases
+                .GroupBy(f => f.Status)
+                .Select(g => new { Status = g.Key, Count = g.Count() })
+                .ToListAsync();
+            DashboardCountDTO CaseStatusRow(CaseStatus status, string label)
+            {
+                var count = caseStatus.FirstOrDefault(x => x.Status == status)?.Count ?? 0;
+                return new DashboardCountDTO { Label = label, Count = count, Percent = Percent(count, totalCases) };
+            }
+
+            // Collection per calendar year (grouped in memory: payments are small rows).
+            var payments = await _db.Payments.AsNoTracking().Select(p => new { p.DateOfPayment, p.Amount }).ToListAsync();
+            var byYear = payments
+                .GroupBy(p => p.DateOfPayment.Year)
+                .OrderBy(g => g.Key)
+                .Select(g => new DashboardYearCollectionDTO { Year = g.Key, Collection = g.Sum(p => p.Amount) })
+                .ToList();
+
+            // Apprehending officers by office
+            var enforcers = await GetEnforcersAsync();
+            var enforcersByOffice = enforcers.Rows
+                .GroupBy(r => string.IsNullOrWhiteSpace(r.Office) ? "Unassigned" : r.Office)
+                .OrderByDescending(g => g.Count())
+                .Select(g => new DashboardCountDTO { Label = g.Key, Count = g.Count(), Percent = Percent(g.Count(), enforcers.Rows.Count) })
+                .ToList();
+
+            var topBarangays = await _db.Violations
+                .Where(v => v.BarangayOfOccurrenceId != null)
+                .GroupBy(v => v.BarangayOfOccurrence!.Name)
+                .Select(g => new { Label = g.Key, Count = g.Count() })
+                .OrderByDescending(x => x.Count).ThenBy(x => x.Label)
+                .Take(10)
+                .ToListAsync();
+
+            var topOrdinances = await _db.Violations
+                .GroupBy(v => v.Ordinance.ShortName)
+                .Select(g => new { Label = g.Key, Count = g.Count() })
+                .OrderByDescending(x => x.Count).ThenBy(x => x.Label)
+                .Take(3)
+                .ToListAsync();
+
+            return new DashboardSummaryDTO
+            {
+                AsOf = DateOnly.FromDateTime(DateTime.Now),
+                TotalViolators = totalViolators,
+                TotalViolations = totalViolations,
+                PaidCount = paidCount,
+                PaidPercent = Percent(paidCount, totalViolations),
+                SeminarCount = seminarCount,
+                SeminarPercent = Percent(seminarCount, totalViolations),
+                SeminarBreakdown = seminarByType
+                    .OrderByDescending(x => x.Count)
+                    .Select(x => new DashboardCountDTO { Label = SeminarLabel(x.Type), Count = x.Count, Percent = Percent(x.Count, totalViolations) })
+                    .ToList(),
+                TotalCollection = totalCollection,
+                CasesByOrdinance = caseRows,
+                TotalCasesFiled = totalCases,
+                OngoingCases = CaseStatusRow(CaseStatus.Filed, "On-going"),
+                ClosedCases = CaseStatusRow(CaseStatus.Closed, "Case closed"),
+                DismissedCases = CaseStatusRow(CaseStatus.Dismissed, "Dismissed"),
+                CollectionByYear = byYear,
+                EnforcerCount = enforcers.Rows.Count,
+                EnforcersByOffice = enforcersByOffice,
+                TopBarangays = topBarangays.Select(x => new DashboardCountDTO { Label = x.Label, Count = x.Count, Percent = Percent(x.Count, totalViolations) }).ToList(),
+                TopOrdinances = topOrdinances.Select(x => new DashboardCountDTO { Label = x.Label, Count = x.Count, Percent = Percent(x.Count, totalViolations) }).ToList()
+            };
+        }
     }
 }
