@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { forkJoin } from 'rxjs';
 import { BarangaysService } from '../../core/services/barangays-service';
 import { ViolationsService } from '../../core/services/violations-service';
@@ -25,14 +26,27 @@ export class Dashboard implements OnInit {
   summary = signal<DashboardSummary | null>(null);
   summaryFailed = signal(false);
 
+  /** Google Maps embed of the Pasig City Traffic and Parking Management Office. */
+  readonly officeAddress =
+    '2nd Floor, BPD Office, Tbar Building, F.Manalo St. Brgy. Sto Tomas, Pasig City (front of 711)';
+  readonly mapUrl: SafeResourceUrl;
+  readonly mapLink = 'https://www.google.com/maps/search/?api=1&query=' +
+    encodeURIComponent('Pasig City Traffic and Parking Management Office, F. Manalo St, Sto. Tomas, Pasig City');
+
   constructor(
+    sanitizer: DomSanitizer,
     public authService: AuthService,
     private reportsService: ReportsService,
     private barangaysService: BarangaysService,
     private violationsService: ViolationsService,
     private ordinancesService: OrdinancesService,
     private filedCasesService: FiledCasesService,
-  ) {}
+  ) {
+    const query = 'Pasig City Traffic and Parking Management Office, F. Manalo St, Sto. Tomas, Pasig City';
+    this.mapUrl = sanitizer.bypassSecurityTrustResourceUrl(
+      `https://www.google.com/maps?q=${encodeURIComponent(query)}&output=embed`,
+    );
+  }
 
   ngOnInit(): void {
     if (this.authService.canApprove()) {

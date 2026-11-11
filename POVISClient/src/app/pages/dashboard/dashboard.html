@@ -204,6 +204,21 @@
   }
   }
 
+  <h2 class="font-poppins font-bold text-[16px] text-[#152238] mt-8 mb-3">Office Location</h2>
+  <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+    <iframe [src]="mapUrl" title="Pasig City Traffic and Parking Management Office - Google Maps"
+      class="w-full h-[320px] sm:h-[400px] border-0" loading="lazy" allowfullscreen
+      referrerpolicy="no-referrer-when-downgrade"></iframe>
+    <div class="p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div>
+        <div class="text-[14px] font-semibold text-[#152238]">Pasig City Traffic and Parking Management Office</div>
+        <div class="text-[12px] text-[#7a889c] mt-0.5">{{ officeAddress }}</div>
+      </div>
+      <a [href]="mapLink" target="_blank" rel="noopener noreferrer"
+        class="text-[13px] font-semibold text-[#1e3a63] hover:underline">Open in Google Maps</a>
+    </div>
+  </div>
+
   <h2 class="font-poppins font-bold text-[16px] text-[#152238] mt-8 mb-3">Downloadable Forms</h2>
   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
     <a href="templates/pledge-of-commitment.docx" download="Pledge of Commitment (English and Tagalog).docx"
