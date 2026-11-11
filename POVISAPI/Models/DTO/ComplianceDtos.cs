@@ -10,6 +10,8 @@ namespace POVISAPI.Models.DTO
         public string ViolationId { get; set; } = string.Empty;
         public string OvrNumber { get; set; } = string.Empty;
         public string ViolatorFullName { get; set; } = string.Empty;
+        /// <summary>The violation has a recorded payment; the closure certificate is only available then.</summary>
+        public bool HasPayment { get; set; }
         public SeminarType SeminarType { get; set; }
         public DateOnly? ScheduledDate { get; set; }
         public decimal? RequiredDays { get; set; }
@@ -67,6 +69,8 @@ namespace POVISAPI.Models.DTO
         public string ViolationId { get; set; } = string.Empty;
         public string OvrNumber { get; set; } = string.Empty;
         public string ViolatorFullName { get; set; } = string.Empty;
+        /// <summary>The violation has a recorded payment; the closure certificate is only available then.</summary>
+        public bool HasPayment { get; set; }
         public decimal? RequiredHours { get; set; }
         public int? RequiredDays { get; set; }
         public DateOnly? ScheduledDate { get; set; }
@@ -129,6 +133,8 @@ namespace POVISAPI.Models.DTO
         public string ViolationId { get; set; } = string.Empty;
         public string OvrNumber { get; set; } = string.Empty;
         public string ViolatorFullName { get; set; } = string.Empty;
+        /// <summary>The violation has a recorded payment; the closure certificate is only available then.</summary>
+        public bool HasPayment { get; set; }
         public string? InterventionType { get; set; }
         public string? ConductedBy { get; set; }
         public DateOnly? ScheduledDate { get; set; }

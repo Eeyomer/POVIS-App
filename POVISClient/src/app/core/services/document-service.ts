@@ -3,6 +3,7 @@ import { Observable, firstValueFrom } from 'rxjs';
 import JSZip from 'jszip';
 import { CommunityServiceDTO, CounselingDTO, SeminarRecordDTO, SeminarType, ViolationDTO } from '../models/app-dto';
 import { OrdinancesService } from './ordinances-service';
+import { PaymentsService } from './payments-service';
 import { ViolationsService } from './violations-service';
 import { ViolatorsService } from './violators-service';
 
@@ -33,6 +34,7 @@ export class DocumentService {
     private violations: ViolationsService,
     private violators: ViolatorsService,
     private ordinances: OrdinancesService,
+    private payments: PaymentsService,
   ) {}
 
   seminar(record: SeminarRecordDTO): Promise<GeneratedDocument> {
@@ -55,6 +57,24 @@ export class DocumentService {
       hoursWords: hours != null ? numberToWords(hours) : null,
       hoursNumber: hours != null ? String(hours) : null,
       ...c,
+    }));
+  }
+
+  /**
+   * Certification of Compliance and Closure. Only valid once the OVR is paid, since it cites the
+   * official receipt; it is the same document for a seminar, counseling or community service record.
+   */
+  async closure(record: { violationId: string; ovrNumber: string }): Promise<GeneratedDocument> {
+    const payment = await first(this.payments.getByViolationId(record.violationId));
+    if (!payment) throw new Error('This OVR has no recorded payment yet, so a closure certificate cannot be issued.');
+
+    return this.build('closure-certificate', 'Closure Certificate', record.ovrNumber, record.violationId, (c) => ({
+      ...c,
+      occurrenceTimePlace: [c['occurrenceTime'], c['place']].filter(Boolean).join(', '),
+      section: c['section'] ? `Section ${c['section']}` : null,
+      receiptNumber: payment.receiptNumber,
+      receiptDate: formatDate(payment.dateOfPayment),
+      issuedDate: formatIssuedDate(new Date()),
     }));
   }
 
@@ -102,6 +122,9 @@ export class DocumentService {
       occurrenceTime: formatTime(violation.timeOfOccurrence),
       place: violation.placeOfOccurrence,
       barangay: violation.barangayOfOccurrenceName,
+      ordinanceReference: ordinance
+        ? `${ordinance.isExecutiveOrder ? 'Executive Order No.' : 'City Ordinance No.'} ${ordinance.ordinanceNumber}, Series of ${ordinance.series}`
+        : null,
       ordinanceNumber: ordinance?.ordinanceNumber,
       ordinanceSeries: ordinance ? String(ordinance.series) : null,
       section: violation.ordinanceSectionCode,
@@ -149,6 +172,13 @@ function formatDate(value: Date | string | null | undefined): string | null {
   const date = typeof value === 'string' ? new Date(`${value.slice(0, 10)}T00:00:00`) : value;
   if (isNaN(date.getTime())) return null;
   return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+}
+
+/** 11 Nov 2026 -> "11th day of November 2026" */
+function formatIssuedDate(date: Date): string {
+  const day = date.getDate();
+  const suffix = day % 10 === 1 && day !== 11 ? 'st' : day % 10 === 2 && day !== 12 ? 'nd' : day % 10 === 3 && day !== 13 ? 'rd' : 'th';
+  return `${day}${suffix} day of ${date.toLocaleDateString('en-US', { month: 'long' })} ${date.getFullYear()}`;
 }
 
 /** "14:30:00" -> "2:30 PM" */

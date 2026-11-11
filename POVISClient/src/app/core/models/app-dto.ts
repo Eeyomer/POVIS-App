@@ -345,6 +345,8 @@ export interface SeminarRecordDTO {
   violationId: string;
   ovrNumber: string;
   violatorFullName: string;
+  /** The violation is paid; the closure certificate is only available then. */
+  hasPayment: boolean;
   seminarType: SeminarType;
   scheduledDate?: string | null;
   requiredDays?: number | null;
@@ -377,6 +379,8 @@ export interface CommunityServiceDTO {
   violationId: string;
   ovrNumber: string;
   violatorFullName: string;
+  /** The violation is paid; the closure certificate is only available then. */
+  hasPayment: boolean;
   requiredHours?: number | null;
   requiredDays?: number | null;
   scheduledDate?: string | null;
@@ -412,6 +416,8 @@ export interface CounselingDTO {
   violationId: string;
   ovrNumber: string;
   violatorFullName: string;
+  /** The violation is paid; the closure certificate is only available then. */
+  hasPayment: boolean;
   interventionType?: string | null;
   conductedBy?: string | null;
   scheduledDate?: string | null;

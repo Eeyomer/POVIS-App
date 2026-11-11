@@ -17,6 +17,7 @@ namespace POVISAPI.Services
             SeminarRecordId = s.Id.ToString(),
             ViolationId = s.ViolationId.ToString(),
             OvrNumber = s.Violation.OvrNumber,
+            HasPayment = s.Violation.Payment != null,
             ViolatorFullName = s.Violation.Violator.LastName + ", " + s.Violation.Violator.FirstName,
             SeminarType = s.SeminarType,
             ScheduledDate = s.ScheduledDate,
@@ -27,7 +28,8 @@ namespace POVISAPI.Services
         };
 
         private IQueryable<SeminarRecord> IncludedQuery() =>
-            dbContext.SeminarRecords.Include(s => s.Violation).ThenInclude(v => v.Violator);
+            dbContext.SeminarRecords.Include(s => s.Violation).ThenInclude(v => v.Violator)
+                .Include(s => s.Violation).ThenInclude(v => v.Payment);
 
         public async Task<PagedResult<SeminarRecordDTO>> GetAllAsync(SeminarType? type, ComplianceStatus? status, int page = 1, int pageSize = 20, string? search = null)
         {
@@ -135,6 +137,7 @@ namespace POVISAPI.Services
             CommunityServiceRecordId = c.Id.ToString(),
             ViolationId = c.ViolationId.ToString(),
             OvrNumber = c.Violation.OvrNumber,
+            HasPayment = c.Violation.Payment != null,
             ViolatorFullName = c.Violation.Violator.LastName + ", " + c.Violation.Violator.FirstName,
             RequiredHours = c.RequiredHours,
             RequiredDays = c.RequiredDays,
@@ -146,7 +149,8 @@ namespace POVISAPI.Services
         };
 
         private IQueryable<CommunityServiceRecord> IncludedQuery() =>
-            dbContext.CommunityServiceRecords.Include(c => c.Violation).ThenInclude(v => v.Violator);
+            dbContext.CommunityServiceRecords.Include(c => c.Violation).ThenInclude(v => v.Violator)
+                .Include(c => c.Violation).ThenInclude(v => v.Payment);
 
         public async Task<PagedResult<CommunityServiceDTO>> GetAllAsync(ComplianceStatus? status, int page = 1, int pageSize = 20, string? search = null)
         {
@@ -255,6 +259,7 @@ namespace POVISAPI.Services
             CounselingRecordId = c.Id.ToString(),
             ViolationId = c.ViolationId.ToString(),
             OvrNumber = c.Violation.OvrNumber,
+            HasPayment = c.Violation.Payment != null,
             ViolatorFullName = c.Violation.Violator.LastName + ", " + c.Violation.Violator.FirstName,
             InterventionType = c.InterventionType,
             ConductedBy = c.ConductedBy,
@@ -266,7 +271,8 @@ namespace POVISAPI.Services
         };
 
         private IQueryable<CounselingRecord> IncludedQuery() =>
-            dbContext.CounselingRecords.Include(c => c.Violation).ThenInclude(v => v.Violator);
+            dbContext.CounselingRecords.Include(c => c.Violation).ThenInclude(v => v.Violator)
+                .Include(c => c.Violation).ThenInclude(v => v.Payment);
 
         public async Task<PagedResult<CounselingDTO>> GetAllAsync(ComplianceStatus? status, int page = 1, int pageSize = 20, string? search = null)
         {

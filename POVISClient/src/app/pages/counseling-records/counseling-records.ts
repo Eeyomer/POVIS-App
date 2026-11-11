@@ -192,6 +192,22 @@ export class CounselingRecords implements OnInit {
     this.generate(item, (doc) => this.documents.download(doc));
   }
 
+  /** Certification of Compliance and Closure; only for violations that are already paid. */
+  previewClosure(item: CounselingDTO): void {
+    if (!item.hasPayment) return;
+    this.generatingId.set(item.counselingRecordId);
+    this.documents.closure(item).then(
+      (doc) => {
+        this.generatingId.set(null);
+        this.preview.set(doc);
+      },
+      (err: Error) => {
+        this.generatingId.set(null);
+        this.toast.error(err.message);
+      },
+    );
+  }
+
   downloadPreviewed(): void {
     const doc = this.preview();
     if (doc) this.documents.download(doc);
