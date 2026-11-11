@@ -23,4 +23,8 @@ public class User : BaseEntity
 
     /// <summary>Deputation number issued to an Apprehending Officer. Null for other roles.</summary>
     public string? DeputationNumber { get; set; }
+
+    /// <summary>Barangay this user is assigned to. Null when not assigned.</summary>
+    public Guid? BarangayId { get; set; }
+    public Barangay? Barangay { get; set; }
 }

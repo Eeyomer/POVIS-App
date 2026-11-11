@@ -15,6 +15,8 @@ public class UserDTO
     public MaritalStatus? MaritalStatus { get; set; }
     public string? Photo { get; set; }
     public string? DeputationNumber { get; set; }
+    public Guid? BarangayId { get; set; }
+    public string? BarangayName { get; set; }
     public bool MustChangePassword { get; set; }
 
     /// <summary>Only populated in the response to create, and shown to MIS Personnel once.</summary>
@@ -35,6 +37,7 @@ public class CreateUserDTO
     public string? Photo { get; set; }
     public Role Role { get; set; }
     public string? DeputationNumber { get; set; }
+    public Guid? BarangayId { get; set; }
 }
 
 public class UpdateUserDTO
@@ -51,6 +54,7 @@ public class UpdateUserDTO
     /// <summary>Null keeps the current photo, an empty string removes it, a base64 data URL replaces it.</summary>
     public string? Photo { get; set; }
     public string? DeputationNumber { get; set; }
+    public Guid? BarangayId { get; set; }
 }
 
 public class ChangePasswordDTO

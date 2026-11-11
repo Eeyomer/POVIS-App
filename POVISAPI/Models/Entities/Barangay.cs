@@ -17,4 +17,5 @@ public class Barangay : BaseEntity
 
     public ICollection<Violation> ViolationsOccurred { get; set; } = new List<Violation>();
     public ICollection<Violator> Residents { get; set; } = new List<Violator>();
+    public ICollection<User> AssignedUsers { get; set; } = new List<User>();
 }

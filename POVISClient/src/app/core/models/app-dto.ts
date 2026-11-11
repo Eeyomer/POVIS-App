@@ -476,6 +476,8 @@ export interface User {
   maritalStatus?: MaritalStatus | null;
   photo?: string | null;
   deputationNumber?: string | null;
+  barangayId?: string | null;
+  barangayName?: string | null;
   mustChangePassword: boolean;
   /** Only present in the response to create, shown once to MIS Personnel. */
   temporaryPassword?: string | null;
@@ -493,6 +495,7 @@ export interface CreateUserDTO {
   photo?: string | null;
   role: Role;
   deputationNumber?: string | null;
+  barangayId?: string | null;
 }
 
 export interface UpdateUserDTO {
@@ -507,6 +510,7 @@ export interface UpdateUserDTO {
   role: Role;
   isActive: boolean;
   deputationNumber?: string | null;
+  barangayId?: string | null;
 }
 
 export interface ChangePasswordDTO {

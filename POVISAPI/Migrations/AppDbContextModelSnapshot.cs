@@ -501,6 +501,9 @@ namespace POVISAPI.Migrations
                         .HasMaxLength(300)
                         .HasColumnType("character varying(300)");
 
+                    b.Property<Guid?>("BarangayId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("ContactNumber")
                         .HasMaxLength(30)
                         .HasColumnType("character varying(30)");
@@ -551,6 +554,8 @@ namespace POVISAPI.Migrations
                         .HasColumnType("character varying(100)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("BarangayId");
 
                     b.HasIndex("DeputationNumber")
                         .IsUnique()
@@ -855,6 +860,16 @@ namespace POVISAPI.Migrations
                     b.Navigation("Violation");
                 });
 
+            modelBuilder.Entity("POVISAPI.Models.Entity.User", b =>
+                {
+                    b.HasOne("POVISAPI.Models.Entity.Barangay", "Barangay")
+                        .WithMany("AssignedUsers")
+                        .HasForeignKey("BarangayId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Barangay");
+                });
+
             modelBuilder.Entity("POVISAPI.Models.Entity.Violation", b =>
                 {
                     b.HasOne("POVISAPI.Models.Entity.Barangay", "BarangayOfOccurrence")
@@ -911,6 +926,8 @@ namespace POVISAPI.Migrations
 
             modelBuilder.Entity("POVISAPI.Models.Entity.Barangay", b =>
                 {
+                    b.Navigation("AssignedUsers");
+
                     b.Navigation("Residents");
 
                     b.Navigation("ViolationsOccurred");

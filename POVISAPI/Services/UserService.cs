@@ -20,6 +20,7 @@ public class UserService : IUserService
     public async Task<List<UserDTO>> GetAllAsync()
     {
         var users = await context.Users
+            .Include(u => u.Barangay)
             .OrderBy(u => u.Username)
             .ToListAsync();
 
@@ -28,10 +29,17 @@ public class UserService : IUserService
 
     public async Task<UserDTO> GetByIdAsync(Guid id)
     {
-        var user = await context.Users.FindAsync(id)
+        var user = await context.Users.Include(u => u.Barangay).FirstOrDefaultAsync(u => u.Id == id)
             ?? throw new KeyNotFoundException("User does not exist.");
 
         return ToDto(user);
+    }
+
+    private async Task<Barangay?> ResolveBarangayAsync(Guid? barangayId)
+    {
+        if (barangayId == null) return null;
+        return await context.Barangays.FirstOrDefaultAsync(b => b.Id == barangayId)
+            ?? throw new ArgumentException("Selected barangay does not exist.");
     }
 
     public async Task<UserDTO> CreateAsync(CreateUserDTO dto)
@@ -47,9 +55,12 @@ public class UserService : IUserService
             throw new ArgumentException("Full name is required.");
 
         var temporaryPassword = PasswordGenerator.GenerateTemporary();
+        var barangay = await ResolveBarangayAsync(dto.BarangayId);
 
         var user = new User
         {
+            BarangayId = barangay?.Id,
+            Barangay = barangay,
             Username = dto.Username,
             FullName = profile.FullName,
             ContactNumber = profile.ContactNumber,
@@ -74,8 +85,12 @@ public class UserService : IUserService
 
     public async Task<UserDTO> UpdateAsync(UpdateUserDTO dto)
     {
-        var user = await context.Users.FindAsync(dto.Id)
+        var user = await context.Users.Include(u => u.Barangay).FirstOrDefaultAsync(u => u.Id == dto.Id)
             ?? throw new KeyNotFoundException("User does not exist.");
+
+        var barangay = await ResolveBarangayAsync(dto.BarangayId);
+        user.Barangay = barangay;
+        user.BarangayId = barangay?.Id;
 
         if (user.Role == Role.MISPersonnel && dto.Role != Role.MISPersonnel)
         {
@@ -122,23 +137,6 @@ public class UserService : IUserService
         user.MustChangePassword = true;
         await context.SaveChangesAsync();
         return temporaryPassword;
-    }
-
-    public async Task DeleteAsync(Guid id)
-    {
-        var user = await context.Users.FindAsync(id)
-            ?? throw new KeyNotFoundException("User does not exist.");
-
-        if (user.Role == Role.MISPersonnel)
-        {
-            var otherActiveMis = await context.Users
-                .AnyAsync(u => u.Id != id && u.Role == Role.MISPersonnel && u.IsActive);
-            if (!otherActiveMis)
-                throw new InvalidOperationException("At least one active MIS Personnel account must remain.");
-        }
-
-        context.Users.Remove(user);
-        await context.SaveChangesAsync();
     }
 
     private async Task<string?> ResolveDeputationNumberForCreateAsync(Role role, string? number)
@@ -219,6 +217,8 @@ public class UserService : IUserService
         Role = u.Role,
         IsActive = u.IsActive,
         DeputationNumber = u.DeputationNumber,
+        BarangayId = u.BarangayId,
+        BarangayName = u.Barangay?.Name,
         FullName = u.FullName,
         ContactNumber = u.ContactNumber,
         Email = u.Email,

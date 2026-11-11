@@ -244,6 +244,10 @@ public class AppDbContext : DbContext
             e.Property(u => u.Address).HasMaxLength(300);
             e.Property(u => u.Photo).HasColumnType("text");
             e.HasIndex(u => u.DeputationNumber).IsUnique().HasFilter("\"DeputationNumber\" IS NOT NULL");
+            e.HasOne(u => u.Barangay)
+             .WithMany(b => b.AssignedUsers)
+             .HasForeignKey(u => u.BarangayId)
+             .OnDelete(DeleteBehavior.SetNull);
         });
 
         // ================= ViolationEvidence =================

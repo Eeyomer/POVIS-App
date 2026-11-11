@@ -46,7 +46,7 @@ export class FiledCases implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.violationsService.list({ pageSize: 200 }).subscribe((res) => this.violations.set(res.items));
+    this.violationsService.list({ pageSize: 100 }).subscribe((res) => this.violations.set(res.items));
     this.refresh();
   }
 

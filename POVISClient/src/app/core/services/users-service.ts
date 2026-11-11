@@ -37,13 +37,6 @@ export class UsersService {
     );
   }
 
-  remove(id: string): Observable<void> {
-    return this.api.delete(id).pipe(
-      map(() => void 0),
-      catchError((err) => this.rethrowAsError(err)),
-    );
-  }
-
   private rethrowAsError(err: HttpErrorResponse) {
     return throwError(() => new Error(err?.error?.message || 'Something went wrong. Please try again.'));
   }

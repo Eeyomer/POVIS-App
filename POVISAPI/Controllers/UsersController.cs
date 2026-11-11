@@ -57,12 +57,5 @@ namespace POVISAPI.Controllers
             var temporaryPassword = await userService.ResetPasswordAsync(id);
             return Ok(new APIResponse<object> { Success = true, Message = "Password reset successfully", Data = new { temporaryPassword } });
         }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(Guid id)
-        {
-            await userService.DeleteAsync(id);
-            return Ok(new APIResponse<object> { Success = true, Message = "User deleted successfully" });
-        }
     }
 }

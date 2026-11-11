@@ -5,7 +5,8 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UsersService } from '../../core/services/users-service';
 import { AuthService } from '../../core/services/auth-service';
 import { BulkUpload } from '../../shared/components/bulk-upload/bulk-upload';
-import { MaritalStatus, ROLE_LABELS, Role, User } from '../../core/models/app-dto';
+import { BarangayDTO, MaritalStatus, ROLE_LABELS, Role, User } from '../../core/models/app-dto';
+import { BarangaysService } from '../../core/services/barangays-service';
 import { IMAGE_ACCEPT, readImageAsDataUrl } from '../../core/utils/image-upload';
 import { ToastService } from '../../shared/toast/toast-service';
 
@@ -17,12 +18,13 @@ import { ToastService } from '../../shared/toast/toast-service';
 })
 export class Users implements OnInit {
   users = signal<User[]>([]);
+  barangays = signal<BarangayDTO[]>([]);
   search = signal('');
   filteredUsers = computed(() => {
     const term = this.search().trim().toLowerCase();
     if (!term) return this.users();
     return this.users().filter((u) =>
-      `${u.fullName ?? ''} ${u.username} ${ROLE_LABELS[u.role]} ${u.deputationNumber ?? ''} ${u.email ?? ''} ${u.contactNumber ?? ''}`.toLowerCase().includes(term),
+      `${u.fullName ?? ''} ${u.username} ${ROLE_LABELS[u.role]} ${u.deputationNumber ?? ''} ${u.barangayName ?? ''} ${u.email ?? ''} ${u.contactNumber ?? ''}`.toLowerCase().includes(term),
     );
   });
   showForm = signal(false);
@@ -51,16 +53,19 @@ export class Users implements OnInit {
     maritalStatus: [''],
     role: ['ApprehendingOfficer' as Role, Validators.required],
     deputationNumber: ['', [Validators.maxLength(50)]],
+    barangayId: [''],
   });
 
   constructor(
     private usersService: UsersService,
+    private barangaysService: BarangaysService,
     public authService: AuthService,
     private toast: ToastService,
   ) {}
 
   ngOnInit(): void {
     this.form.controls.role.valueChanges.subscribe(() => this.syncDeputationValidator());
+    this.barangaysService.list().subscribe((data) => this.barangays.set(data));
     this.refresh();
   }
 
@@ -81,6 +86,7 @@ export class Users implements OnInit {
       maritalStatus: '',
       role: 'ApprehendingOfficer',
       deputationNumber: '',
+      barangayId: '',
     });
     this.syncDeputationValidator();
     this.showForm.set(true);
@@ -99,6 +105,7 @@ export class Users implements OnInit {
       maritalStatus: user.maritalStatus ?? '',
       role: user.role,
       deputationNumber: user.deputationNumber ?? '',
+      barangayId: user.barangayId ?? '',
     });
     this.syncDeputationValidator();
     this.showForm.set(true);
@@ -154,7 +161,7 @@ export class Users implements OnInit {
       return;
     }
 
-    const { username, fullName, contactNumber, email, address, maritalStatus, role, deputationNumber } = this.form.getRawValue();
+    const { username, fullName, contactNumber, email, address, maritalStatus, role, deputationNumber, barangayId } = this.form.getRawValue();
     const profile = {
       fullName: fullName!.trim(),
       contactNumber: contactNumber?.trim() || null,
@@ -174,8 +181,9 @@ export class Users implements OnInit {
           role: role!,
           isActive: current.isActive,
           deputationNumber: deputation,
+          barangayId: barangayId || null,
         })
-      : this.usersService.create({ username: username!, ...profile, photo: this.photo(), role: role!, deputationNumber: deputation });
+      : this.usersService.create({ username: username!, ...profile, photo: this.photo(), role: role!, deputationNumber: deputation, barangayId: barangayId || null });
 
     request.subscribe({
       next: (saved) => {
@@ -202,6 +210,7 @@ export class Users implements OnInit {
         role: user.role,
         isActive: !user.isActive,
         deputationNumber: user.deputationNumber,
+        barangayId: user.barangayId,
       }).subscribe({
       next: () => this.refresh(),
       error: (err) => this.toast.error(err.message),
@@ -231,15 +240,5 @@ export class Users implements OnInit {
 
   dismissIssuedPassword(): void {
     this.issuedPassword.set(null);
-  }
-
-  remove(user: User): void {
-    this.usersService.remove(user.id).subscribe({
-      next: () => {
-        this.toast.success('User removed.');
-        this.refresh();
-      },
-      error: (err) => this.toast.error(err.message),
-    });
   }
 }

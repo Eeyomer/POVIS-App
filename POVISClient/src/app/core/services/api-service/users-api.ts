@@ -26,8 +26,4 @@ export class UsersApi {
   resetPassword(id: string): Observable<APIResponse<ResetPasswordResult>> {
     return this.http.put<APIResponse<ResetPasswordResult>>(`${this.apiUrl}/${id}/reset-password`, {});
   }
-
-  delete(id: string): Observable<APIResponse<null>> {
-    return this.http.delete<APIResponse<null>>(`${this.apiUrl}/${id}`);
-  }
 }

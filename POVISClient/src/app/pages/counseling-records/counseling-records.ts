@@ -8,11 +8,13 @@ import { AuthService } from '../../core/services/auth-service';
 import { Pagination } from '../../shared/components/pagination/pagination';
 import { BulkUpload } from '../../shared/components/bulk-upload/bulk-upload';
 import { ComplianceStatus, CounselingDTO, ViolationDTO } from '../../core/models/app-dto';
+import { DocumentService, GeneratedDocument } from '../../core/services/document-service';
+import { DocPreview } from '../../shared/components/doc-preview/doc-preview';
 import { ToastService } from '../../shared/toast/toast-service';
 
 @Component({
   selector: 'app-counseling-records',
-  imports: [CommonModule, ReactiveFormsModule, BulkUpload, Pagination, FormPanel],
+  imports: [CommonModule, ReactiveFormsModule, BulkUpload, Pagination, FormPanel, DocPreview],
   templateUrl: './counseling-records.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -22,6 +24,9 @@ export class CounselingRecords implements OnInit {
   page = signal(1);
   readonly pageSize = 20;
   violations = signal<ViolationDTO[]>([]);
+
+  preview = signal<GeneratedDocument | null>(null);
+  generatingId = signal<string | null>(null);
 
   showForm = signal(false);
   editing = signal<CounselingDTO | null>(null);
@@ -44,10 +49,11 @@ export class CounselingRecords implements OnInit {
     private violationsService: ViolationsService,
     public authService: AuthService,
     private toast: ToastService,
+    private documents: DocumentService,
   ) {}
 
   ngOnInit(): void {
-    this.violationsService.list({ pageSize: 200 }).subscribe((res) => this.violations.set(res.items));
+    this.violationsService.list({ pageSize: 100 }).subscribe((res) => this.violations.set(res.items));
     this.refresh();
   }
 
@@ -144,5 +150,33 @@ export class CounselingRecords implements OnInit {
       },
       error: (err) => this.toast.error(err.message),
     });
+  }
+
+  /** Fills the letter template with this record's data. */
+  private generate(item: CounselingDTO, onReady: (doc: GeneratedDocument) => void): void {
+    this.generatingId.set(item.counselingRecordId);
+    this.documents.counseling(item).then(
+      (doc) => {
+        this.generatingId.set(null);
+        onReady(doc);
+      },
+      (err: Error) => {
+        this.generatingId.set(null);
+        this.toast.error(err.message);
+      },
+    );
+  }
+
+  previewDocument(item: CounselingDTO): void {
+    this.generate(item, (doc) => this.preview.set(doc));
+  }
+
+  downloadDocument(item: CounselingDTO): void {
+    this.generate(item, (doc) => this.documents.download(doc));
+  }
+
+  downloadPreviewed(): void {
+    const doc = this.preview();
+    if (doc) this.documents.download(doc);
   }
 }

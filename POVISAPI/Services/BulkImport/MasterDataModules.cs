@@ -80,26 +80,30 @@ namespace POVISAPI.Services.BulkImport
             new BulkColumn("Email", false, "Optional. Valid email address, up to 150 characters."),
             new BulkColumn("Address", false, "Optional. Up to 300 characters."),
             new BulkColumn("Marital Status", false, "Optional. Single, Married, Widowed, Separated or Divorced.", Opt.Of<MaritalStatus>()),
+            new BulkColumn("Assigned Barangay", false, "Optional. Must match a barangay name already in POVIS."),
             new BulkColumn("Is Active", false, "Yes or No. Default Yes.", Opt.YesNo)
         };
 
         public override IReadOnlyList<string[]> Examples { get; } = new[]
         {
-            new[] { "jdelacruz", "Juan Dela Cruz", "ApprehendingOfficer", "2025-01-440", "09171234567", "juan@example.com", "12 Rizal St., Pasig", "Married", "Yes" },
-            new[] { "msantos", "Maria Santos", "OVRSupervisor", "", "09181234567", "", "", "Single", "Yes" }
+            new[] { "jdelacruz", "Juan Dela Cruz", "ApprehendingOfficer", "2025-01-440", "09171234567", "juan@example.com", "12 Rizal St., Pasig", "Married", "Ugong", "Yes" },
+            new[] { "msantos", "Maria Santos", "OVRSupervisor", "", "09181234567", "", "", "Single", "", "Yes" }
         };
 
         public override IReadOnlyList<(string, string)> Notes { get; } = new[]
         {
             ("Passwords", "Each new user gets a system-generated temporary password and must change it at first login. The passwords are shown ONCE after a successful upload (with a CSV download) - save them before leaving the page."),
             ("Existing records", "A username that already exists is skipped, not changed."),
-            ("Limit", "Users are limited to 300 rows per upload because every account needs its own password hash.")
+            ("Limit", "Users are limited to 300 rows per upload because every account needs its own password hash."),
+            ("Upload order", "Upload Barangays first - Assigned Barangay is matched by name.")
         };
 
         public override async Task StageAsync(AppDbContext db, IReadOnlyList<BulkRow> rows, BulkContext ctx)
         {
             var usernames = (await db.Users.Select(u => u.Username).ToListAsync()).Select(u => u.ToLowerInvariant()).ToHashSet();
             var deputations = (await db.Users.Where(u => u.DeputationNumber != null).Select(u => u.DeputationNumber!).ToListAsync()).ToHashSet();
+            var barangays = (await db.Barangays.ToListAsync())
+                .GroupBy(b => b.Name.Trim().ToLowerInvariant()).ToDictionary(g => g.Key, g => g.First().Id);
 
             foreach (var r in rows)
             {
@@ -111,7 +115,15 @@ namespace POVISAPI.Services.BulkImport
                 var email = r.Text("Email", 150);
                 var address = r.Text("Address", 300);
                 var marital = r.Choice<MaritalStatus>("Marital Status");
+                var barangayName = r.Text("Assigned Barangay", 100);
                 var active = r.Bool("Is Active", true);
+
+                Guid? barangayId = null;
+                if (barangayName != null)
+                {
+                    if (barangays.TryGetValue(barangayName.Trim().ToLowerInvariant(), out var bid)) barangayId = bid;
+                    else r.Error($"Barangay '{barangayName}' does not exist. Upload it in Barangays first or fix the spelling.");
+                }
 
                 if (username.Contains(' ')) r.Error("Username cannot contain spaces.");
                 if (email != null && !IsEmail(email)) r.Error("Email address is not valid.");
@@ -138,6 +150,7 @@ namespace POVISAPI.Services.BulkImport
                     Email = email,
                     Address = address,
                     MaritalStatus = marital,
+                    BarangayId = barangayId,
                     IsActive = active,
                     PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
                     MustChangePassword = true
