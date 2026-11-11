@@ -87,6 +87,12 @@ export class System implements OnInit {
     this.refreshLogs();
   }
 
+  onPageSizeChange(size: number): void {
+    this.pageSize = size;
+    this.page.set(1);
+    this.refreshLogs();
+  }
+
   nextPage(): void {
     const p = this.logsPage();
     if (p.page * p.pageSize >= p.totalCount) return;

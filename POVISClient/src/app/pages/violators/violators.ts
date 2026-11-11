@@ -58,6 +58,12 @@ export class Violators implements OnInit {
     this.refresh();
   }
 
+  onPageSizeChange(size: number): void {
+    this.pageSize = size;
+    this.page.set(1);
+    this.refresh();
+  }
+
   onPageChange(page: number): void {
     this.page.set(page);
     this.refresh();

@@ -7,7 +7,18 @@ import { ChangeDetectionStrategy, Component, computed, input, output } from '@an
   template: `
     @if (total() > 0) {
     <div class="flex flex-wrap items-center justify-between gap-2 mt-4 text-[12.5px] text-[#7a889c]">
-      <span>Showing {{ from() }}–{{ to() }} of {{ total() }}</span>
+      <div class="flex flex-wrap items-center gap-3">
+        <span>Showing {{ from() }}–{{ to() }} of {{ total() }}</span>
+        <label class="flex items-center gap-1.5">
+          Rows per page
+          <select [value]="pageSize()" (change)="pageSizeChange.emit(+$any($event.target).value)"
+            class="px-2 py-1 rounded-lg border border-[#d3dae5] bg-white text-[12.5px] font-semibold text-[#152238]">
+            @for (size of sizes(); track size) {
+            <option [value]="size" [selected]="size === pageSize()">{{ size }}</option>
+            }
+          </select>
+        </label>
+      </div>
       @if (totalPages() > 1) {
       <div class="flex flex-wrap gap-1">
         <button type="button" (click)="go(page() - 1)" [disabled]="page() <= 1"
@@ -40,6 +51,15 @@ export class Pagination {
   pageSize = input(20);
   total = input.required<number>();
   pageChange = output<number>();
+  /** Emits the newly chosen rows-per-page; the parent should go back to page 1 and reload. */
+  pageSizeChange = output<number>();
+  /** Capped at 100, the most any list endpoint accepts. */
+  pageSizeOptions = input([10, 20, 50, 100]);
+
+  sizes = computed(() => {
+    const options = this.pageSizeOptions();
+    return options.includes(this.pageSize()) ? options : [...options, this.pageSize()].sort((a, b) => a - b);
+  });
 
   totalPages = computed(() => Math.max(1, Math.ceil(this.total() / this.pageSize())));
   from = computed(() => (this.page() - 1) * this.pageSize() + 1);

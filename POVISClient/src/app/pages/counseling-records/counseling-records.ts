@@ -22,7 +22,7 @@ export class CounselingRecords implements OnInit {
   records = signal<CounselingDTO[]>([]);
   totalCount = signal(0);
   page = signal(1);
-  readonly pageSize = 20;
+  pageSize = 20;
   violations = signal<ViolationDTO[]>([]);
 
   preview = signal<GeneratedDocument | null>(null);
@@ -61,6 +61,12 @@ export class CounselingRecords implements OnInit {
 
   onSearchChange(value: string): void {
     this.search.set(value);
+    this.page.set(1);
+    this.refresh();
+  }
+
+  onPageSizeChange(size: number): void {
+    this.pageSize = size;
     this.page.set(1);
     this.refresh();
   }

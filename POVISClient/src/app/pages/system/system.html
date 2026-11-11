@@ -133,8 +133,19 @@
       </table>
     </div>
 
-    <div class="flex items-center justify-between mt-4 text-[12.5px] text-[#7a889c]">
-      <span>{{ logsPage().totalCount }} total entries</span>
+    <div class="flex flex-wrap items-center justify-between gap-2 mt-4 text-[12.5px] text-[#7a889c]">
+      <div class="flex flex-wrap items-center gap-3">
+        <span>{{ logsPage().totalCount }} total entries</span>
+        <label class="flex items-center gap-1.5">
+          Rows per page
+          <select [value]="pageSize" (change)="onPageSizeChange(+$any($event.target).value)"
+            class="px-2 py-1 rounded-lg border border-[#d3dae5] bg-white text-[12.5px] font-semibold text-[#152238]">
+            @for (size of [10, 25, 50, 100]; track size) {
+            <option [value]="size" [selected]="size === pageSize">{{ size }}</option>
+            }
+          </select>
+        </label>
+      </div>
       <div class="flex gap-2">
         <button type="button" (click)="prevPage()" [disabled]="logsPage().page <= 1"
           class="px-3 py-1.5 rounded-lg border border-[#d3dae5] font-semibold text-[#152238] disabled:opacity-40">

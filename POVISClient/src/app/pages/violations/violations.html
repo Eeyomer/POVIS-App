@@ -223,7 +223,8 @@
       </tbody>
     </table>
   </div>
-  <app-pagination [page]="page()" [pageSize]="pageSize" [total]="totalCount()" (pageChange)="onPageChange($event)" />
+  <app-pagination [page]="page()" [pageSize]="pageSize" [total]="totalCount()" (pageChange)="onPageChange($event)"
+    (pageSizeChange)="onPageSizeChange($event)" />
 
 @if (previewImage(); as img) {
 <div class="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" (click)="previewImage.set(null)">

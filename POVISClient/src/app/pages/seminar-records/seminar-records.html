@@ -114,5 +114,6 @@
   @if (preview(); as doc) {
     <app-doc-preview [document]="doc" (closed)="preview.set(null)" (downloaded)="downloadPreviewed()" />
   }
-  <app-pagination [page]="page()" [pageSize]="pageSize" [total]="totalCount()" (pageChange)="onPageChange($event)" />
+  <app-pagination [page]="page()" [pageSize]="pageSize" [total]="totalCount()" (pageChange)="onPageChange($event)"
+    (pageSizeChange)="onPageSizeChange($event)" />
 </div>

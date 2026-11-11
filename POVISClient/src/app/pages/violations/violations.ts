@@ -32,7 +32,7 @@ export class Violations implements OnInit {
   violations = signal<ViolationDTO[]>([]);
   totalCount = signal(0);
   page = signal(1);
-  readonly pageSize = 20;
+  pageSize = 20;
   violators = signal<ViolatorDTO[]>([]);
   ordinances = signal<OrdinanceListDTO[]>([]);
   barangays = signal<BarangayDTO[]>([]);
@@ -124,6 +124,12 @@ export class Violations implements OnInit {
     this.violatorsService.search(undefined, 1, 200).subscribe((res) => this.violators.set(res.items));
     this.ordinancesService.list().subscribe((data) => this.ordinances.set(data));
     this.barangaysService.list().subscribe((data) => this.barangays.set(data));
+    this.refresh();
+  }
+
+  onPageSizeChange(size: number): void {
+    this.pageSize = size;
+    this.page.set(1);
     this.refresh();
   }
 
