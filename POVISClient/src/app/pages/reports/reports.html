@@ -76,6 +76,20 @@
     </div>
   </div>
 
+  @if (loading() && !ordinanceSummary()) {
+  <div class="bg-white rounded-2xl shadow-sm p-6 mb-6" role="status" aria-label="Loading">
+    <app-skeleton class="h-5 w-56 mb-4" />
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5">
+      @for (i of [1, 2, 3, 4]; track i) {
+      <app-skeleton class="h-16" />
+      }
+    </div>
+    <table class="w-full text-[13px]">
+      <tbody app-skeleton-rows [columns]="6" [rows]="5"></tbody>
+    </table>
+  </div>
+  }
+
   @if (ordinanceSummary(); as summary) {
   <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
     <h2 class="text-[15px] font-semibold text-[#152238] mb-4">

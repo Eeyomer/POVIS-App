@@ -157,7 +157,10 @@
           <th class="px-4 py-3"></th>
         </tr>
       </thead>
-      <tbody>
+      @if (loading()) {
+        <tbody app-skeleton-rows [columns]="5" [rows]="5"></tbody>
+        } @else {
+        <tbody>
         @for (o of filteredOrdinances(); track o.ordinanceId) {
         <tr class="border-t border-[#eef2f8]">
           <td class="px-4 py-3 font-medium text-[#152238]">{{ o.ordinanceNumber }}</td>
@@ -177,6 +180,7 @@
         <tr><td colspan="5" class="px-4 py-6 text-center text-[#7a889c]">No ordinances yet.</td></tr>
         }
       </tbody>
+        }
     </table>
   </div>
 </div>

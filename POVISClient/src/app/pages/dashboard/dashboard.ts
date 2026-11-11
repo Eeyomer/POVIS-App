@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Skeleton } from '../../shared/components/skeleton/skeleton';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { forkJoin } from 'rxjs';
+import { finalize, forkJoin } from 'rxjs';
 import { BarangaysService } from '../../core/services/barangays-service';
 import { ViolationsService } from '../../core/services/violations-service';
 import { OrdinancesService } from '../../core/services/ordinances-service';
@@ -12,11 +13,12 @@ import { DashboardSummary } from '../../core/models/app-dto';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule],
+  imports: [CommonModule, Skeleton],
   templateUrl: './dashboard.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Dashboard implements OnInit {
+  loading = signal(true);
   barangayCount = signal(0);
   ordinanceCount = signal(0);
   pendingViolationCount = signal(0);
@@ -61,7 +63,9 @@ export class Dashboard implements OnInit {
       ordinances: this.ordinancesService.list(),
       pendingViolations: this.violationsService.list({ status: 'Pending', pageSize: 1 }),
       filedCases: this.filedCasesService.list('Filed', undefined, undefined, 1, 1),
-    }).subscribe(({ barangays, ordinances, pendingViolations, filedCases }) => {
+    })
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe(({ barangays, ordinances, pendingViolations, filedCases }) => {
       this.barangayCount.set(barangays.length);
       this.ordinanceCount.set(ordinances.length);
       this.pendingViolationCount.set(pendingViolations.totalCount);

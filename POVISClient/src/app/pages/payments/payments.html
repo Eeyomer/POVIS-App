@@ -67,6 +67,9 @@
           <th class="px-4 py-3"></th>
         </tr>
       </thead>
+      @if (loading()) {
+      <tbody app-skeleton-rows [columns]="6"></tbody>
+      } @else {
       <tbody>
         @for (p of payments(); track p.paymentId) {
         <tr class="border-t border-[#eef2f8]">
@@ -88,6 +91,7 @@
         <tr><td colspan="6" class="px-4 py-6 text-center text-[#7a889c]">No payments recorded.</td></tr>
         }
       </tbody>
+      }
     </table>
   </div>
   <app-pagination [page]="page()" [pageSize]="pageSize" [total]="totalCount()" (pageChange)="onPageChange($event)"

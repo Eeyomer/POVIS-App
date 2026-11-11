@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { SkeletonRows } from '../../shared/components/skeleton/skeleton';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ViolatorsService } from '../../core/services/violators-service';
@@ -7,7 +8,7 @@ import { ViolatorDTO, ViolatorHistoryDTO } from '../../core/models/app-dto';
 
 @Component({
   selector: 'app-verify',
-  imports: [CommonModule, FormsModule],
+  imports: [SkeletonRows, CommonModule, FormsModule],
   templateUrl: './verify.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

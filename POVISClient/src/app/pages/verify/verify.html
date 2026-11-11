@@ -56,6 +56,9 @@
             <th class="px-3 py-2">Compliance Status</th>
           </tr>
         </thead>
+        @if (loadingHistory()) {
+        <tbody app-skeleton-rows [columns]="5" [rows]="5"></tbody>
+        } @else {
         <tbody>
           @for (h of history(); track h.violationId) {
           <tr class="border-t border-[#eef2f8]">
@@ -71,6 +74,7 @@
           </td></tr>
           }
         </tbody>
+        }
       </table>
     </div>
   </div>

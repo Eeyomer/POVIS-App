@@ -1,4 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal, computed } from '@angular/core';
+import { SkeletonRows } from '../../shared/components/skeleton/skeleton';
+import { finalize } from 'rxjs';
 import { FormPanel } from '../../shared/components/form-panel/form-panel';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -16,11 +18,12 @@ import { SearchSelect, SelectOption } from '../../shared/components/search-selec
 
 @Component({
   selector: 'app-seminar-records',
-  imports: [CommonModule, ReactiveFormsModule, BulkUpload, Pagination, FormPanel, DocPreview, SearchSelect],
+  imports: [SkeletonRows, CommonModule, ReactiveFormsModule, BulkUpload, Pagination, FormPanel, DocPreview, SearchSelect],
   templateUrl: './seminar-records.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SeminarRecords implements OnInit {
+  loading = signal(true);
   records = signal<SeminarRecordDTO[]>([]);
   totalCount = signal(0);
   page = signal(1);
@@ -87,7 +90,10 @@ export class SeminarRecords implements OnInit {
   }
 
   refresh(): void {
-    this.recordsService.list(null, null, this.page(), this.pageSize, this.search() || null).subscribe((result) => {
+    this.loading.set(true);
+    this.recordsService.list(null, null, this.page(), this.pageSize, this.search() || null)
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe((result) => {
       this.records.set(result.items);
       this.totalCount.set(result.totalCount);
     });

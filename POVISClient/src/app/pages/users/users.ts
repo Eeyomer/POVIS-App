@@ -1,4 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { finalize } from 'rxjs';
+import { SkeletonRows } from '../../shared/components/skeleton/skeleton';
 import { FormPanel } from '../../shared/components/form-panel/form-panel';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -12,11 +14,12 @@ import { ToastService } from '../../shared/toast/toast-service';
 
 @Component({
   selector: 'app-users',
-  imports: [CommonModule, ReactiveFormsModule, BulkUpload, FormPanel],
+  imports: [SkeletonRows, CommonModule, ReactiveFormsModule, BulkUpload, FormPanel],
   templateUrl: './users.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Users implements OnInit {
+  loading = signal(true);
   users = signal<User[]>([]);
   barangays = signal<BarangayDTO[]>([]);
   search = signal('');
@@ -70,7 +73,11 @@ export class Users implements OnInit {
   }
 
   refresh(): void {
-    this.usersService.list().subscribe((data) => this.users.set(data));
+    this.loading.set(true);
+    this.usersService
+      .list()
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe((data) => this.users.set(data));
   }
 
   openAdd(): void {

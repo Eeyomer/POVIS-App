@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { Skeleton, SkeletonRows } from '../../shared/components/skeleton/skeleton';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ReportsService } from '../../core/services/reports-service';
@@ -17,7 +18,7 @@ function today(): string {
 
 @Component({
   selector: 'app-reports',
-  imports: [CommonModule, FormsModule],
+  imports: [Skeleton, SkeletonRows, CommonModule, FormsModule],
   templateUrl: './reports.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

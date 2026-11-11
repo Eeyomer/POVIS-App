@@ -96,6 +96,9 @@
             <th class="px-4 py-2">Status</th>
           </tr>
         </thead>
+        @if (historyLoading()) {
+        <tbody app-skeleton-rows [columns]="5" [rows]="5"></tbody>
+        } @else {
         <tbody>
           @for (item of history(); track item.violationId) {
           <tr class="border-t border-[#eef2f8]">
@@ -109,6 +112,7 @@
           <tr><td colspan="5" class="px-4 py-4 text-center text-[#7a889c]">No prior violations.</td></tr>
           }
         </tbody>
+        }
       </table>
     </div>
   </app-form-panel>
@@ -126,6 +130,9 @@
           <th class="px-4 py-3"></th>
         </tr>
       </thead>
+      @if (loading()) {
+      <tbody app-skeleton-rows [columns]="6"></tbody>
+      } @else {
       <tbody>
         @for (v of violators(); track v.violatorId) {
         <tr class="border-t border-[#eef2f8]">
@@ -145,6 +152,7 @@
         <tr><td colspan="6" class="px-4 py-6 text-center text-[#7a889c]">No violators found.</td></tr>
         }
       </tbody>
+      }
     </table>
   </div>
   <app-pagination [page]="page()" [pageSize]="pageSize" [total]="totalCount()" (pageChange)="onPageChange($event)"

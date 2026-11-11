@@ -1,4 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { finalize } from 'rxjs';
+import { SkeletonRows } from '../../shared/components/skeleton/skeleton';
 import { FormPanel } from '../../shared/components/form-panel/form-panel';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -10,11 +12,12 @@ import { ToastService } from '../../shared/toast/toast-service';
 
 @Component({
   selector: 'app-ordinances',
-  imports: [CommonModule, ReactiveFormsModule, FormPanel],
+  imports: [SkeletonRows, CommonModule, ReactiveFormsModule, FormPanel],
   templateUrl: './ordinances.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Ordinances implements OnInit {
+  loading = signal(true);
   ordinances = signal<OrdinanceListDTO[]>([]);
   selected = signal<OrdinanceDTO | null>(null);
 
@@ -93,7 +96,11 @@ export class Ordinances implements OnInit {
   }
 
   refresh(): void {
-    this.ordinancesService.list(true).subscribe((data) => this.ordinances.set(data));
+    this.loading.set(true);
+    this.ordinancesService
+      .list(true)
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe((data) => this.ordinances.set(data));
   }
 
   openAdd(): void {

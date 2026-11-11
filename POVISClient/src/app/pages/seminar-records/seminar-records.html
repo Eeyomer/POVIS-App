@@ -82,6 +82,9 @@
           <th class="px-4 py-3"></th>
         </tr>
       </thead>
+      @if (loading()) {
+      <tbody app-skeleton-rows [columns]="6"></tbody>
+      } @else {
       <tbody>
         @for (r of records(); track r.seminarRecordId) {
         <tr class="border-t border-[#eef2f8]">
@@ -108,6 +111,7 @@
         <tr><td colspan="6" class="px-4 py-6 text-center text-[#7a889c]">No seminar records.</td></tr>
         }
       </tbody>
+      }
     </table>
   </div>
   @if (preview(); as doc) {

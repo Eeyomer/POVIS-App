@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
+import { Skeleton, SkeletonRows } from '../../shared/components/skeleton/skeleton';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ViewModeService } from '../../core/services/view-mode-service';
@@ -11,14 +12,14 @@ const EMPTY_LOGS: PagedResult<TechnicalLog> = { items: [], totalCount: 0, page: 
 
 @Component({
   selector: 'app-system',
-  imports: [CommonModule, FormsModule],
+  imports: [Skeleton, SkeletonRows, CommonModule, FormsModule],
   templateUrl: './system.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class System implements OnInit {
   health = signal<SystemHealth | null>(null);
   logsPage = signal<PagedResult<TechnicalLog>>(EMPTY_LOGS);
-  logsLoading = signal(false);
+  logsLoading = signal(true);
   restoring = signal(false);
 
   searchTerm = signal('');

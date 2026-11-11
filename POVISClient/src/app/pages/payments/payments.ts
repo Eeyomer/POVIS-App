@@ -1,4 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal, computed } from '@angular/core';
+import { SkeletonRows } from '../../shared/components/skeleton/skeleton';
+import { finalize } from 'rxjs';
 import { FormPanel } from '../../shared/components/form-panel/form-panel';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -14,11 +16,12 @@ import { SearchSelect, SelectOption } from '../../shared/components/search-selec
 
 @Component({
   selector: 'app-payments',
-  imports: [CommonModule, ReactiveFormsModule, BulkUpload, Pagination, FormPanel, SearchSelect],
+  imports: [SkeletonRows, CommonModule, ReactiveFormsModule, BulkUpload, Pagination, FormPanel, SearchSelect],
   templateUrl: './payments.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Payments implements OnInit {
+  loading = signal(true);
   payments = signal<PaymentDTO[]>([]);
   totalCount = signal(0);
   page = signal(1);
@@ -80,7 +83,10 @@ export class Payments implements OnInit {
   }
 
   refresh(): void {
-    this.paymentsService.list(null, null, this.page(), this.pageSize, this.search() || null).subscribe((result) => {
+    this.loading.set(true);
+    this.paymentsService.list(null, null, this.page(), this.pageSize, this.search() || null)
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe((result) => {
       this.payments.set(result.items);
       this.totalCount.set(result.totalCount);
     });

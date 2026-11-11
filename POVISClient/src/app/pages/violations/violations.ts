@@ -1,4 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal, computed } from '@angular/core';
+import { SkeletonRows } from '../../shared/components/skeleton/skeleton';
+import { finalize } from 'rxjs';
 import { FormPanel } from '../../shared/components/form-panel/form-panel';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -26,11 +28,12 @@ import { SearchSelect, SelectOption } from '../../shared/components/search-selec
 
 @Component({
   selector: 'app-violations',
-  imports: [CommonModule, ReactiveFormsModule, BulkUpload, Pagination, FormPanel, SearchSelect],
+  imports: [SkeletonRows, CommonModule, ReactiveFormsModule, BulkUpload, Pagination, FormPanel, SearchSelect],
   templateUrl: './violations.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Violations implements OnInit {
+  loading = signal(true);
   violations = signal<ViolationDTO[]>([]);
   totalCount = signal(0);
   page = signal(1);
@@ -153,7 +156,10 @@ export class Violations implements OnInit {
   }
 
   refresh(): void {
-    this.violationsService.list({ status: this.statusFilter() || undefined, search: this.search() || undefined, page: this.page(), pageSize: this.pageSize }).subscribe((result) => {
+    this.loading.set(true);
+    this.violationsService.list({ status: this.statusFilter() || undefined, search: this.search() || undefined, page: this.page(), pageSize: this.pageSize })
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe((result) => {
       this.violations.set(result.items);
       this.totalCount.set(result.totalCount);
     });

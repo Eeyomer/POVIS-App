@@ -1,4 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { SkeletonRows } from '../../shared/components/skeleton/skeleton';
+import { finalize } from 'rxjs';
 import { FormPanel } from '../../shared/components/form-panel/form-panel';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -12,11 +14,12 @@ import { ToastService } from '../../shared/toast/toast-service';
 
 @Component({
   selector: 'app-violators',
-  imports: [CommonModule, ReactiveFormsModule, BulkUpload, Pagination, FormPanel],
+  imports: [SkeletonRows, CommonModule, ReactiveFormsModule, BulkUpload, Pagination, FormPanel],
   templateUrl: './violators.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Violators implements OnInit {
+  loading = signal(true);
   violators = signal<ViolatorDTO[]>([]);
   totalCount = signal(0);
   barangays = signal<BarangayDTO[]>([]);
@@ -29,6 +32,7 @@ export class Violators implements OnInit {
 
   historyFor = signal<ViolatorDTO | null>(null);
   history = signal<ViolatorHistoryDTO[]>([]);
+  historyLoading = signal(false);
 
   private fb = inject(FormBuilder);
 
@@ -70,7 +74,10 @@ export class Violators implements OnInit {
   }
 
   refresh(): void {
-    this.violatorsService.search(this.search() || undefined, this.page(), this.pageSize).subscribe((result) => {
+    this.loading.set(true);
+    this.violatorsService.search(this.search() || undefined, this.page(), this.pageSize)
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe((result) => {
       this.violators.set(result.items);
       this.totalCount.set(result.totalCount);
     });
@@ -149,7 +156,11 @@ export class Violators implements OnInit {
 
   viewHistory(violator: ViolatorDTO): void {
     this.historyFor.set(violator);
-    this.violatorsService.getHistory(violator.violatorId).subscribe((data) => this.history.set(data));
+    this.historyLoading.set(true);
+    this.violatorsService
+      .getHistory(violator.violatorId)
+      .pipe(finalize(() => this.historyLoading.set(false)))
+      .subscribe((data) => this.history.set(data));
   }
 
   closeHistory(): void {

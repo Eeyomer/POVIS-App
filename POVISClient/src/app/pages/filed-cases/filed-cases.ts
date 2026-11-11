@@ -1,4 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal, computed } from '@angular/core';
+import { SkeletonRows } from '../../shared/components/skeleton/skeleton';
+import { finalize } from 'rxjs';
 import { FormPanel } from '../../shared/components/form-panel/form-panel';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -14,11 +16,12 @@ import { SearchSelect, SelectOption } from '../../shared/components/search-selec
 
 @Component({
   selector: 'app-filed-cases',
-  imports: [CommonModule, ReactiveFormsModule, BulkUpload, Pagination, FormPanel, SearchSelect],
+  imports: [SkeletonRows, CommonModule, ReactiveFormsModule, BulkUpload, Pagination, FormPanel, SearchSelect],
   templateUrl: './filed-cases.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FiledCases implements OnInit {
+  loading = signal(true);
   cases = signal<FiledCaseDTO[]>([]);
   totalCount = signal(0);
   page = signal(1);
@@ -81,7 +84,10 @@ export class FiledCases implements OnInit {
   }
 
   refresh(): void {
-    this.filedCasesService.list(null, null, null, this.page(), this.pageSize, this.search() || null).subscribe((result) => {
+    this.loading.set(true);
+    this.filedCasesService.list(null, null, null, this.page(), this.pageSize, this.search() || null)
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe((result) => {
       this.cases.set(result.items);
       this.totalCount.set(result.totalCount);
     });
