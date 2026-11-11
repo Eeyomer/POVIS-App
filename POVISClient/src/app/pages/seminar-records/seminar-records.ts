@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal, computed } from '@angular/core';
 import { FormPanel } from '../../shared/components/form-panel/form-panel';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -12,9 +12,11 @@ import { DocumentService, GeneratedDocument } from '../../core/services/document
 import { DocPreview } from '../../shared/components/doc-preview/doc-preview';
 import { ToastService } from '../../shared/toast/toast-service';
 
+import { SearchSelect, SelectOption } from '../../shared/components/search-select/search-select';
+
 @Component({
   selector: 'app-seminar-records',
-  imports: [CommonModule, ReactiveFormsModule, BulkUpload, Pagination, FormPanel, DocPreview],
+  imports: [CommonModule, ReactiveFormsModule, BulkUpload, Pagination, FormPanel, DocPreview, SearchSelect],
   templateUrl: './seminar-records.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -52,7 +54,7 @@ export class SeminarRecords implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.violationsService.list({ pageSize: 100 }).subscribe((res) => this.violations.set(res.items));
+    this.searchViolations('');
     this.refresh();
   }
 
@@ -62,6 +64,15 @@ export class SeminarRecords implements OnInit {
     this.search.set(value);
     this.page.set(1);
     this.refresh();
+  }
+
+  violationOptions = computed<SelectOption[]>(() =>
+    this.violations().map((v) => ({ value: v.violationId, label: `${v.ovrNumber} — ${v.violatorFullName}` })),
+  );
+
+  /** Loads the violations matching what was typed into the selector. */
+  searchViolations(term: string): void {
+    this.violationsService.list({ search: term || undefined, pageSize: 20 }).subscribe((res) => this.violations.set(res.items));
   }
 
   onPageSizeChange(size: number): void {

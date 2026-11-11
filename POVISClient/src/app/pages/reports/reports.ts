@@ -41,14 +41,14 @@ export class Reports {
     { value: 'incentives', label: 'Incentives (10% per deputized enforcer)' },
     { value: 'enforcers', label: 'Deputized Enforcers' },
   ];
-  readonly divisions = ['POD', 'BPD', 'ALD', 'PSD', 'PNP', 'SOG', 'Other'];
+  readonly divisions = ['ALD', 'BPD', 'PNP', 'POD', 'PSD', 'SOG', 'Other'];
 
   constructor(
     private reportsService: ReportsService,
     private toast: ToastService,
     private barangaysService: BarangaysService,
   ) {
-    this.barangaysService.list().subscribe((list) => this.barangays.set(list));
+    this.barangaysService.list().subscribe((list) => this.barangays.set([...list].sort((a, b) => a.name.localeCompare(b.name))));
     this.runOrdinanceSummary();
   }
 

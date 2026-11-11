@@ -54,7 +54,7 @@ export class Violators implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.barangaysService.list().subscribe((data) => this.barangays.set(data));
+    this.barangaysService.list().subscribe((data) => this.barangays.set([...data].sort((a, b) => a.name.localeCompare(b.name))));
     this.refresh();
   }
 

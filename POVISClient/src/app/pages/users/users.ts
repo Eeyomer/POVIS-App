@@ -65,7 +65,7 @@ export class Users implements OnInit {
 
   ngOnInit(): void {
     this.form.controls.role.valueChanges.subscribe(() => this.syncDeputationValidator());
-    this.barangaysService.list().subscribe((data) => this.barangays.set(data));
+    this.barangaysService.list().subscribe((data) => this.barangays.set([...data].sort((a, b) => a.name.localeCompare(b.name))));
     this.refresh();
   }
 

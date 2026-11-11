@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal, computed } from '@angular/core';
 import { FormPanel } from '../../shared/components/form-panel/form-panel';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -22,9 +22,11 @@ import { manilaToday } from '../../core/utils/manila-time';
 import { IMAGE_ACCEPT, readImageAsDataUrl } from '../../core/utils/image-upload';
 import { ToastService } from '../../shared/toast/toast-service';
 
+import { SearchSelect, SelectOption } from '../../shared/components/search-select/search-select';
+
 @Component({
   selector: 'app-violations',
-  imports: [CommonModule, ReactiveFormsModule, BulkUpload, Pagination, FormPanel],
+  imports: [CommonModule, ReactiveFormsModule, BulkUpload, Pagination, FormPanel, SearchSelect],
   templateUrl: './violations.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -121,10 +123,22 @@ export class Violations implements OnInit {
   ngOnInit(): void {
     this.form.controls.violatorId.valueChanges.subscribe(() => this.updateAge());
     this.form.controls.dateOfOccurrence.valueChanges.subscribe(() => this.updateAge());
-    this.violatorsService.search(undefined, 1, 200).subscribe((res) => this.violators.set(res.items));
-    this.ordinancesService.list().subscribe((data) => this.ordinances.set(data));
-    this.barangaysService.list().subscribe((data) => this.barangays.set(data));
+    this.searchViolators('');
+    this.ordinancesService.list().subscribe((data) => this.ordinances.set([...data].sort((a, b) => a.shortName.localeCompare(b.shortName))));
+    this.barangaysService.list().subscribe((data) => this.barangays.set([...data].sort((a, b) => a.name.localeCompare(b.name))));
     this.refresh();
+  }
+
+  violatorOptions = computed<SelectOption[]>(() =>
+    this.violators().map((v) => ({
+      value: v.violatorId,
+      label: `${v.lastName}, ${v.firstName}${v.middleName ? ' ' + v.middleName : ''}${v.barangayName ? ' — ' + v.barangayName : ''}`,
+    })),
+  );
+
+  /** Loads the violators matching what was typed into the selector. */
+  searchViolators(term: string): void {
+    this.violatorsService.search(term || undefined, 1, 20).subscribe((res) => this.violators.set(res.items));
   }
 
   onPageSizeChange(size: number): void {
