@@ -1,5 +1,5 @@
 <div
-  class="w-[264px] shrink-0 h-screen fixed inset-y-0 left-0 z-40 bg-[#12233f] flex flex-col p-[18px] pt-[26px] gap-1.5 overflow-y-auto font-inter transition-transform duration-200 md:sticky md:top-0 md:translate-x-0 md:z-auto"
+  class="w-[264px] shrink-0 h-screen fixed inset-y-0 left-0 z-40 bg-[#12233f] flex flex-col p-[18px] pt-[26px] gap-1.5 overflow-hidden font-inter transition-transform duration-200 md:sticky md:top-0 md:translate-x-0 md:z-auto"
   [class.translate-x-0]="sidebarService.isOpen()"
   [class.-translate-x-full]="!sidebarService.isOpen()">
 
@@ -17,8 +17,7 @@
     </button>
   </div>
 
-  <!-- Overview -->
-  <div class="text-[11px] font-bold tracking-[0.06em] uppercase text-[#8a9bb8] px-2.5 pt-[10px] pb-1">Overview</div>
+  <!-- Dashboard -->
   <a routerLink="/" routerLinkActive="bg-[#1e3a63] text-white" [routerLinkActiveOptions]="{ exact: true }" (click)="onNavigate()"
     class="flex items-center gap-3 px-3 py-[10px] rounded-[10px] text-[14px] font-semibold text-[#c4cfe0]">
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1" /><rect x="14" y="3" width="7" height="5" rx="1" /><rect x="14" y="12" width="7" height="9" rx="1" /><rect x="3" y="16" width="7" height="5" rx="1" /></svg>
@@ -26,7 +25,12 @@
   </a>
 
   <!-- Records -->
-  <div class="text-[11px] font-bold tracking-[0.06em] uppercase text-[#8a9bb8] px-2.5 pt-[14px] pb-1">Records</div>
+  <button type="button" (click)="toggleGroup('records')" [attr.aria-expanded]="openGroup() === 'records'"
+    class="w-full flex items-center justify-between text-[11px] font-bold tracking-[0.06em] uppercase text-[#8a9bb8] hover:text-white px-2.5 pt-[14px] pb-1">
+    Records
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="transition-transform" [class.rotate-180]="openGroup() === 'records'"><path d="m6 9 6 6 6-6"/></svg>
+  </button>
+  @if (openGroup() === 'records') {
   @if (!authService.isApprehendingOfficer()) {
   <a routerLink="/barangays" routerLinkActive="bg-[#1e3a63] text-white" (click)="onNavigate()"
     class="flex items-center gap-3 px-3 py-[10px] rounded-[10px] text-[14px] font-semibold text-[#c4cfe0]">
@@ -51,9 +55,15 @@
     Verify
   </a>
   }
+  }
 
   <!-- Enforcement -->
-  <div class="text-[11px] font-bold tracking-[0.06em] uppercase text-[#8a9bb8] px-2.5 pt-[14px] pb-1">Enforcement</div>
+  <button type="button" (click)="toggleGroup('enforcement')" [attr.aria-expanded]="openGroup() === 'enforcement'"
+    class="w-full flex items-center justify-between text-[11px] font-bold tracking-[0.06em] uppercase text-[#8a9bb8] hover:text-white px-2.5 pt-[14px] pb-1">
+    Enforcement
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="transition-transform" [class.rotate-180]="openGroup() === 'enforcement'"><path d="m6 9 6 6 6-6"/></svg>
+  </button>
+  @if (openGroup() === 'enforcement') {
   <a routerLink="/violations" routerLinkActive="bg-[#1e3a63] text-white" (click)="onNavigate()"
     class="flex items-center gap-3 px-3 py-[10px] rounded-[10px] text-[14px] font-semibold text-[#c4cfe0]">
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><path d="M12 9v4M12 17h.01" /></svg>
@@ -73,10 +83,16 @@
     Payments
   </a>
   }
+  }
 
   <!-- Compliance -->
   @if (!authService.isApprehendingOfficer()) {
-  <div class="text-[11px] font-bold tracking-[0.06em] uppercase text-[#8a9bb8] px-2.5 pt-[14px] pb-1">Compliance</div>
+  <button type="button" (click)="toggleGroup('compliance')" [attr.aria-expanded]="openGroup() === 'compliance'"
+    class="w-full flex items-center justify-between text-[11px] font-bold tracking-[0.06em] uppercase text-[#8a9bb8] hover:text-white px-2.5 pt-[14px] pb-1">
+    Compliance
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="transition-transform" [class.rotate-180]="openGroup() === 'compliance'"><path d="m6 9 6 6 6-6"/></svg>
+  </button>
+  @if (openGroup() === 'compliance') {
   <a routerLink="/seminar-records" routerLinkActive="bg-[#1e3a63] text-white" (click)="onNavigate()"
     class="flex items-center gap-3 px-3 py-[10px] rounded-[10px] text-[14px] font-semibold text-[#c4cfe0]">
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5-10-5z" /><path d="M6 12v5c3 3 9 3 12 0v-5" /></svg>
@@ -93,20 +109,32 @@
     Community Service
   </a>
   }
+  }
 
   <!-- Reports -->
   @if (authService.canApprove()) {
-  <div class="text-[11px] font-bold tracking-[0.06em] uppercase text-[#8a9bb8] px-2.5 pt-[14px] pb-1">Reports</div>
+  <button type="button" (click)="toggleGroup('reports')" [attr.aria-expanded]="openGroup() === 'reports'"
+    class="w-full flex items-center justify-between text-[11px] font-bold tracking-[0.06em] uppercase text-[#8a9bb8] hover:text-white px-2.5 pt-[14px] pb-1">
+    Reports
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="transition-transform" [class.rotate-180]="openGroup() === 'reports'"><path d="m6 9 6 6 6-6"/></svg>
+  </button>
+  @if (openGroup() === 'reports') {
   <a routerLink="/reports" routerLinkActive="bg-[#1e3a63] text-white" (click)="onNavigate()"
     class="flex items-center gap-3 px-3 py-[10px] rounded-[10px] text-[14px] font-semibold text-[#c4cfe0]">
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18" /><path d="M7 15l3-4 3 2 4-6" /></svg>
     Reports
   </a>
   }
+  }
 
   <!-- Administration -->
   @if (authService.canManageUsers()) {
-  <div class="text-[11px] font-bold tracking-[0.06em] uppercase text-[#8a9bb8] px-2.5 pt-[14px] pb-1">Administration</div>
+  <button type="button" (click)="toggleGroup('administration')" [attr.aria-expanded]="openGroup() === 'administration'"
+    class="w-full flex items-center justify-between text-[11px] font-bold tracking-[0.06em] uppercase text-[#8a9bb8] hover:text-white px-2.5 pt-[14px] pb-1">
+    Administration
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="transition-transform" [class.rotate-180]="openGroup() === 'administration'"><path d="m6 9 6 6 6-6"/></svg>
+  </button>
+  @if (openGroup() === 'administration') {
   <a routerLink="/users" routerLinkActive="bg-[#1e3a63] text-white" (click)="onNavigate()"
     class="flex items-center gap-3 px-3 py-[10px] rounded-[10px] text-[14px] font-semibold text-[#c4cfe0]">
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-8h-6M20 10V7" /></svg>
@@ -117,6 +145,7 @@
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>
     System Maintenance
   </a>
+  }
   }
 
   <!-- Profile -->
