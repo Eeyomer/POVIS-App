@@ -266,7 +266,7 @@
       <div class="flex items-center gap-4 shrink-0">
         <button type="button" (click)="previewForm('pledge-of-commitment', 'Pledge of Commitment')" [disabled]="previewingForm() === 'pledge-of-commitment'"
           class="text-[13px] font-semibold text-[#7a889c] hover:text-[#1e3a63] disabled:opacity-50">
-          {{ previewingForm() === 'pledge-of-commitment' ? 'Opening...' : 'Overview' }}
+          {{ previewingForm() === 'pledge-of-commitment' ? 'Opening...' : 'Preview' }}
         </button>
         <a href="templates/pledge-of-commitment.docx" download="Pledge of Commitment (English and Tagalog).docx" class="text-[13px] font-semibold text-[#1e3a63] hover:underline">Download</a>
       </div>
@@ -279,7 +279,7 @@
       <div class="flex items-center gap-4 shrink-0">
         <button type="button" (click)="previewForm('general-instruction', 'General Instruction')" [disabled]="previewingForm() === 'general-instruction'"
           class="text-[13px] font-semibold text-[#7a889c] hover:text-[#1e3a63] disabled:opacity-50">
-          {{ previewingForm() === 'general-instruction' ? 'Opening...' : 'Overview' }}
+          {{ previewingForm() === 'general-instruction' ? 'Opening...' : 'Preview' }}
         </button>
         <a href="templates/general-instruction.docx" download="General Instruction (English and Tagalog).docx" class="text-[13px] font-semibold text-[#1e3a63] hover:underline">Download</a>
       </div>
