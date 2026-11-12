@@ -10,13 +10,15 @@ import { AuthService } from '../../core/services/auth-service';
 import { Pagination } from '../../shared/components/pagination/pagination';
 import { BulkUpload } from '../../shared/components/bulk-upload/bulk-upload';
 import { PaymentDTO, ViolationDTO } from '../../core/models/app-dto';
+import { DocumentService, GeneratedDocument } from '../../core/services/document-service';
+import { DocPreview } from '../../shared/components/doc-preview/doc-preview';
 import { ToastService } from '../../shared/toast/toast-service';
 
 import { SearchSelect, SelectOption } from '../../shared/components/search-select/search-select';
 
 @Component({
   selector: 'app-payments',
-  imports: [SkeletonRows, CommonModule, ReactiveFormsModule, BulkUpload, Pagination, FormPanel, SearchSelect],
+  imports: [SkeletonRows, CommonModule, ReactiveFormsModule, BulkUpload, Pagination, FormPanel, SearchSelect, DocPreview],
   templateUrl: './payments.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -27,6 +29,9 @@ export class Payments implements OnInit {
   page = signal(1);
   pageSize = 20;
   violations = signal<ViolationDTO[]>([]);
+
+  preview = signal<GeneratedDocument | null>(null);
+  generatingId = signal<string | null>(null);
 
   showForm = signal(false);
   editing = signal<PaymentDTO | null>(null);
@@ -47,7 +52,28 @@ export class Payments implements OnInit {
     private violationsService: ViolationsService,
     public authService: AuthService,
     private toast: ToastService,
+    private documents: DocumentService,
   ) {}
+
+  /** Certification of Compliance and Closure for a paid violation. */
+  previewClosure(item: PaymentDTO): void {
+    this.generatingId.set(item.paymentId);
+    this.documents.closure(item).then(
+      (doc) => {
+        this.generatingId.set(null);
+        this.preview.set(doc);
+      },
+      (err: Error) => {
+        this.generatingId.set(null);
+        this.toast.error(err.message);
+      },
+    );
+  }
+
+  downloadPreviewed(): void {
+    const doc = this.preview();
+    if (doc) this.documents.download(doc);
+  }
 
   ngOnInit(): void {
     this.searchViolations('');

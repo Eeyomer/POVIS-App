@@ -79,6 +79,9 @@
           <td class="px-4 py-3">₱{{ p.amount }}</td>
           <td class="px-4 py-3">{{ p.receiptNumber ?? '—' }}</td>
           <td class="px-4 py-3 text-right">
+            <button type="button" (click)="previewClosure(p)" [disabled]="generatingId() === p.paymentId"
+              title="Certification of Compliance and Closure"
+              class="text-[#7a889c] font-semibold mr-3 disabled:opacity-50">Closure</button>
             @if (authService.canApprove()) {
             <button type="button" (click)="openEdit(p)" class="text-[#1e3a63] font-semibold mr-3">Edit</button>
             }
@@ -94,6 +97,9 @@
       }
     </table>
   </div>
+  @if (preview(); as doc) {
+    <app-doc-preview [document]="doc" (closed)="preview.set(null)" (downloaded)="downloadPreviewed()" />
+  }
   <app-pagination [page]="page()" [pageSize]="pageSize" [total]="totalCount()" (pageChange)="onPageChange($event)"
     (pageSizeChange)="onPageSizeChange($event)" />
 </div>

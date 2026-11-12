@@ -1,6 +1,9 @@
 import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Skeleton } from '../../shared/components/skeleton/skeleton';
+import { DocumentService, GeneratedDocument } from '../../core/services/document-service';
+import { DocPreview } from '../../shared/components/doc-preview/doc-preview';
+import { ToastService } from '../../shared/toast/toast-service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { finalize, forkJoin } from 'rxjs';
 import { BarangaysService } from '../../core/services/barangays-service';
@@ -13,7 +16,7 @@ import { DashboardSummary } from '../../core/models/app-dto';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule, Skeleton],
+  imports: [CommonModule, Skeleton, DocPreview],
   templateUrl: './dashboard.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -35,8 +38,13 @@ export class Dashboard implements OnInit {
   readonly mapLink = 'https://www.google.com/maps/search/?api=1&query=' +
     encodeURIComponent('Pasig City Traffic and Parking Management Office, F. Manalo St, Sto. Tomas, Pasig City');
 
+  preview = signal<GeneratedDocument | null>(null);
+  previewingForm = signal<string | null>(null);
+
   constructor(
     sanitizer: DomSanitizer,
+    private documents: DocumentService,
+    private toast: ToastService,
     public authService: AuthService,
     private reportsService: ReportsService,
     private barangaysService: BarangaysService,
@@ -48,6 +56,26 @@ export class Dashboard implements OnInit {
     this.mapUrl = sanitizer.bypassSecurityTrustResourceUrl(
       `https://www.google.com/maps?q=${encodeURIComponent(query)}&output=embed`,
     );
+  }
+
+  /** Opens a blank form template in the preview modal. */
+  previewForm(file: string, title: string): void {
+    this.previewingForm.set(file);
+    this.documents.template(file, title).then(
+      (doc) => {
+        this.previewingForm.set(null);
+        this.preview.set(doc);
+      },
+      (err: Error) => {
+        this.previewingForm.set(null);
+        this.toast.error(err.message);
+      },
+    );
+  }
+
+  downloadPreviewed(): void {
+    const doc = this.preview();
+    if (doc) this.documents.download(doc);
   }
 
   ngOnInit(): void {

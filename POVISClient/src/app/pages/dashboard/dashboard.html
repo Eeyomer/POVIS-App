@@ -258,21 +258,34 @@
 
   <h2 class="font-poppins font-bold text-[16px] text-[#152238] mt-8 mb-3">Downloadable Forms</h2>
   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-    <a href="templates/pledge-of-commitment.docx" download="Pledge of Commitment (English and Tagalog).docx"
-      class="bg-white rounded-2xl shadow-sm p-5 flex items-center justify-between gap-4 hover:bg-[#f3f5f8]">
+    <div class="bg-white rounded-2xl shadow-sm p-5 flex items-center justify-between gap-4">
       <div>
         <div class="text-[14px] font-semibold text-[#152238]">Pledge of Commitment</div>
         <div class="text-[12px] text-[#7a889c] mt-0.5">English and Tagalog (.docx)</div>
       </div>
-      <span class="text-[13px] font-semibold text-[#1e3a63]">Download</span>
-    </a>
-    <a href="templates/general-instruction.docx" download="General Instruction (English and Tagalog).docx"
-      class="bg-white rounded-2xl shadow-sm p-5 flex items-center justify-between gap-4 hover:bg-[#f3f5f8]">
+      <div class="flex items-center gap-4 shrink-0">
+        <button type="button" (click)="previewForm('pledge-of-commitment', 'Pledge of Commitment')" [disabled]="previewingForm() === 'pledge-of-commitment'"
+          class="text-[13px] font-semibold text-[#7a889c] hover:text-[#1e3a63] disabled:opacity-50">
+          {{ previewingForm() === 'pledge-of-commitment' ? 'Opening...' : 'Overview' }}
+        </button>
+        <a href="templates/pledge-of-commitment.docx" download="Pledge of Commitment (English and Tagalog).docx" class="text-[13px] font-semibold text-[#1e3a63] hover:underline">Download</a>
+      </div>
+    </div>
+    <div class="bg-white rounded-2xl shadow-sm p-5 flex items-center justify-between gap-4">
       <div>
         <div class="text-[14px] font-semibold text-[#152238]">General Instruction</div>
         <div class="text-[12px] text-[#7a889c] mt-0.5">English and Tagalog (.docx)</div>
       </div>
-      <span class="text-[13px] font-semibold text-[#1e3a63]">Download</span>
-    </a>
+      <div class="flex items-center gap-4 shrink-0">
+        <button type="button" (click)="previewForm('general-instruction', 'General Instruction')" [disabled]="previewingForm() === 'general-instruction'"
+          class="text-[13px] font-semibold text-[#7a889c] hover:text-[#1e3a63] disabled:opacity-50">
+          {{ previewingForm() === 'general-instruction' ? 'Opening...' : 'Overview' }}
+        </button>
+        <a href="templates/general-instruction.docx" download="General Instruction (English and Tagalog).docx" class="text-[13px] font-semibold text-[#1e3a63] hover:underline">Download</a>
+      </div>
+    </div>
   </div>
+  @if (preview(); as doc) {
+  <app-doc-preview [document]="doc" (closed)="preview.set(null)" (downloaded)="downloadPreviewed()" />
+  }
 </div>

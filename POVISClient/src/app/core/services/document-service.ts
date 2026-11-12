@@ -78,6 +78,13 @@ export class DocumentService {
     }));
   }
 
+  /** A blank form template (e.g. the Pledge of Commitment), unfilled, so it can be previewed as-is. */
+  async template(file: string, title: string): Promise<GeneratedDocument> {
+    const response = await fetch(`templates/${file}.docx`);
+    if (!response.ok) throw new Error('The document template could not be loaded.');
+    return { blob: await response.blob(), title, fileName: `${title}.docx` };
+  }
+
   download(doc: GeneratedDocument): void {
     const url = URL.createObjectURL(doc.blob);
     const a = document.createElement('a');
