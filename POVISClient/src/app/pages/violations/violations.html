@@ -31,7 +31,7 @@
 
   @if (showForm()) {
   <app-form-panel (dismissed)="cancel()">
-    <h2 class="text-[15px] font-semibold text-[#152238] mb-4">{{ editing() ? 'Edit' : 'Record' }} Violation</h2>
+    <h2 class="text-[15px] font-semibold text-[#152238] mb-4">{{ viewOnly() ? 'View' : editing() ? 'Edit' : 'Record' }} Violation</h2>
     <form [formGroup]="form" (ngSubmit)="save()" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       @if (!editing()) {
       <div>
@@ -147,11 +147,13 @@
             <button type="button" (click)="previewImage.set(e.data)" title="View">
               <img [src]="e.data" alt="Evidence {{ $index + 1 }}" class="w-24 h-24 object-cover rounded-lg border border-[#d3dae5]" />
             </button>
+            @if (!viewOnly()) {
             <button type="button" (click)="removeEvidence($index)" title="Remove"
               class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-500 text-white text-[13px] leading-none flex items-center justify-center">&times;</button>
+            }
           </div>
           }
-          @if (evidence().length < maxEvidence) {
+          @if (evidence().length < maxEvidence && !viewOnly()) {
           <label class="w-24 h-24 rounded-lg border-2 border-dashed border-[#d3dae5] text-[#7a889c] text-[12px] font-semibold flex flex-col items-center justify-center cursor-pointer hover:bg-[#f3f5f8]">
             <span class="text-[22px] leading-none">+</span>
             Add photo
@@ -162,8 +164,10 @@
       </div>
 
       <div class="sm:col-span-3 flex gap-3">
+        @if (!viewOnly()) {
         <button type="submit" class="px-4 py-2 rounded-lg bg-[#1e3a63] text-white text-[13px] font-semibold">Save</button>
-        <button type="button" (click)="cancel()" class="px-4 py-2 rounded-lg border border-[#d3dae5] text-[13px] font-semibold text-[#152238]">Cancel</button>
+        }
+        <button type="button" (click)="cancel()" class="px-4 py-2 rounded-lg border border-[#d3dae5] text-[13px] font-semibold text-[#152238]">{{ viewOnly() ? 'Close' : 'Cancel' }}</button>
       </div>
     </form>
   </app-form-panel>
@@ -209,7 +213,7 @@
             <button type="button" (click)="toggleReviewed(v)" class="text-[#1e3a63] font-semibold mr-3">
               {{ v.isReviewed ? 'Unreview' : 'Approve' }}
             </button>
-            <button type="button" (click)="openEdit(v)" class="text-[#1e3a63] font-semibold mr-3">Edit</button>
+            <button type="button" (click)="openEdit(v)" class="text-[#1e3a63] font-semibold mr-3">{{ v.isReviewed ? 'View' : 'Edit' }}</button>
             }
             @if (authService.canDelete()) {
             <button type="button" (click)="remove(v)" class="text-red-500 font-semibold">Archive</button>

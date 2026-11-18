@@ -240,6 +240,8 @@ export class Violations implements OnInit {
   }
 
   openAdd(): void {
+    this.viewOnly.set(false);
+    this.form.enable({ emitEvent: false });
     this.editing.set(null);
     this.resetEvidence();
     this.selectedOrdinanceDetail.set(null);
@@ -247,7 +249,12 @@ export class Violations implements OnInit {
     this.showForm.set(true);
   }
 
+  /** Approved violations open read-only. */
+  viewOnly = signal(false);
+
   openEdit(violation: ViolationDTO): void {
+    this.viewOnly.set(violation.isReviewed);
+    this.form.enable({ emitEvent: false });
     this.editing.set(violation);
     this.resetEvidence();
     // The list does not carry the photos; load them with the full record.
@@ -275,6 +282,7 @@ export class Violations implements OnInit {
       remarks: violation.remarks ?? '',
       remarks2: violation.remarks2 ?? '',
     });
+    if (violation.isReviewed) this.form.disable({ emitEvent: false });
     this.showForm.set(true);
   }
 

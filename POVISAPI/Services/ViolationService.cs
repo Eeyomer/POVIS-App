@@ -240,6 +240,8 @@ namespace POVISAPI.Services
         public async Task<ViolationDTO> UpdateAsync(UpdateViolationDTO dto)
         {
             var entity = await GetTrackedViolation(dto.ViolationId);
+            if (entity.IsReviewed)
+                throw new InvalidOperationException("An approved violation cannot be edited. Unreview it first.");
 
             Guid? ordinanceSectionId = null;
             if (!string.IsNullOrWhiteSpace(dto.OrdinanceSectionId))
