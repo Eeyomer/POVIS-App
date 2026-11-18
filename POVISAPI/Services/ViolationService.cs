@@ -311,7 +311,7 @@ namespace POVISAPI.Services
         public async Task DeleteAsync(string id)
         {
             var entity = await GetTrackedViolation(id);
-            dbContext.Violations.Remove(entity);
+            entity.IsArchived = true; entity.ArchivedAt = DateTime.UtcNow;
             await dbContext.SaveChangesAsync();
         }
 

@@ -161,10 +161,10 @@ export class SeminarRecords implements OnInit {
   }
 
   remove(item: SeminarRecordDTO): void {
-    if (!confirm(`Delete seminar record for ${item.ovrNumber}?`)) return;
+    if (!confirm(`Archive seminar record for ${item.ovrNumber}?`)) return;
     this.recordsService.remove(item.seminarRecordId).subscribe({
       next: () => {
-        this.toast.success('Seminar record deleted.');
+        this.toast.success('Seminar record archived.');
         this.refresh();
       },
       error: (err) => this.toast.error(err.message),

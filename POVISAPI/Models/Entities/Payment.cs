@@ -6,8 +6,11 @@ namespace POVISAPI.Models.Entity;
 /// dual-violation tickets (e.g. ₱3,300 = smoking + littering) stay as one payment
 /// against a single OVR, with the breakdown noted in Remarks.
 /// </summary>
-public class Payment : BaseEntity
+public class Payment : BaseEntity, IArchivable
 {
+    public bool IsArchived { get; set; }
+    public DateTime? ArchivedAt { get; set; }
+
     public Guid ViolationId { get; set; }
     public Violation Violation { get; set; } = null!;
 

@@ -7,8 +7,11 @@ namespace POVISAPI.Models.Entity;
 /// Source: FILED CASE sheet — batches dated per filing (e.g. "FILED CASE – June 22, 2026"),
 /// with REMARKS/NPS DOCKET NUMBER, STATUS, and DISMISSED columns.
 /// </summary>
-public class FiledCase : BaseEntity
+public class FiledCase : BaseEntity, IArchivable
 {
+    public bool IsArchived { get; set; }
+    public DateTime? ArchivedAt { get; set; }
+
     public Guid ViolationId { get; set; }
     public Violation Violation { get; set; } = null!;
 

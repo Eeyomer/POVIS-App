@@ -9,8 +9,11 @@ namespace POVISAPI.Models.Entity;
 /// PAID, seminar, community service, counseling, and filed-case sheets hang
 /// off this entity as child records.
 /// </summary>
-public class Violation : BaseEntity
+public class Violation : BaseEntity, IArchivable
 {
+    public bool IsArchived { get; set; }
+    public DateTime? ArchivedAt { get; set; }
+
     public Guid ViolatorId { get; set; }
     public Violator Violator { get; set; } = null!;
 

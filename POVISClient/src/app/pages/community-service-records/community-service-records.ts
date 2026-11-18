@@ -165,10 +165,10 @@ export class CommunityServiceRecords implements OnInit {
   }
 
   remove(item: CommunityServiceDTO): void {
-    if (!confirm(`Delete community service record for ${item.ovrNumber}?`)) return;
+    if (!confirm(`Archive community service record for ${item.ovrNumber}?`)) return;
     this.recordsService.remove(item.communityServiceRecordId).subscribe({
       next: () => {
-        this.toast.success('Community service record deleted.');
+        this.toast.success('Community service record archived.');
         this.refresh();
       },
       error: (err) => this.toast.error(err.message),

@@ -48,6 +48,15 @@ public class AppDbContext : DbContext
             }
         }
 
+        // Archived records are hidden unless explicitly requested.
+        modelBuilder.Entity<Violation>().HasQueryFilter(x => !x.IsArchived);
+        modelBuilder.Entity<SeminarRecord>().HasQueryFilter(x => !x.IsArchived);
+        modelBuilder.Entity<CounselingRecord>().HasQueryFilter(x => !x.IsArchived);
+        modelBuilder.Entity<CommunityServiceRecord>().HasQueryFilter(x => !x.IsArchived);
+        modelBuilder.Entity<FiledCase>().HasQueryFilter(x => !x.IsArchived);
+        modelBuilder.Entity<Payment>().HasQueryFilter(x => !x.IsArchived);
+        modelBuilder.Entity<ViolationEvidence>().HasQueryFilter(x => !x.Violation.IsArchived);
+
         // ================= Barangay =================
         modelBuilder.Entity<Barangay>(e =>
         {

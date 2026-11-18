@@ -345,10 +345,10 @@ export class Violations implements OnInit {
   }
 
   remove(violation: ViolationDTO): void {
-    if (!confirm(`Delete violation ${violation.ovrNumber}?`)) return;
+    if (!confirm(`Archive violation ${violation.ovrNumber}?`)) return;
     this.violationsService.remove(violation.violationId).subscribe({
       next: () => {
-        this.toast.success('Violation deleted.');
+        this.toast.success('Violation archived.');
         this.refresh();
       },
       error: (err) => this.toast.error(err.message),

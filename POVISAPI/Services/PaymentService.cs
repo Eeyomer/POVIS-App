@@ -125,7 +125,7 @@ namespace POVISAPI.Services
         {
             var entity = await GetTrackedPayment(id);
             entity.Violation.Status = ViolationStatus.Pending;
-            dbContext.Payments.Remove(entity);
+            entity.IsArchived = true; entity.ArchivedAt = DateTime.UtcNow;
             await dbContext.SaveChangesAsync();
         }
 

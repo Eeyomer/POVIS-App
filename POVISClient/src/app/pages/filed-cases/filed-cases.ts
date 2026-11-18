@@ -154,10 +154,10 @@ export class FiledCases implements OnInit {
   }
 
   remove(item: FiledCaseDTO): void {
-    if (!confirm(`Delete filed case for ${item.ovrNumber}?`)) return;
+    if (!confirm(`Archive filed case for ${item.ovrNumber}?`)) return;
     this.filedCasesService.remove(item.filedCaseId).subscribe({
       next: () => {
-        this.toast.success('Filed case deleted.');
+        this.toast.success('Filed case archived.');
         this.refresh();
       },
       error: (err) => this.toast.error(err.message),

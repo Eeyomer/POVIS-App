@@ -241,18 +241,38 @@
   }
   }
 
-  <h2 class="font-poppins font-bold text-[16px] text-[#152238] mt-8 mb-3">Office Location</h2>
-  <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-    <iframe [src]="mapUrl" title="Pasig City Traffic and Parking Management Office - Google Maps"
-      class="w-full h-[320px] sm:h-[400px] border-0" loading="lazy" allowfullscreen
-      referrerpolicy="no-referrer-when-downgrade"></iframe>
-    <div class="p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-      <div>
-        <div class="text-[14px] font-semibold text-[#152238]">Pasig City Traffic and Parking Management Office</div>
-        <div class="text-[12px] text-[#7a889c] mt-0.5">{{ officeAddress }}</div>
+  <div class="grid grid-cols-1 lg:grid-cols-5 gap-4 mt-8 items-start">
+    <div class="lg:col-span-2">
+      <h2 class="font-poppins font-bold text-[16px] text-[#152238] mb-3">Office Location</h2>
+      <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+        <iframe [src]="mapUrl" title="Pasig City Traffic and Parking Management Office - Google Maps"
+          class="w-full h-[220px] border-0" loading="lazy" allowfullscreen
+          referrerpolicy="no-referrer-when-downgrade"></iframe>
+        <div class="p-4 flex flex-col gap-2">
+          <div>
+            <div class="text-[13px] font-semibold text-[#152238]">Pasig City Traffic and Parking Management Office</div>
+            <div class="text-[12px] text-[#7a889c] mt-0.5">{{ officeAddress }}</div>
+          </div>
+          <a [href]="mapLink" target="_blank" rel="noopener noreferrer"
+            class="text-[13px] font-semibold text-[#1e3a63] hover:underline">Open in Google Maps</a>
+        </div>
       </div>
-      <a [href]="mapLink" target="_blank" rel="noopener noreferrer"
-        class="text-[13px] font-semibold text-[#1e3a63] hover:underline">Open in Google Maps</a>
+    </div>
+
+    <div class="lg:col-span-3">
+      <h2 class="font-poppins font-bold text-[16px] text-[#152238] mb-3">Mission &amp; Vision</h2>
+      <div class="bg-white rounded-2xl shadow-sm p-5 flex flex-col gap-4 text-[13px] text-[#152238] leading-relaxed">
+        <section>
+          <h3 class="font-bold">Mission</h3>
+          <p class="mt-1">A strong and determined and highly DEPENDABLE DEPARTMENT committed to capacitate and nurture local government units, public and safety institutions, to sustain pleasant, intensifying, and adaptable communities where people live peacefully.</p>
+          <p class="mt-2 text-[#4a5a72]"><span class="font-semibold">Misyon:</span> Ang Peace and Order Department (POD) ay isang matatag, determinado, at maaasahang departamento na nakatuon sa pagpapalakas ng kakayahan at pagpapaunlad ng mga yunit ng lokal na pamahalaan at mga institusyong pangkaligtasan at pangseguridad. Layunin nitong mapanatili ang kaaya-aya, ligtas, at mapayapang pamayanan na may kakayahang umangkop sa mga pagbabago, kung saan ang bawat mamamayan ay namumuhay nang may kapayapaan.</p>
+        </section>
+        <section>
+          <h3 class="font-bold">Vision</h3>
+          <p class="mt-1">Peace and Order Department is one that promotes and sustains an environment of peace, security and community living in an aspect of peace and quietude, free menaces of lawless components through unity and intelligence to acclaim associated agencies in the effective enforcement of laws and ordinances.</p>
+          <p class="mt-2 text-[#4a5a72]"><span class="font-semibold">Bisyon:</span> Ang Peace and Order Department (POD) ay naglalayong itaguyod at mapanatili ang isang pamayanang may kapayapaan, seguridad, at maayos na pamumuhay, na malaya sa mga banta ng kaguluhan at pag-labag sa batas. Sa pamamagitan ng pagkakaisa, mahusay na koordinasyon, at pakikipagtulungan sa mga kaugnay na ahensya, nilalayon nitong maisakatuparan ang epektibong pagpapatupad ng mga batas at ordinansa.</p>
+        </section>
+      </div>
     </div>
   </div>
 

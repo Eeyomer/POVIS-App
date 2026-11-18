@@ -75,6 +75,9 @@ namespace POVISAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime?>("ArchivedAt")
+                        .HasColumnType("timestamp without time zone");
+
                     b.Property<string>("AssignedLocation")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
@@ -84,6 +87,9 @@ namespace POVISAPI.Migrations
 
                     b.Property<DateOnly?>("DateCompleted")
                         .HasColumnType("date");
+
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Remarks")
                         .HasMaxLength(500)
@@ -123,6 +129,9 @@ namespace POVISAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime?>("ArchivedAt")
+                        .HasColumnType("timestamp without time zone");
+
                     b.Property<string>("ConductedBy")
                         .HasMaxLength(150)
                         .HasColumnType("character varying(150)");
@@ -136,6 +145,9 @@ namespace POVISAPI.Migrations
                     b.Property<string>("InterventionType")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
+
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("ParentOrGuardianPresent")
                         .HasColumnType("boolean");
@@ -171,6 +183,9 @@ namespace POVISAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime?>("ArchivedAt")
+                        .HasColumnType("timestamp without time zone");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp without time zone");
 
@@ -179,6 +194,9 @@ namespace POVISAPI.Migrations
 
                     b.Property<DateOnly?>("DateResolved")
                         .HasColumnType("date");
+
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("NpsDocketNumber")
                         .HasMaxLength(50)
@@ -371,11 +389,17 @@ namespace POVISAPI.Migrations
                         .HasPrecision(10, 2)
                         .HasColumnType("numeric(10,2)");
 
+                    b.Property<DateTime?>("ArchivedAt")
+                        .HasColumnType("timestamp without time zone");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<DateOnly>("DateOfPayment")
                         .HasColumnType("date");
+
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("PaidAt")
                         .HasMaxLength(100)
@@ -411,11 +435,17 @@ namespace POVISAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime?>("ArchivedAt")
+                        .HasColumnType("timestamp without time zone");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<DateOnly?>("DateCompleted")
                         .HasColumnType("date");
+
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Remarks")
                         .HasMaxLength(500)
@@ -584,6 +614,9 @@ namespace POVISAPI.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
+                    b.Property<DateTime?>("ArchivedAt")
+                        .HasColumnType("timestamp without time zone");
+
                     b.Property<Guid?>("BarangayOfOccurrenceId")
                         .HasColumnType("uuid");
 
@@ -600,6 +633,9 @@ namespace POVISAPI.Migrations
                         .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("character varying(30)");
+
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsReviewed")
                         .HasColumnType("boolean");

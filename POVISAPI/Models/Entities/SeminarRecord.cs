@@ -8,8 +8,11 @@ namespace POVISAPI.Models.Entity;
 /// also record the solid-waste seminar required by Ord. 01 S.2018.
 /// Key columns: CENRO SEMINAR SCHEDULE, COMPLETED CESSATION SEMINAR.
 /// </summary>
-public class SeminarRecord : BaseEntity
+public class SeminarRecord : BaseEntity, IArchivable
 {
+    public bool IsArchived { get; set; }
+    public DateTime? ArchivedAt { get; set; }
+
     public Guid ViolationId { get; set; }
     public Violation Violation { get; set; } = null!;
 

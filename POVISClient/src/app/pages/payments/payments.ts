@@ -179,10 +179,10 @@ export class Payments implements OnInit {
   }
 
   remove(item: PaymentDTO): void {
-    if (!confirm(`Void payment for ${item.ovrNumber}?`)) return;
+    if (!confirm(`Archive payment for ${item.ovrNumber}?`)) return;
     this.paymentsService.remove(item.paymentId).subscribe({
       next: () => {
-        this.toast.success('Payment voided.');
+        this.toast.success('Payment archived.');
         this.refresh();
       },
       error: (err) => this.toast.error(err.message),

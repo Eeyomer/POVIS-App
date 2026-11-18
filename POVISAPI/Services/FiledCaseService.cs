@@ -117,7 +117,7 @@ namespace POVISAPI.Services
         {
             var entity = await GetTrackedFiledCase(id);
             entity.Violation.Status = ViolationStatus.Pending;
-            dbContext.FiledCases.Remove(entity);
+            entity.IsArchived = true; entity.ArchivedAt = DateTime.UtcNow;
             await dbContext.SaveChangesAsync();
         }
 

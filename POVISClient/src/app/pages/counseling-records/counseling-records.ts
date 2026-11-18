@@ -165,10 +165,10 @@ export class CounselingRecords implements OnInit {
   }
 
   remove(item: CounselingDTO): void {
-    if (!confirm(`Delete counseling record for ${item.ovrNumber}?`)) return;
+    if (!confirm(`Archive counseling record for ${item.ovrNumber}?`)) return;
     this.recordsService.remove(item.counselingRecordId).subscribe({
       next: () => {
-        this.toast.success('Counseling record deleted.');
+        this.toast.success('Counseling record archived.');
         this.refresh();
       },
       error: (err) => this.toast.error(err.message),

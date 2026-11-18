@@ -7,8 +7,11 @@ namespace POVISAPI.Models.Entity;
 /// 4/8/16 hours; Ord. 07 S.2019 3rd offense prescribes 15 days).
 /// Source: COMMUNITY SERVICE sheet (same base columns + STATUS).
 /// </summary>
-public class CommunityServiceRecord : BaseEntity
+public class CommunityServiceRecord : BaseEntity, IArchivable
 {
+    public bool IsArchived { get; set; }
+    public DateTime? ArchivedAt { get; set; }
+
     public Guid ViolationId { get; set; }
     public Violation Violation { get; set; } = null!;
 

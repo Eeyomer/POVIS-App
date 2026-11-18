@@ -8,8 +8,11 @@ namespace POVISAPI.Models.Entity;
 /// are stored as Violations; this child record tracks the counseling itself
 /// (the MONTHLY report counts "17 For Counseling (PENDING)").
 /// </summary>
-public class CounselingRecord : BaseEntity
+public class CounselingRecord : BaseEntity, IArchivable
 {
+    public bool IsArchived { get; set; }
+    public DateTime? ArchivedAt { get; set; }
+
     public Guid ViolationId { get; set; }
     public Violation Violation { get; set; } = null!;
 

@@ -110,7 +110,7 @@ namespace POVISAPI.Services
         public async Task DeleteAsync(string id)
         {
             var entity = await GetTrackedRecord(id);
-            dbContext.SeminarRecords.Remove(entity);
+            entity.IsArchived = true; entity.ArchivedAt = DateTime.UtcNow;
             await dbContext.SaveChangesAsync();
         }
 
@@ -232,7 +232,7 @@ namespace POVISAPI.Services
         public async Task DeleteAsync(string id)
         {
             var entity = await GetTrackedRecord(id);
-            dbContext.CommunityServiceRecords.Remove(entity);
+            entity.IsArchived = true; entity.ArchivedAt = DateTime.UtcNow;
             await dbContext.SaveChangesAsync();
         }
 
@@ -354,7 +354,7 @@ namespace POVISAPI.Services
         public async Task DeleteAsync(string id)
         {
             var entity = await GetTrackedRecord(id);
-            dbContext.CounselingRecords.Remove(entity);
+            entity.IsArchived = true; entity.ArchivedAt = DateTime.UtcNow;
             await dbContext.SaveChangesAsync();
         }
 
