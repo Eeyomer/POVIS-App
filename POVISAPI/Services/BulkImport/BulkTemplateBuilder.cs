@@ -180,7 +180,7 @@ namespace POVISAPI.Services.BulkImport
                 dv.AllowedValues = XLAllowedValues.List;
                 dv.Value = listName;
                 dv.InCellDropdown = true;
-                dv.IgnoreBlanks = true;
+                dv.IgnoreBlanks = false; // an empty source must not turn into "accept anything"
                 dv.ShowErrorMessage = true;
                 dv.ErrorStyle = XLErrorStyle.Stop;
                 dv.ErrorTitle = "Not a registered officer";

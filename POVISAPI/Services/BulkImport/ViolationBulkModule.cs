@@ -36,7 +36,9 @@ namespace POVISAPI.Services.BulkImport
                 .ToList();
             return new BulkReferenceList(
                 "Officers",
-                "Registered Apprehending Officers. READ-ONLY - the Apprehending Officer column only accepts the values in the first column. To add an officer, register them in POVIS > Users & Roles and download a fresh template.",
+                rows.Count == 0
+                    ? "NO ACTIVE APPREHENDING OFFICERS ARE REGISTERED YET, so the Apprehending Officer dropdown is empty and no violations can be uploaded. Register officers in POVIS > Users & Roles (role: Apprehending Officer), then download a fresh template."
+                    : "Registered Apprehending Officers. READ-ONLY - the Apprehending Officer column only accepts the values in the first column. To add an officer, register them in POVIS > Users & Roles and download a fresh template.",
                 new[] { "Apprehending Officer (pick this in the data sheet)", "Deputation Number", "Username", "Contact Number", "Email" },
                 rows,
                 OfficerHeader);
