@@ -3,7 +3,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, map, tap, throwError } from 'rxjs';
 import { ChangePasswordDTO, LoginDTO, RegisterDTO, Role, ROLE_LABELS } from '../models/app-dto';
-import { AuthResponse } from '../models/auth-model';
+import { AuthResponse, MyProfile } from '../models/auth-model';
 import { AuthApi } from './api-service/auth-api';
 
 @Injectable({ providedIn: 'root' })
@@ -17,12 +17,25 @@ export class AuthService {
   private readonly _isLoggedIn = signal(false);
   readonly isLoggedIn$ = this._isLoggedIn.asReadonly();
 
+  private readonly _profile = signal<MyProfile | null>(null);
+  /** The signed-in user's name and photo (null until loaded). */
+  readonly profile = this._profile.asReadonly();
+
   constructor(
     @Inject(PLATFORM_ID) platformId: object,
     private api: AuthApi,
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
     this._isLoggedIn.set(!!this.getToken());
+  }
+
+  /** Loads (or refreshes) the signed-in user's name and photo for the sidebar. */
+  loadProfile(): void {
+    if (!this.getToken()) return;
+    this.api.me().subscribe({
+      next: (res) => this._profile.set(res.data ?? null),
+      error: () => this._profile.set(null),
+    });
   }
 
   login(credentials: LoginDTO): Observable<AuthResponse> {
@@ -75,6 +88,7 @@ export class AuthService {
       localStorage.removeItem(this.MUST_CHANGE_KEY);
     }
     this._isLoggedIn.set(false);
+    this._profile.set(null);
   }
 
   getToken(): string | null {

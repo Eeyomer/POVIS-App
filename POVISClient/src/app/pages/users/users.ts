@@ -196,6 +196,7 @@ export class Users implements OnInit {
     request.subscribe({
       next: (saved) => {
         this.toast.success(current ? 'User updated.' : 'User created.');
+        this.authService.loadProfile(); // the sidebar shows the signed-in user's photo, which may have just changed
         if (!current && saved.temporaryPassword) {
           this.issuedPassword.set({ username: saved.username, password: saved.temporaryPassword });
         }

@@ -61,7 +61,7 @@ export class Ordinances implements OnInit {
 
   levelForm = this.fb.group({
     fineAmount: [null as number | null],
-    penaltyText: ['', Validators.required],
+    penaltyText: [''],
   });
 
   readonly ordinal = ordinal;
@@ -230,7 +230,10 @@ export class Ordinances implements OnInit {
     });
   }
 
+  levelError = signal<string | null>(null);
+
   startAdd(key: string): void {
+    this.levelError.set(null);
     this.levelForm.reset({ fineAmount: null, penaltyText: '' });
     this.addingFor.set(key);
   }
@@ -242,14 +245,17 @@ export class Ordinances implements OnInit {
   /** Adds the next, higher level to a section's (or the whole ordinance's) penalty ladder. */
   addLevel(scope: PenaltyScope): void {
     const detail = this.selected();
-    if (!detail || this.levelForm.invalid) {
-      this.levelForm.markAllAsTouched();
+    if (!detail) return;
+    const raw = this.levelForm.getRawValue();
+    const text = raw.penaltyText?.trim() ?? '';
+    if (raw.fineAmount == null && !text) {
+      this.levelError.set('Enter at least one penalty: a fine amount or a penalty description.');
       return;
     }
-    const raw = this.levelForm.getRawValue();
+    this.levelError.set(null);
     const previous = scope.penalties.at(-1);
     if (previous?.fineAmount != null && raw.fineAmount != null && raw.fineAmount < previous.fineAmount) {
-      this.toast.error(`The ${ordinal(scope.nextLevel)} offense must be higher than the ${ordinal(previous.offenseLevel)} offense (fine of at least ₱${previous.fineAmount}).`);
+      this.levelError.set(`The ${ordinal(scope.nextLevel)} offense must be higher than the ${ordinal(previous.offenseLevel)} offense (fine of at least ₱${previous.fineAmount}).`);
       return;
     }
     this.ordinancesService.addPenalty(detail.ordinanceId, {
@@ -260,7 +266,7 @@ export class Ordinances implements OnInit {
       hasImprisonment: false,
       businessPermitAction: 'None',
       isConjunctive: false,
-      penaltyText: raw.penaltyText!,
+      penaltyText: text || `Fine of ₱${raw.fineAmount}`,
     }).subscribe({
       next: () => {
         this.addingFor.set(null);

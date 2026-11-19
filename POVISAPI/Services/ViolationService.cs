@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using POVISAPI.Common;
 using POVISAPI.Data;
 using POVISAPI.Interfaces;
@@ -11,7 +12,12 @@ namespace POVISAPI.Services
     public class ViolationService : IViolationService
     {
         private readonly AppDbContext dbContext;
-        public ViolationService(AppDbContext _dbContext) => dbContext = _dbContext;
+        private readonly IMemoryCache cache;
+        public ViolationService(AppDbContext _dbContext, IMemoryCache _cache)
+        {
+            dbContext = _dbContext;
+            cache = _cache;
+        }
 
         private static ViolationDTO MapToDTO(Violation v) => new()
         {
@@ -371,15 +377,23 @@ namespace POVISAPI.Services
         {
             var violation = await GetTrackedViolation(id);
 
-            var penalty = await dbContext.OrdinancePenalties.AsNoTracking()
-                .Where(p => p.OrdinanceId == violation.OrdinanceId
-                         // highest defined level not above this offense (a 6th offense on a 4-level ladder uses level 4)
-                         && p.OffenseLevel <= violation.OffenseLevel
-                         && (p.OrdinanceSectionId == violation.OrdinanceSectionId
-                             || p.OrdinanceSectionId == null))
+            // The ordinance's whole penalty ladder is cached (until a penalty or section is added/removed), so looking up
+            // a penalty does not hit the database every time.
+            var ladder = await cache.GetOrCreateAsync(CacheKeys.Penalties(violation.OrdinanceId), async entry =>
+            {
+                entry.SetAbsoluteExpiration(CacheKeys.PenaltiesSafetyExpiry);
+                return await dbContext.OrdinancePenalties.AsNoTracking()
+                    .Where(p => p.OrdinanceId == violation.OrdinanceId)
+                    .ToListAsync();
+            }) ?? new List<OrdinancePenalty>();
+
+            // highest defined level not above this offense (a 6th offense on a 4-level ladder uses level 4)
+            var penalty = ladder
+                .Where(p => p.OffenseLevel <= violation.OffenseLevel
+                         && (p.OrdinanceSectionId == violation.OrdinanceSectionId || p.OrdinanceSectionId == null))
                 .OrderByDescending(p => p.OrdinanceSectionId != null)
                 .ThenByDescending(p => p.OffenseLevel)
-                .FirstOrDefaultAsync();
+                .FirstOrDefault();
 
             if (penalty == null)
                 throw new KeyNotFoundException("No penalty schedule found for this violation.");

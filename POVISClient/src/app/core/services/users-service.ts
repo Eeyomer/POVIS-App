@@ -1,12 +1,16 @@
 import { Injectable } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Observable, catchError, map, of, throwError } from 'rxjs';
+import { Observable, catchError, map, of, tap, throwError } from 'rxjs';
 import { CreateUserDTO, UpdateUserDTO, User } from '../models/app-dto';
 import { UsersApi } from './api-service/users-api';
+import { ViolationsService } from './violations-service';
 
 @Injectable({ providedIn: 'root' })
 export class UsersService {
-  constructor(private api: UsersApi) {}
+  constructor(
+    private api: UsersApi,
+    private violationsService: ViolationsService,
+  ) {}
 
   list(): Observable<User[]> {
     return this.api.getAll().pipe(
@@ -18,6 +22,7 @@ export class UsersService {
   create(dto: CreateUserDTO): Observable<User> {
     return this.api.add(dto).pipe(
       map((res) => res.data as User),
+      tap(() => this.violationsService.invalidateOfficers()), // the violation form's officer list may have changed
       catchError((err) => this.rethrowAsError(err)),
     );
   }
@@ -25,6 +30,7 @@ export class UsersService {
   update(id: string, dto: UpdateUserDTO): Observable<User> {
     return this.api.update(id, dto).pipe(
       map((res) => res.data as User),
+      tap(() => this.violationsService.invalidateOfficers()), // the violation form's officer list may have changed
       catchError((err) => this.rethrowAsError(err)),
     );
   }

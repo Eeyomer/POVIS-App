@@ -153,8 +153,12 @@
                 </span>
                 }
               </div>
+              @if (levelError(); as err) {
+              <div class="col-span-2 text-[12.5px] font-semibold text-red-600">{{ err }}</div>
+              }
               <input type="number" formControlName="fineAmount" placeholder="Fine amount" class="px-3 py-2 rounded-lg border border-[#d3dae5] text-[13px]" />
-              <input type="text" formControlName="penaltyText" placeholder="Penalty text" class="px-3 py-2 rounded-lg border border-[#d3dae5] text-[13px]" />
+              <input type="text" formControlName="penaltyText" placeholder="Penalty (e.g. community service, imprisonment, a specific seminar)" class="px-3 py-2 rounded-lg border border-[#d3dae5] text-[13px]" />
+              <div class="col-span-2 text-[11.5px] text-[#7a889c]">Enter a fine amount, a penalty description, or both.</div>
               <button type="submit" class="px-3 py-2 rounded-lg bg-[#1e3a63] text-white text-[13px] font-semibold">Save {{ ordinal(scope.nextLevel) }} offense</button>
               <button type="button" (click)="cancelAdd()" class="px-3 py-2 rounded-lg border border-[#d3dae5] text-[13px] font-semibold text-[#152238]">Cancel</button>
             </form>

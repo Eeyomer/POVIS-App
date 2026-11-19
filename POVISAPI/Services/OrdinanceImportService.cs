@@ -1,5 +1,7 @@
 using ClosedXML.Excel;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
+using POVISAPI.Common;
 using POVISAPI.Data;
 using POVISAPI.Interfaces;
 using POVISAPI.Models.DTO;
@@ -14,7 +16,12 @@ namespace POVISAPI.Services
         private const int MaxRows = 2000;
 
         private readonly AppDbContext dbContext;
-        public OrdinanceImportService(AppDbContext _dbContext) => dbContext = _dbContext;
+        private readonly IMemoryCache cache;
+        public OrdinanceImportService(AppDbContext _dbContext, IMemoryCache _cache)
+        {
+            dbContext = _dbContext;
+            cache = _cache;
+        }
 
         // Headers are matched on letters only, lowercase, so "Ordinance Number *" == "ordinancenumber".
         private static readonly string[] RequiredHeaders =
@@ -288,7 +295,11 @@ namespace POVISAPI.Services
                 result.PenaltiesCreated++;
             }
 
+            // Penalties were added to these ordinances; their cached ladders are now out of date.
+            var touched = dbContext.ChangeTracker.Entries<OrdinancePenalty>()
+                .Where(e => e.State == EntityState.Added).Select(e => e.Entity.OrdinanceId).Distinct().ToList();
             await dbContext.SaveChangesAsync();
+            foreach (var ordinanceId in touched) cache.Remove(CacheKeys.Penalties(ordinanceId));
         }
 
         // ---------- helpers ----------

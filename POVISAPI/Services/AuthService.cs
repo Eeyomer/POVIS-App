@@ -84,6 +84,13 @@ public class AuthService : IAuthService
         return BuildAuthResponse(user);
     }
 
+    public async Task<MyProfileDTO> GetProfileAsync(Guid userId)
+    {
+        var user = await context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId && u.IsActive)
+            ?? throw new KeyNotFoundException("User does not exist.");
+        return new MyProfileDTO { Username = user.Username, FullName = user.FullName, Photo = user.Photo };
+    }
+
     public async Task<bool> AdminExistsAsync()
     {
         return await context.Users.AnyAsync(u => u.Role == Role.MISPersonnel && u.IsActive);

@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
+using POVISAPI.Common;
 using POVISAPI.Data;
 using POVISAPI.Interfaces;
 using POVISAPI.Models.DTO;
@@ -10,7 +12,15 @@ namespace POVISAPI.Services
     public class OrdinanceService : IOrdinanceService
     {
         private readonly AppDbContext dbContext;
-        public OrdinanceService(AppDbContext _dbContext) => dbContext = _dbContext;
+        private readonly IMemoryCache cache;
+        public OrdinanceService(AppDbContext _dbContext, IMemoryCache _cache)
+        {
+            dbContext = _dbContext;
+            cache = _cache;
+        }
+
+        /// <summary>Penalty ladders are cached per ordinance; drop the cached copy whenever one is added or removed.</summary>
+        private void InvalidatePenalties(Guid ordinanceId) => cache.Remove(CacheKeys.Penalties(ordinanceId));
 
         private static OrdinancePenaltyDTO MapPenalty(OrdinancePenalty p) => new()
         {
@@ -121,6 +131,7 @@ namespace POVISAPI.Services
                 dbContext.Ordinances.Remove(entity);
             }
             await dbContext.SaveChangesAsync();
+            InvalidatePenalties(entity.Id);
         }
 
         public async Task<OrdinanceSectionDTO> AddSectionAsync(string ordinanceId, AddOrdinanceSectionDTO dto)
@@ -162,6 +173,7 @@ namespace POVISAPI.Services
 
             dbContext.OrdinanceSections.Remove(section);
             await dbContext.SaveChangesAsync();
+            InvalidatePenalties(parsedOrdinanceId); // a removed section takes its penalties with it
         }
 
         public async Task<OrdinancePenaltyDTO> AddPenaltyAsync(string ordinanceId, AddOrdinancePenaltyDTO dto)
@@ -212,6 +224,7 @@ namespace POVISAPI.Services
             };
             await dbContext.OrdinancePenalties.AddAsync(penalty);
             await dbContext.SaveChangesAsync();
+            InvalidatePenalties(ordinance.Id);
             return MapPenalty(penalty);
         }
 
@@ -236,6 +249,7 @@ namespace POVISAPI.Services
 
             dbContext.OrdinancePenalties.Remove(penalty);
             await dbContext.SaveChangesAsync();
+            InvalidatePenalties(parsedOrdinanceId);
         }
 
         private async Task<Ordinance> GetTrackedOrdinance(string id, bool includeSections)

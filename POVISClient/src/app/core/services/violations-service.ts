@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Observable, catchError, map, of, throwError } from 'rxjs';
+import { Observable, catchError, map, of, shareReplay, tap, throwError } from 'rxjs';
 import { PagedResult } from '../models/app-model';
 import {
   AddViolationDTO,
@@ -11,6 +11,7 @@ import {
   ViolationFilterDTO,
 } from '../models/app-dto';
 import { ViolationsApi } from './api-service/violations-api';
+import { TtlCache } from '../utils/ttl-cache';
 
 const EMPTY_PAGE: PagedResult<ViolationDTO> = { items: [], totalCount: 0, page: 1, pageSize: 20 };
 
@@ -33,10 +34,30 @@ export class ViolationsService {
     );
   }
 
+  /** Registered officers change when accounts are added/edited: kept for 5 minutes, or until an account changes. */
+  private officersCache = new TtlCache<Observable<OfficerOption[]>>(5 * 60 * 1000);
+
+  /** Drops the cached officer list (called when a user account is created, edited or imported). */
+  invalidateOfficers(): void {
+    this.officersCache.clear();
+  }
+
   getOfficers(): Observable<OfficerOption[]> {
-    return this.api.getOfficers().pipe(
-      map((res) => (res.success ? res.data ?? [] : [])),
-      catchError(() => of([])),
+    let source = this.officersCache.get('officers');
+    if (!source) {
+      source = this.api.getOfficers().pipe(
+        map((res) => {
+          if (!res.success) throw new Error(res.message);
+          return res.data ?? [];
+        }),
+        tap({ error: () => this.officersCache.delete('officers') }), // never keep a failed load
+        shareReplay({ bufferSize: 1, refCount: false }),
+      );
+      this.officersCache.set('officers', source);
+    }
+    return source.pipe(
+      map((list) => [...list]),
+      catchError(() => of([] as OfficerOption[])),
     );
   }
 

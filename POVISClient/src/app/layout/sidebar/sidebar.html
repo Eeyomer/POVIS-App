@@ -150,9 +150,15 @@
 
   <!-- Profile -->
   <div class="mt-auto pt-[18px] border-t border-white/10 flex items-center gap-2.5">
-    <div class="w-[34px] h-[34px] rounded-full bg-[#1e3a63] flex items-center justify-center text-white text-[13px] font-bold shrink-0">{{ initials }}</div>
+    <div class="w-[34px] h-[34px] rounded-full bg-[#1e3a63] flex items-center justify-center text-white text-[13px] font-bold shrink-0 overflow-hidden">
+      @if (authService.profile()?.photo; as photo) {
+      <img [src]="photo" alt="" class="w-full h-full object-cover" />
+      } @else {
+      {{ initials() }}
+      }
+    </div>
     <div class="flex-1 min-w-0">
-      <div class="text-[13px] font-semibold text-white truncate">{{ username || 'User' }}</div>
+      <div class="text-[13px] font-semibold text-white truncate">{{ displayName() }}</div>
       <div class="text-[11.5px] text-[#8a9bb8]">{{ roleLabel }}</div>
     </div>
     <button type="button" (click)="logout()" title="Log out"

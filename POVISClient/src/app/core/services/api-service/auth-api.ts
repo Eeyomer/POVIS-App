@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environment/environment';
 import { APIResponse } from '../../models/app-model';
 import { ChangePasswordDTO, LoginDTO, RegisterDTO } from '../../models/app-dto';
-import { AuthResponse } from '../../models/auth-model';
+import { AuthResponse, MyProfile } from '../../models/auth-model';
 
 @Injectable({ providedIn: 'root' })
 export class AuthApi {
@@ -22,6 +22,10 @@ export class AuthApi {
 
   changePassword(dto: ChangePasswordDTO): Observable<APIResponse<AuthResponse>> {
     return this.http.post<APIResponse<AuthResponse>>(`${this.apiUrl}/change-password`, dto);
+  }
+
+  me(): Observable<APIResponse<MyProfile>> {
+    return this.http.get<APIResponse<MyProfile>>(`${this.apiUrl}/me`);
   }
 
   adminExists(): Observable<APIResponse<{ exists: boolean }>> {

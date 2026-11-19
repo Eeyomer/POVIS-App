@@ -1,14 +1,20 @@
 import { Injectable } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Observable, catchError, from, map, throwError } from 'rxjs';
+import { Observable, catchError, from, map, tap, throwError } from 'rxjs';
 import { BulkImportResult } from '../models/app-dto';
 import { BulkUploadApi } from './api-service/bulk-upload-api';
+import { BarangaysService } from './barangays-service';
+import { ViolationsService } from './violations-service';
 
 export type BulkUploadError = Error & { result?: BulkImportResult };
 
 @Injectable({ providedIn: 'root' })
 export class BulkUploadService {
-  constructor(private api: BulkUploadApi) {}
+  constructor(
+    private api: BulkUploadApi,
+    private barangaysService: BarangaysService,
+    private violationsService: ViolationsService,
+  ) {}
 
   /** Downloads the module's .xlsx template (Instructions, data sheet, Example, Lists). */
   downloadTemplate(module: string): Observable<void> {
@@ -22,12 +28,18 @@ export class BulkUploadService {
   upload(module: string, file: File): Observable<BulkImportResult> {
     return this.api.upload(module, file).pipe(
       map((res) => res.data as BulkImportResult),
+      tap(() => this.invalidateCaches(module)), // imported rows may be what a cached list or dropdown shows
       catchError((err: HttpErrorResponse) => {
         const error = new Error(err?.error?.message || 'Something went wrong. Please try again.') as BulkUploadError;
         error.result = err?.error?.data;
         return throwError(() => error);
       }),
     );
+  }
+
+  private invalidateCaches(module: string): void {
+    if (module === 'barangays') this.barangaysService.invalidate();
+    if (module === 'users') this.violationsService.invalidateOfficers();
   }
 
   save(blob: Blob, fileName: string): void {

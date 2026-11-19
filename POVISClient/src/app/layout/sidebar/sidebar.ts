@@ -33,7 +33,6 @@ const GROUP_BY_PATH: Record<string, NavGroup> = {
 })
 export class Sidebar implements OnInit {
   username: string | null = null;
-  initials = 'A';
   roleLabel = '';
 
   /** Only one group is expanded at a time so the sidebar never needs to scroll. */
@@ -50,7 +49,7 @@ export class Sidebar implements OnInit {
 
   ngOnInit(): void {
     this.username = this.authService.getUsername();
-    this.initials = this.computeInitials(this.username);
+    this.authService.loadProfile();
     this.roleLabel = this.authService.getRoleLabel();
     this.cdr.markForCheck();
 
@@ -70,9 +69,18 @@ export class Sidebar implements OnInit {
     if (group) this.openGroup.set(group);
   }
 
-  private computeInitials(username: string | null): string {
-    if (!username) return 'A';
-    return username.trim().slice(0, 2).toUpperCase();
+  /** Name shown in the profile card: the full name when set, otherwise the username. */
+  displayName(): string {
+    return this.authService.profile()?.fullName?.trim() || this.username || 'User';
+  }
+
+  /** Shown in the circle when no photo was uploaded: first letters of the first two words of the name. */
+  initials(): string {
+    const name = this.authService.profile()?.fullName?.trim();
+    if (name) {
+      return name.split(/s+/).slice(0, 2).map((p) => p[0]?.toUpperCase() ?? '').join('');
+    }
+    return (this.username ?? 'A').trim().slice(0, 2).toUpperCase();
   }
 
   onNavigate(): void {

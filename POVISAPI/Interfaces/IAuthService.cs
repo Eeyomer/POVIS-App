@@ -8,4 +8,5 @@ public interface IAuthService
     Task<AuthResponseDTO> LoginAsync(LoginDTO dto);
     Task<AuthResponseDTO> ChangePasswordAsync(Guid userId, ChangePasswordDTO dto);
     Task<bool> AdminExistsAsync();
+    Task<MyProfileDTO> GetProfileAsync(Guid userId);
 }

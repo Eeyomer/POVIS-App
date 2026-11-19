@@ -42,6 +42,23 @@ namespace POVISAPI.Controllers
             return Ok(new APIResponse<object> { Success = true, Message = "Login successful", Data = response });
         }
 
+        /// <summary>The signed-in user's name and photo, for the sidebar.</summary>
+        [Authorize]
+        [HttpGet("me")]
+        public async Task<IActionResult> Me()
+        {
+            // The JWT's "sub" (username) shares a claim type with the user id, so pick the claim that is a Guid.
+            var userId = User.Claims
+                .Where(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier || c.Type == "nameid")
+                .Select(c => Guid.TryParse(c.Value, out var g) ? g : (Guid?)null)
+                .FirstOrDefault(g => g.HasValue);
+            if (userId is null)
+                return Unauthorized();
+
+            var profile = await authService.GetProfileAsync(userId.Value);
+            return Ok(new APIResponse<object> { Success = true, Message = "Profile retrieved successfully", Data = profile });
+        }
+
         [Authorize]
         [HttpPost("change-password")]
         public async Task<IActionResult> ChangePassword(ChangePasswordDTO dto)
