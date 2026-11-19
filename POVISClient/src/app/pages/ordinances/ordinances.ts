@@ -17,6 +17,7 @@ interface PenaltyScope {
   title: string;
   subtitle: string | null;
   sectionId: string | null;
+  section: OrdinanceSectionDTO | null;
   penalties: OrdinancePenaltyDTO[];
   nextLevel: number;
 }
@@ -66,6 +67,13 @@ export class Ordinances implements OnInit {
 
   readonly ordinal = ordinal;
 
+  /** Which accordion item ("ordinance" or a section id) is expanded. */
+  openScope = signal<string | null>(null);
+
+  toggleScope(key: string): void {
+    this.openScope.update((cur) => (cur === key ? null : key));
+  }
+
   /** Which penalty ladder ("ordinance" or a section id) currently has the add-level form open. */
   addingFor = signal<string | null>(null);
 
@@ -73,15 +81,13 @@ export class Ordinances implements OnInit {
   scopes = computed<PenaltyScope[]>(() => {
     const o = this.selected();
     if (!o) return [];
-    const build = (key: string, title: string, subtitle: string | null, sectionId: string | null, list: OrdinancePenaltyDTO[]): PenaltyScope => {
+    const build = (key: string, title: string, subtitle: string | null, section: OrdinanceSectionDTO | null, list: OrdinancePenaltyDTO[]): PenaltyScope => {
       const penalties = [...list].sort((a, b) => a.offenseLevel - b.offenseLevel);
-      return { key, title, subtitle, sectionId, penalties, nextLevel: (penalties.at(-1)?.offenseLevel ?? 0) + 1 };
+      return { key, title, subtitle, sectionId: section?.ordinanceSectionId ?? null, section, penalties, nextLevel: (penalties.at(-1)?.offenseLevel ?? 0) + 1 };
     };
     return [
       build('ordinance', 'Whole ordinance', 'Used when a violation has no section, or its section has no penalties of its own.', null, o.penalties),
-      ...o.sections.map((s) =>
-        build(s.ordinanceSectionId, s.sectionCode, null, s.ordinanceSectionId, s.penalties ?? []),
-      ),
+      ...o.sections.map((s) => build(s.ordinanceSectionId, s.sectionCode, null, s, s.penalties ?? [])),
     ];
   });
 
@@ -202,6 +208,7 @@ export class Ordinances implements OnInit {
 
   closeDetail(): void {
     this.selected.set(null);
+    this.openScope.set(null);
     this.showSectionForm.set(false);
   }
 
