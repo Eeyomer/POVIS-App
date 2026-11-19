@@ -97,7 +97,7 @@
           @for (s of o.sections; track s.ordinanceSectionId) {
           <li class="flex items-center justify-between text-[13px] border-b border-[#eef2f8] py-1.5">
             <span>{{ s.sectionCode }} — {{ s.description }}</span>
-            @if (authService.canManageUsers()) {
+            @if (authService.canManageUsers() && !editingSectionId()) {
             <span class="flex gap-3 shrink-0">
               <button type="button" (click)="editSection(s)" class="text-[#1e3a63] font-semibold">Edit</button>
               <button type="button" (click)="removeSection(s.ordinanceSectionId)" class="text-red-500 font-semibold">Remove</button>
