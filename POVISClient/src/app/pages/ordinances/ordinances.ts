@@ -56,7 +56,7 @@ export class Ordinances implements OnInit {
 
   sectionForm = this.fb.group({
     sectionCode: ['', Validators.required],
-    description: [''],
+    description: ['', Validators.maxLength(5000)],
   });
 
   levelForm = this.fb.group({

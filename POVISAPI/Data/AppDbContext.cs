@@ -77,7 +77,7 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<OrdinanceSection>(e =>
         {
             e.Property(s => s.SectionCode).HasMaxLength(50).IsRequired();
-            e.Property(s => s.Description).HasMaxLength(500);
+            e.Property(s => s.Description).HasMaxLength(5000);
 
             e.HasOne(s => s.Ordinance)
              .WithMany(o => o.Sections)

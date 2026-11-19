@@ -355,8 +355,8 @@ namespace POVISAPI.Migrations
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
+                        .HasMaxLength(5000)
+                        .HasColumnType("character varying(5000)");
 
                     b.Property<Guid>("OrdinanceId")
                         .HasColumnType("uuid");

@@ -141,7 +141,7 @@ namespace POVISAPI.Services
                 row.SectionCode = Text(xr, "sectioncode");
                 if (row.SectionCode is { Length: > 50 }) Err("Section Code cannot exceed 50 characters.");
                 row.SectionDescription = Text(xr, "sectiondescription");
-                if (row.SectionDescription is { Length: > 500 }) Err("Section Description cannot exceed 500 characters.");
+                if (row.SectionDescription is { Length: > 5000 }) Err("Section Description cannot exceed 5,000 characters.");
                 if (row.SectionCode == null && row.SectionDescription != null)
                     Err("Section Description was given without a Section Code.");
 

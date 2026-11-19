@@ -84,7 +84,7 @@ namespace POVISAPI.Models.DTO
         [StringLength(50, ErrorMessage = "Section code cannot exceed 50 characters")]
         public required string SectionCode { get; set; }
 
-        [StringLength(500, ErrorMessage = "Description cannot exceed 500 characters")]
+        [StringLength(5000, ErrorMessage = "Description cannot exceed 5,000 characters")]
         public string? Description { get; set; }
     }
 
