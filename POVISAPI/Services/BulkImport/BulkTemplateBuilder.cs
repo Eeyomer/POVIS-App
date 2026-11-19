@@ -172,8 +172,14 @@ namespace POVISAPI.Services.BulkImport
             if (linked >= 0)
             {
                 var last = headerRow + Math.Max(reference.Rows.Count, 1);
+                // A workbook-level named range keeps the dropdown in the standard validation block, so it shows in every
+                // Excel version and viewer (a direct cross-sheet range is stored as an extension some ignore).
+                const string listName = "ReferenceList";
+                dataSheet.Workbook.DefinedNames.Add(listName, ws.Range(headerRow + 1, 1, last, 1));
                 var dv = dataSheet.Range(2, linked + 1, 1000, linked + 1).CreateDataValidation();
-                dv.List(ws.Range(headerRow + 1, 1, last, 1), true);
+                dv.AllowedValues = XLAllowedValues.List;
+                dv.Value = listName;
+                dv.InCellDropdown = true;
                 dv.IgnoreBlanks = true;
                 dv.ShowErrorMessage = true;
                 dv.ErrorStyle = XLErrorStyle.Stop;

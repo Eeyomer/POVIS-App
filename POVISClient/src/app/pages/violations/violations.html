@@ -5,11 +5,13 @@
       <input type="text" placeholder="Search OVR no., name..." [value]="search()"
         (input)="onSearchChange($any($event.target).value)"
         class="px-3 py-2 rounded-lg border border-[#d3dae5] text-[13px] w-full sm:w-64" />
+      @if (authService.isApprehendingOfficer()) {
       <select [value]="mineOnly() ? 'mine' : 'all'" (change)="onRecordedByChange($any($event.target).value)"
         class="px-3 py-2 rounded-lg border border-[#d3dae5] text-[13px]">
         <option value="all">All recorded violations</option>
         <option value="mine">Recorded by me</option>
       </select>
+      }
       <select [value]="statusFilter()" (change)="onStatusFilterChange($any($event.target).value)"
         class="px-3 py-2 rounded-lg border border-[#d3dae5] text-[13px]">
         <option value="">All statuses</option>

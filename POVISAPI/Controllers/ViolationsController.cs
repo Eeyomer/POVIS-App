@@ -29,7 +29,7 @@ namespace POVISAPI.Controllers
         public async Task<IActionResult> GetAllViolations([FromQuery] ViolationFilterDTO filter)
         {
             // "Recorded by me" filter: scope to the logged-in user's own entries.
-            if (filter.Mine)
+            if (filter.Mine && User.IsInRole("ApprehendingOfficer"))
                 filter.RecordedByUserId = CurrentUserId() ?? Guid.Empty;
 
             var violations = await violationService.GetAllAsync(filter);
