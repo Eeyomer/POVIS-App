@@ -1,1 +1,18 @@
 <router-outlet />
+
+@if (storageNotice.open()) {
+<div class="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50 p-4" (click)="storageNotice.dismiss()">
+  <div
+    class="w-full max-w-md rounded-2xl bg-white p-6 text-center shadow-xl"
+    role="alertdialog"
+    aria-modal="true"
+    aria-labelledby="storage-full-title"
+    (click)="$event.stopPropagation()"
+  >
+    <h2 id="storage-full-title" class="mb-2 text-[16px] font-semibold text-[#152238]">Storage consumed</h2>
+    <p class="mb-2 text-[14px] text-[#4a5a70]">Neon free storage is consumed. Please subscribe to avail more storage.</p>
+    <p class="mb-5 text-[12.5px] text-[#7a889c]">New records can't be added for now. You can still view, edit and delete existing records.</p>
+    <button type="button" (click)="storageNotice.dismiss()" class="rounded-lg bg-[#1e3a63] px-4 py-2 text-[13px] font-semibold text-white">OK</button>
+  </div>
+</div>
+}
