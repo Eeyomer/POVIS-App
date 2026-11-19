@@ -27,6 +27,31 @@ namespace POVISAPI.Services.BulkImport
 
             using var ms = new MemoryStream();
             wb.SaveAs(ms);
+            return StripEmptyValidationFormulas(ms.ToArray());
+        }
+
+        /// <summary>
+        /// ClosedXML writes an empty &lt;formula2 /&gt; inside every list validation. Excel 2013 treats that as corrupt,
+        /// discards ALL data validation on the sheet and shows a repair prompt, so remove the empty elements.
+        /// </summary>
+        private static byte[] StripEmptyValidationFormulas(byte[] xlsx)
+        {
+            using var ms = new MemoryStream();
+            ms.Write(xlsx);
+            using (var zip = new System.IO.Compression.ZipArchive(ms, System.IO.Compression.ZipArchiveMode.Update, leaveOpen: true))
+            {
+                foreach (var entry in zip.Entries.Where(e => e.FullName.StartsWith("xl/worksheets/sheet") && e.FullName.EndsWith(".xml")).ToList())
+                {
+                    string xml;
+                    using (var reader = new StreamReader(entry.Open())) xml = reader.ReadToEnd();
+                    var cleaned = System.Text.RegularExpressions.Regex.Replace(xml, @"<(\w+:)?formula2\s*/>", string.Empty);
+                    if (cleaned == xml) continue;
+                    var name = entry.FullName;
+                    entry.Delete();
+                    using var writer = new StreamWriter(zip.CreateEntry(name).Open(), new System.Text.UTF8Encoding(false));
+                    writer.Write(cleaned);
+                }
+            }
             return ms.ToArray();
         }
 
