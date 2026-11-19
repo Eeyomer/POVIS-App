@@ -80,7 +80,7 @@ export class Ordinances implements OnInit {
     return [
       build('ordinance', 'Whole ordinance', 'Used when a violation has no section, or its section has no penalties of its own.', null, o.penalties),
       ...o.sections.map((s) =>
-        build(s.ordinanceSectionId, s.sectionCode + (s.description ? ' — ' + s.description : ''), null, s.ordinanceSectionId, s.penalties ?? []),
+        build(s.ordinanceSectionId, s.sectionCode, null, s.ordinanceSectionId, s.penalties ?? []),
       ),
     ];
   });
