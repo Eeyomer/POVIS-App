@@ -38,7 +38,7 @@ namespace POVISAPI.Models.DTO
         public string OrdinanceShortName { get; set; } = string.Empty;
         public string? OrdinanceSectionId { get; set; }
         public string? OrdinanceSectionCode { get; set; }
-        public OffenseLevel OffenseLevel { get; set; }
+        public int OffenseLevel { get; set; }
         public bool IsWarningTicket { get; set; }
         public ViolationStatus Status { get; set; }
         public string? Remarks { get; set; }
@@ -200,7 +200,7 @@ namespace POVISAPI.Models.DTO
 
     public class ApplicablePenaltyDTO
     {
-        public OffenseLevel OffenseLevel { get; set; }
+        public int OffenseLevel { get; set; }
         public decimal? FineAmount { get; set; }
         public string PenaltyText { get; set; } = string.Empty;
     }

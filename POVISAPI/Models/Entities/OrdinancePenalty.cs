@@ -18,7 +18,8 @@ public class OrdinancePenalty : BaseEntity
     public Guid? OrdinanceSectionId { get; set; }
     public OrdinanceSection? OrdinanceSection { get; set; }
 
-    public OffenseLevel OffenseLevel { get; set; }
+    /// <summary>1 = 1st offense, 2 = 2nd, ... Each level is a higher offense than the previous one.</summary>
+    public int OffenseLevel { get; set; } = 1;
 
     /// <summary>Null for ordinances that don't split by offender type (most of them).
     /// Ord. 22 S.2002 (toy guns) and Ord. 74 S.2023 (minors) do.</summary>

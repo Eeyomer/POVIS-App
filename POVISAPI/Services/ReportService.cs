@@ -18,13 +18,8 @@ namespace POVISAPI.Services
         private static string OrdinanceCode(string number, int series, bool isExecutiveOrder) =>
             isExecutiveOrder ? $"E.O {number}, S. {series}" : $"ORDINANCE NO. {number}, S. {series}";
 
-        private static string OffenseSuffix(OffenseLevel level) => level switch
-        {
-            OffenseLevel.Second => " 2ND OFFENSE",
-            OffenseLevel.Third => " 3RD OFFENSE",
-            OffenseLevel.Fourth => " 4TH OFFENSE",
-            _ => string.Empty
-        };
+        private static string OffenseSuffix(int level) =>
+            level <= 1 ? string.Empty : " " + OffenseLevels.Ordinal(level).ToUpperInvariant() + " OFFENSE";
 
         public async Task<OrdinanceSummaryReportDTO> GetOrdinanceSummaryAsync(DateOnly from, DateOnly to)
         {
@@ -51,9 +46,10 @@ namespace POVISAPI.Services
                     // "unpaid" per the OVERALL sheet = fine amount of unsettled violations
                     FineAmount = _db.OrdinancePenalties
                         .Where(p => p.OrdinanceId == v.OrdinanceId
-                                 && p.OffenseLevel == v.OffenseLevel
+                                 && p.OffenseLevel <= v.OffenseLevel
                                  && (p.OrdinanceSectionId == v.OrdinanceSectionId || p.OrdinanceSectionId == null))
                         .OrderByDescending(p => p.OrdinanceSectionId != null)
+                        .ThenByDescending(p => p.OffenseLevel)
                         .Select(p => p.FineAmount)
                         .FirstOrDefault()
                 })
@@ -77,7 +73,7 @@ namespace POVISAPI.Services
                         g.Key.OffenseLevel,
                         Row = new OrdinanceSummaryRowDTO
                         {
-                            OrdinanceId = $"{g.Key.OrdinanceId}:{g.Key.OrdinanceSectionId}:{(int)g.Key.OffenseLevel}",
+                            OrdinanceId = $"{g.Key.OrdinanceId}:{g.Key.OrdinanceSectionId}:{g.Key.OffenseLevel}",
                             OrdinanceShortName = first.OrdinanceShortName,
                             Label = label,
                             FemaleCount = g.Count(x => x.Gender == Gender.Female),

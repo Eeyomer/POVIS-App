@@ -7,7 +7,7 @@ namespace POVISAPI.Models.DTO
     {
         public string OrdinancePenaltyId { get; set; } = string.Empty;
         public string? OrdinanceSectionId { get; set; }
-        public OffenseLevel OffenseLevel { get; set; }
+        public int OffenseLevel { get; set; }
         public OffenderType? OffenderType { get; set; }
         public decimal? FineAmount { get; set; }
         public int? SeminarDays { get; set; }
@@ -25,9 +25,9 @@ namespace POVISAPI.Models.DTO
     {
         public string? OrdinanceSectionId { get; set; }
 
-        [Required(ErrorMessage = "Offense level is required")]
-        [EnumDataType(typeof(OffenseLevel), ErrorMessage = "Invalid offense level")]
-        public OffenseLevel OffenseLevel { get; set; }
+        /// <summary>Leave empty to add the NEXT level (one higher than the highest existing level for this section).</summary>
+        [Range(1, 100, ErrorMessage = "Offense level must be between 1 and 100")]
+        public int? OffenseLevel { get; set; }
 
         [EnumDataType(typeof(OffenderType), ErrorMessage = "Invalid offender type")]
         public OffenderType? OffenderType { get; set; }

@@ -1,3 +1,4 @@
+import { ordinal } from '../../core/utils/offense-level';
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { SkeletonRows } from '../../shared/components/skeleton/skeleton';
 import { CommonModule } from '@angular/common';
@@ -13,6 +14,7 @@ import { ViolatorDTO, ViolatorHistoryDTO } from '../../core/models/app-dto';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Verify {
+  readonly ordinal = ordinal;
   search = signal('');
   results = signal<ViolatorDTO[]>([]);
   searching = signal(false);

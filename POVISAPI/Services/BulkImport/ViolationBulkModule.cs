@@ -69,7 +69,7 @@ namespace POVISAPI.Services.BulkImport
             new BulkColumn("Witness", false, "Optional. Up to 150 characters."),
             new BulkColumn(OfficerHeader, true, "Required. Pick from the dropdown - it is tied to the \"Officers\" sheet (registered Apprehending Officers with their Deputation Numbers). Any other value is rejected."),
             new BulkColumn("Is Warning Ticket", false, "Yes or No. Default No.", Opt.YesNo),
-            new BulkColumn("Offense Level", false, "First, Second, Third or Fourth. Leave blank to have it computed from the violator's earlier tickets for the same ordinance (in date order).", Opt.Of<OffenseLevel>()),
+            new BulkColumn("Offense Level", false, "Optional. A whole number: 1 = 1st offense, 2 = 2nd, 3 = 3rd, 4 = 4th, and so on (no limit). Leave blank to have it computed from the violator's earlier tickets for the same ordinance section (in date order).", null, ColType.Number),
             new BulkColumn("Status", false, "Optional. Pending, Paid, ForSeminar, ForCounseling, ForCommunityService, CaseFiled, Dismissed, Closed, DidNotComply or WarningIssued. Default Pending (WarningIssued for warning tickets).", Opt.Of<ViolationStatus>()),
             new BulkColumn("Remarks", false, "Optional. Up to 500 characters."),
             new BulkColumn("Remarks 2", false, "Optional. Up to 500 characters."),
@@ -85,7 +85,7 @@ namespace POVISAPI.Services.BulkImport
         public override IReadOnlyList<(string, string)> Notes { get; } = new[]
         {
             ("Violators", "Rows are matched to an existing violator by Last Name + First Name (+ Middle Name, + Birthday when given). If none matches, a new violator is created (Gender required). If several match, add the Birthday or Middle Name to say which one."),
-            ("Offense level", "When Offense Level is blank it is computed per violator and ordinance from earlier tickets, both already in POVIS and earlier dates in this file. Warning tickets and dismissed tickets do not count."),
+            ("Offense level", "When Offense Level is blank it is computed per violator and ordinance section from earlier tickets, both already in POVIS and earlier dates in this file. Warning tickets and dismissed tickets do not count."),
             ("Apprehending Officer", "Every violation must be tied to a registered Apprehending Officer. The column is a dropdown linked to the protected \"Officers\" sheet (name and Deputation Number). Values not on that list are rejected, and the list only changes when an officer is added or changed in Users & Roles - download a fresh template after that."),
             ("Existing records", "A ticket with the same OVR Number + ordinance that already exists is skipped, not changed."),
             ("Same OVR, two violations", "If one OVR ticket covers two ordinances, use one row per ordinance with the same OVR Number."),
@@ -107,11 +107,11 @@ namespace POVISAPI.Services.BulkImport
             var existingTickets = (await db.Violations.Select(v => new { v.OvrNumber, v.OrdinanceId }).ToListAsync())
                 .Select(v => (v.OvrNumber.ToLowerInvariant(), v.OrdinanceId)).ToHashSet();
 
-            // Prior non-warning, non-dismissed tickets per violator + ordinance (offense level history).
+            // Prior non-warning, non-dismissed tickets per violator + ordinance + section (offense level history; each section has its own ladder).
             var history = (await db.Violations.Where(v => !v.IsWarningTicket && v.Status != ViolationStatus.Dismissed)
-                    .GroupBy(v => new { v.ViolatorId, v.OrdinanceId })
-                    .Select(g => new { g.Key.ViolatorId, g.Key.OrdinanceId, Count = g.Count() }).ToListAsync())
-                .ToDictionary(x => (x.ViolatorId, x.OrdinanceId), x => x.Count);
+                    .GroupBy(v => new { v.ViolatorId, v.OrdinanceId, v.OrdinanceSectionId })
+                    .Select(g => new { g.Key.ViolatorId, g.Key.OrdinanceId, g.Key.OrdinanceSectionId, Count = g.Count() }).ToListAsync())
+                .ToDictionary(x => (x.ViolatorId, x.OrdinanceId, x.OrdinanceSectionId), x => x.Count);
 
             var today = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(8));
             // Registered, active Apprehending Officers keyed by the exact text the template dropdown offers.
@@ -146,7 +146,7 @@ namespace POVISAPI.Services.BulkImport
                 p.Witness = r.Text("Witness", 150);
                 var officerText = r.Required(OfficerHeader, 250);
                 p.Warning = r.Bool("Is Warning Ticket");
-                p.Level = r.Choice<OffenseLevel>("Offense Level");
+                p.Level = r.Int("Offense Level", 1, OffenseLevels.Max);
                 p.Status = r.Choice<ViolationStatus>("Status");
                 p.Remarks = r.Text("Remarks", 500);
                 p.Remarks2 = r.Text("Remarks 2", 500);
@@ -236,9 +236,9 @@ namespace POVISAPI.Services.BulkImport
                     }
                 }
 
-                var histKey = (violatorId, p.Ordinance.Id);
+                var histKey = (violatorId, p.Ordinance.Id, p.SectionId);
                 history.TryGetValue(histKey, out var prior);
-                var level = p.Level ?? prior switch { 0 => OffenseLevel.First, 1 => OffenseLevel.Second, 2 => OffenseLevel.Third, _ => OffenseLevel.Fourth };
+                var level = p.Level ?? prior + 1; // the Nth offense is level N
                 var status = p.Status ?? (p.Warning ? ViolationStatus.WarningIssued : ViolationStatus.Pending);
                 if (!p.Warning && status != ViolationStatus.Dismissed) history[histKey] = prior + 1;
 
@@ -290,7 +290,7 @@ namespace POVISAPI.Services.BulkImport
             public Division Division;
             public int? Age;
             public bool Warning, Reviewed;
-            public OffenseLevel? Level;
+            public int? Level;
             public ViolationStatus? Status;
         }
 

@@ -219,21 +219,16 @@ namespace POVISAPI.Services
             if (!ordinanceExists)
                 throw new KeyNotFoundException("Ordinance does not exist or is inactive.");
 
-            // Snapshot the offense level from the violator's prior history against
-            // the same ordinance (warning tickets don't count toward offense level).
+            // Snapshot the offense level from the violator's prior history against the same ordinance section
+            // (each section has its own penalty ladder; warning tickets don't count toward offense level).
             var priorCount = await dbContext.Violations.CountAsync(v =>
                 v.ViolatorId == violatorId &&
                 v.OrdinanceId == ordinanceId &&
+                v.OrdinanceSectionId == ordinanceSectionId &&
                 !v.IsWarningTicket &&
                 v.Status != ViolationStatus.Dismissed);
 
-            var offenseLevel = priorCount switch
-            {
-                0 => OffenseLevel.First,
-                1 => OffenseLevel.Second,
-                2 => OffenseLevel.Third,
-                _ => OffenseLevel.Fourth
-            };
+            var offenseLevel = priorCount + 1; // no upper limit: the Nth offense is level N
 
             if ((dto.EvidencePhotos?.Count ?? 0) > MaxEvidencePhotos)
                 throw new ArgumentException($"A violation can have at most {MaxEvidencePhotos} evidence photos.");
@@ -378,10 +373,12 @@ namespace POVISAPI.Services
 
             var penalty = await dbContext.OrdinancePenalties.AsNoTracking()
                 .Where(p => p.OrdinanceId == violation.OrdinanceId
-                         && p.OffenseLevel == violation.OffenseLevel
+                         // highest defined level not above this offense (a 6th offense on a 4-level ladder uses level 4)
+                         && p.OffenseLevel <= violation.OffenseLevel
                          && (p.OrdinanceSectionId == violation.OrdinanceSectionId
                              || p.OrdinanceSectionId == null))
                 .OrderByDescending(p => p.OrdinanceSectionId != null)
+                .ThenByDescending(p => p.OffenseLevel)
                 .FirstOrDefaultAsync();
 
             if (penalty == null)

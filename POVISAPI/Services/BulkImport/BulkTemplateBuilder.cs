@@ -27,30 +27,70 @@ namespace POVISAPI.Services.BulkImport
 
             using var ms = new MemoryStream();
             wb.SaveAs(ms);
-            return StripEmptyValidationFormulas(ms.ToArray());
+            return InjectValidations(ms.ToArray(), BuildRules(m, reference));
+        }
+
+        private sealed record Rule(string Sqref, string Formula, string? Title = null, string? Message = null);
+
+        private static List<Rule> BuildRules(BulkModule m, BulkReferenceList? reference)
+        {
+            var rules = new List<Rule>();
+            for (var i = 0; i < m.Columns.Count; i++)
+            {
+                var letter = XLHelper.GetColumnLetterFromNumber(i + 1);
+                var sqref = $"{letter}2:{letter}1000";
+                var header = m.Columns[i].Header;
+                if (reference != null && header == reference.LinkedColumnHeader)
+                {
+                    var last = 3 + Math.Max(reference.Rows.Count, 1); // list starts on row 4 of the reference sheet
+                    rules.Add(new Rule(sqref, $"{reference.SheetName}!$A$4:$A${last}",
+                        "Not a registered officer",
+                        $"Pick a value from the {reference.SheetName} sheet. Add new officers in POVIS > Users & Roles, then download a fresh template."));
+                }
+                else if (m.Columns[i].Options is { Length: > 0 } opts)
+                {
+                    var literal = string.Join(",", opts);
+                    if (literal.Length <= 255) rules.Add(new Rule(sqref, "\"" + literal + "\""));
+                }
+            }
+            return rules;
         }
 
         /// <summary>
-        /// ClosedXML writes an empty &lt;formula2 /&gt; inside every list validation. Excel 2013 treats that as corrupt,
-        /// discards ALL data validation on the sheet and shows a repair prompt, so remove the empty elements.
+        /// Writes the dropdown rules by hand in exactly the form Excel itself saves them (fixed lists in quotes,
+        /// a cross-sheet range as a plain reference). ClosedXML's own output was rejected by Excel, which then
+        /// discarded every validation on the sheet.
         /// </summary>
-        private static byte[] StripEmptyValidationFormulas(byte[] xlsx)
+        private static byte[] InjectValidations(byte[] xlsx, List<Rule> rules)
         {
+            if (rules.Count == 0) return xlsx;
+            static string Esc(string s) => System.Security.SecurityElement.Escape(s) ?? string.Empty;
+
+            var sb = new System.Text.StringBuilder($"<x:dataValidations count=\"{rules.Count}\">");
+            foreach (var r in rules)
+            {
+                sb.Append("<x:dataValidation type=\"list\" allowBlank=\"1\" showInputMessage=\"1\" showErrorMessage=\"1\"");
+                if (r.Title != null) sb.Append($" errorTitle=\"{Esc(r.Title)}\" error=\"{Esc(r.Message ?? string.Empty)}\"");
+                sb.Append($" sqref=\"{r.Sqref}\"><x:formula1>{Esc(r.Formula)}</x:formula1></x:dataValidation>");
+            }
+            sb.Append("</x:dataValidations>");
+
             using var ms = new MemoryStream();
             ms.Write(xlsx);
             using (var zip = new System.IO.Compression.ZipArchive(ms, System.IO.Compression.ZipArchiveMode.Update, leaveOpen: true))
             {
-                foreach (var entry in zip.Entries.Where(e => e.FullName.StartsWith("xl/worksheets/sheet") && e.FullName.EndsWith(".xml")).ToList())
-                {
-                    string xml;
-                    using (var reader = new StreamReader(entry.Open())) xml = reader.ReadToEnd();
-                    var cleaned = System.Text.RegularExpressions.Regex.Replace(xml, @"<(\w+:)?formula2\s*/>", string.Empty);
-                    if (cleaned == xml) continue;
-                    var name = entry.FullName;
-                    entry.Delete();
-                    using var writer = new StreamWriter(zip.CreateEntry(name).Open(), new System.Text.UTF8Encoding(false));
-                    writer.Write(cleaned);
-                }
+                // Sheets are added in order: Instructions = sheet1, the data sheet = sheet2.
+                const string path = "xl/worksheets/sheet2.xml";
+                var entry = zip.GetEntry(path) ?? throw new InvalidOperationException("Template data sheet not found.");
+                string xml;
+                using (var reader = new StreamReader(entry.Open())) xml = reader.ReadToEnd();
+                var at = xml.IndexOf("<x:printOptions", StringComparison.Ordinal);
+                if (at < 0) at = xml.IndexOf("<x:pageMargins", StringComparison.Ordinal);
+                if (at < 0) throw new InvalidOperationException("Unexpected template layout.");
+                xml = xml.Insert(at, sb.ToString());
+                entry.Delete();
+                using var writer = new StreamWriter(zip.CreateEntry(path).Open(), new System.Text.UTF8Encoding(false));
+                writer.Write(xml);
             }
             return ms.ToArray();
         }
@@ -132,13 +172,6 @@ namespace POVISAPI.Services.BulkImport
 
             if (!withExample)
             {
-                for (var i = 0; i < cols.Count; i++)
-                    if (cols[i].Options is { Length: > 0 } opts)
-                    {
-                        var dv = ws.Range(2, i + 1, 1000, i + 1).CreateDataValidation();
-                        dv.List(string.Join(",", opts));
-                        dv.IgnoreBlanks = true;
-                    }
                 return;
             }
 
@@ -193,18 +226,6 @@ namespace POVISAPI.Services.BulkImport
             ws.SheetView.FreezeRows(headerRow);
             ws.SetTabColor(XLColor.FromHtml("#7B4FA3"));
 
-            var linked = m.Columns.ToList().FindIndex(c => c.Header == reference.LinkedColumnHeader);
-            if (linked >= 0)
-            {
-                var last = headerRow + Math.Max(reference.Rows.Count, 1);
-                var dv = dataSheet.Range(2, linked + 1, 1000, linked + 1).CreateDataValidation();
-                dv.List(ws.Range(headerRow + 1, 1, last, 1), true);
-                dv.IgnoreBlanks = true;
-                dv.ShowErrorMessage = true;
-                dv.ErrorStyle = XLErrorStyle.Stop;
-                dv.ErrorTitle = "Not a registered officer";
-                dv.ErrorMessage = $"Pick a value from the \"{reference.SheetName}\" sheet. Add new officers in POVIS > Users & Roles, then download a fresh template.";
-            }
 
             // Read-only: the list changes only when an officer is added or changed in the system.
             ws.Protect("povis-reference-list").AllowElement(XLSheetProtectionElements.SelectLockedCells);

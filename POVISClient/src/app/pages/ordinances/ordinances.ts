@@ -6,9 +6,20 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { OrdinancesService } from '../../core/services/ordinances-service';
 import { AuthService } from '../../core/services/auth-service';
-import { OffenseLevel, OrdinanceDTO, OrdinanceImportResultDTO, OrdinanceListDTO } from '../../core/models/app-dto';
+import { OrdinanceDTO, OrdinanceImportResultDTO, OrdinanceListDTO, OrdinancePenaltyDTO } from '../../core/models/app-dto';
+import { ordinal } from '../../core/utils/offense-level';
 import { manilaYear } from '../../core/utils/manila-time';
 import { ToastService } from '../../shared/toast/toast-service';
+
+/** One ladder of escalating penalty levels: a section, or the ordinance as a whole. */
+interface PenaltyScope {
+  key: string;
+  title: string;
+  subtitle: string | null;
+  sectionId: string | null;
+  penalties: OrdinancePenaltyDTO[];
+  nextLevel: number;
+}
 
 @Component({
   selector: 'app-ordinances',
@@ -48,11 +59,30 @@ export class Ordinances implements OnInit {
     description: [''],
   });
 
-  penaltyForm = this.fb.group({
-    ordinanceSectionId: [''],
-    offenseLevel: ['First' as OffenseLevel, Validators.required],
+  levelForm = this.fb.group({
     fineAmount: [null as number | null],
     penaltyText: ['', Validators.required],
+  });
+
+  readonly ordinal = ordinal;
+
+  /** Which penalty ladder ("ordinance" or a section id) currently has the add-level form open. */
+  addingFor = signal<string | null>(null);
+
+  /** One ladder per section, plus one for the ordinance as a whole. */
+  scopes = computed<PenaltyScope[]>(() => {
+    const o = this.selected();
+    if (!o) return [];
+    const build = (key: string, title: string, subtitle: string | null, sectionId: string | null, list: OrdinancePenaltyDTO[]): PenaltyScope => {
+      const penalties = [...list].sort((a, b) => a.offenseLevel - b.offenseLevel);
+      return { key, title, subtitle, sectionId, penalties, nextLevel: (penalties.at(-1)?.offenseLevel ?? 0) + 1 };
+    };
+    return [
+      build('ordinance', 'Whole ordinance', 'Used when a violation has no section, or its section has no penalties of its own.', null, o.penalties),
+      ...o.sections.map((s) =>
+        build(s.ordinanceSectionId, s.sectionCode + (s.description ? ' — ' + s.description : ''), null, s.ordinanceSectionId, s.penalties ?? []),
+      ),
+    ];
   });
 
   constructor(
@@ -200,16 +230,31 @@ export class Ordinances implements OnInit {
     });
   }
 
-  addPenalty(): void {
+  startAdd(key: string): void {
+    this.levelForm.reset({ fineAmount: null, penaltyText: '' });
+    this.addingFor.set(key);
+  }
+
+  cancelAdd(): void {
+    this.addingFor.set(null);
+  }
+
+  /** Adds the next, higher level to a section's (or the whole ordinance's) penalty ladder. */
+  addLevel(scope: PenaltyScope): void {
     const detail = this.selected();
-    if (!detail || this.penaltyForm.invalid) {
-      this.penaltyForm.markAllAsTouched();
+    if (!detail || this.levelForm.invalid) {
+      this.levelForm.markAllAsTouched();
       return;
     }
-    const raw = this.penaltyForm.getRawValue();
+    const raw = this.levelForm.getRawValue();
+    const previous = scope.penalties.at(-1);
+    if (previous?.fineAmount != null && raw.fineAmount != null && raw.fineAmount < previous.fineAmount) {
+      this.toast.error(`The ${ordinal(scope.nextLevel)} offense must be higher than the ${ordinal(previous.offenseLevel)} offense (fine of at least ₱${previous.fineAmount}).`);
+      return;
+    }
     this.ordinancesService.addPenalty(detail.ordinanceId, {
-      ordinanceSectionId: raw.ordinanceSectionId || null,
-      offenseLevel: raw.offenseLevel!,
+      ordinanceSectionId: scope.sectionId,
+      offenseLevel: scope.nextLevel,
       fineAmount: raw.fineAmount,
       requiresCounseling: false,
       hasImprisonment: false,
@@ -218,7 +263,7 @@ export class Ordinances implements OnInit {
       penaltyText: raw.penaltyText!,
     }).subscribe({
       next: () => {
-        this.penaltyForm.reset({ offenseLevel: 'First' });
+        this.addingFor.set(null);
         this.viewDetail({ ordinanceId: detail.ordinanceId } as OrdinanceListDTO);
       },
       error: (err) => this.toast.error(err.message),

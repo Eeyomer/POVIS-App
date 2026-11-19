@@ -42,7 +42,7 @@ namespace POVISAPI.Services
             public string? SectionCode;
             public string? SectionDescription;
             public bool HasPenalty;
-            public OffenseLevel OffenseLevel;
+            public int OffenseLevel;
             public OffenderType? OffenderType;
             public decimal? FineAmount;
             public int? SeminarDays;
@@ -147,7 +147,7 @@ namespace POVISAPI.Services
                 {
                     if (levelText == null) Err("Offense Level is required when a penalty is given.");
                     else if (!TryParseLevel(levelText, out row.OffenseLevel))
-                        Err($"Offense Level '{levelText}' is not valid. Use First, Second, Third or Fourth.");
+                        Err($"Offense Level '{levelText}' is not valid. Use a whole number such as 1, 2, 3, 4, 5 (or 1st, 2nd, 3rd...). Each level is a higher offense than the one before.");
 
                     if (penaltyText == null) Err("Penalty Text is required when a penalty is given.");
                     else if (penaltyText.Length > 1000) Err("Penalty Text cannot exceed 1,000 characters.");
@@ -213,7 +213,7 @@ namespace POVISAPI.Services
                 .ToDictionary(o => (o.OrdinanceNumber.ToLowerInvariant(), o.Series));
 
             var counted = new HashSet<(string, int)>();
-            var seenPenalties = new HashSet<(Guid, Guid?, OffenseLevel, OffenderType?)>();
+            var seenPenalties = new HashSet<(Guid, Guid?, int, OffenderType?)>();
 
             foreach (var r in rows)
             {
@@ -301,17 +301,13 @@ namespace POVISAPI.Services
             return string.IsNullOrEmpty(s) ? null : s;
         }
 
-        private static bool TryParseLevel(string text, out OffenseLevel level)
+        private static bool TryParseLevel(string text, out int level)
         {
-            switch (text.Trim().ToLowerInvariant())
-            {
-                case "1": case "1st": case "first": level = OffenseLevel.First; return true;
-                case "2": case "2nd": case "second": level = OffenseLevel.Second; return true;
-                case "3": case "3rd": case "third": level = OffenseLevel.Third; return true;
-                case "4": case "4th": case "fourth": level = OffenseLevel.Fourth; return true;
-            }
-            level = default;
-            return false;
+            var t = text.Trim().ToLowerInvariant();
+            level = t switch { "first" => 1, "second" => 2, "third" => 3, "fourth" => 4, "fifth" => 5, _ => 0 };
+            if (level > 0) return true;
+            t = System.Text.RegularExpressions.Regex.Replace(t, "(st|nd|rd|th)$", string.Empty);
+            return int.TryParse(t, out level) && level >= 1 && level <= OffenseLevels.Max;
         }
 
         private static bool TryParseEnum<T>(string text, out T value) where T : struct, Enum

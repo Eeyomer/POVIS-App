@@ -65,7 +65,7 @@
             <td class="px-3 py-2 font-medium text-[#152238]">{{ h.ovrNumber }}</td>
             <td class="px-3 py-2">{{ h.dateOfOccurrence }}</td>
             <td class="px-3 py-2">{{ h.ordinanceShortName }}</td>
-            <td class="px-3 py-2">{{ h.offenseLevel }}</td>
+            <td class="px-3 py-2">{{ ordinal(h.offenseLevel) }}</td>
             <td class="px-3 py-2">{{ complianceLabel(h.status) }}</td>
           </tr>
           } @empty {

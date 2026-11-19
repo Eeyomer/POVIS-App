@@ -65,7 +65,7 @@ public class Violation : BaseEntity, IArchivable
 
     /// <summary>1st/2nd/3rd/4th offense of THIS violator against THIS ordinance,
     /// computed at ticketing time (SECOND OFFENSE / OFFENSE columns).</summary>
-    public OffenseLevel OffenseLevel { get; set; } = OffenseLevel.First;
+    public int OffenseLevel { get; set; } = 1;
 
     /// <summary>True when this ticket is a warning only (WARNING TICKET sheet).</summary>
     public bool IsWarningTicket { get; set; }

@@ -1,3 +1,4 @@
+import { ordinal } from '../../core/utils/offense-level';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { SkeletonRows } from '../../shared/components/skeleton/skeleton';
 import { finalize } from 'rxjs';
@@ -19,6 +20,7 @@ import { ToastService } from '../../shared/toast/toast-service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Violators implements OnInit {
+  readonly ordinal = ordinal;
   loading = signal(true);
   violators = signal<ViolatorDTO[]>([]);
   totalCount = signal(0);

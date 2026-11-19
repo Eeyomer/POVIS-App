@@ -43,13 +43,20 @@ public enum ViolationStatus
     WarningIssued = 10      // WARNING TICKET sheet
 }
 
-/// <summary>1st–4th offense (Ord. 04 S.2016 and Ord. 45 S.1995 go up to a 4th offense).</summary>
-public enum OffenseLevel
+/// <summary>
+/// Offense levels are plain numbers (1 = 1st offense, 2 = 2nd, ...) so an ordinance section can have as many
+/// escalating penalty levels as it needs; each level is a higher offense than the one before it.
+/// </summary>
+public static class OffenseLevels
 {
-    First = 1,
-    Second = 2,
-    Third = 3,
-    Fourth = 4
+    public const int Max = 100;
+
+    public static string Ordinal(int level)
+    {
+        var mod100 = level % 100;
+        var suffix = mod100 is >= 11 and <= 13 ? "th" : (level % 10) switch { 1 => "st", 2 => "nd", 3 => "rd", _ => "th" };
+        return level + suffix;
+    }
 }
 
 /// <summary>Who the penalty applies to (Ord. 22 S.2002 distinguishes Individual vs

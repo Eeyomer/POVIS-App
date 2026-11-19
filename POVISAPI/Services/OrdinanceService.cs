@@ -3,6 +3,7 @@ using POVISAPI.Data;
 using POVISAPI.Interfaces;
 using POVISAPI.Models.DTO;
 using POVISAPI.Models.Entity;
+using POVISAPI.Models.Entity.Enums;
 
 namespace POVISAPI.Services
 {
@@ -175,11 +176,28 @@ namespace POVISAPI.Services
                 sectionId = parsedSectionId;
             }
 
+            // Levels are sequential and escalating per section (or per whole ordinance when no section): a new level is
+            // always the next one up, and it must not be a lighter fine than the level before it.
+            var siblings = await dbContext.OrdinancePenalties.AsNoTracking()
+                .Where(p => p.OrdinanceId == ordinance.Id && p.OrdinanceSectionId == sectionId && p.OffenderType == dto.OffenderType)
+                .ToListAsync();
+            var nextLevel = siblings.Count == 0 ? 1 : siblings.Max(p => p.OffenseLevel) + 1;
+            var level = dto.OffenseLevel ?? nextLevel;
+            if (siblings.Any(p => p.OffenseLevel == level))
+                throw new ArgumentException($"A {OffenseLevels.Ordinal(level)} offense penalty already exists here. Add the next level ({OffenseLevels.Ordinal(nextLevel)}) instead.");
+            if (level != nextLevel)
+                throw new ArgumentException($"Levels must be added in order. The next level is the {OffenseLevels.Ordinal(nextLevel)} offense.");
+            if (level > OffenseLevels.Max)
+                throw new ArgumentException($"At most {OffenseLevels.Max} levels are allowed.");
+            var previous = siblings.OrderByDescending(p => p.OffenseLevel).FirstOrDefault();
+            if (previous?.FineAmount is decimal prevFine && dto.FineAmount is decimal newFine && newFine < prevFine)
+                throw new ArgumentException($"The {OffenseLevels.Ordinal(level)} offense must be higher than the {OffenseLevels.Ordinal(previous.OffenseLevel)} offense (fine of ₱{prevFine:N2}). Enter a fine of at least that amount.");
+
             var penalty = new OrdinancePenalty
             {
                 OrdinanceId = ordinance.Id,
                 OrdinanceSectionId = sectionId,
-                OffenseLevel = dto.OffenseLevel,
+                OffenseLevel = level,
                 OffenderType = dto.OffenderType,
                 FineAmount = dto.FineAmount,
                 SeminarDays = dto.SeminarDays,
@@ -208,6 +226,13 @@ namespace POVISAPI.Services
                 .FirstOrDefaultAsync(p => p.Id == parsedPenaltyId && p.OrdinanceId == parsedOrdinanceId);
             if (penalty == null)
                 throw new KeyNotFoundException("Penalty does not exist.");
+
+            // Keep the ladder gap-free: only the highest level of a section can be removed.
+            var hasHigher = await dbContext.OrdinancePenalties.AnyAsync(p =>
+                p.OrdinanceId == penalty.OrdinanceId && p.OrdinanceSectionId == penalty.OrdinanceSectionId
+                && p.OffenderType == penalty.OffenderType && p.OffenseLevel > penalty.OffenseLevel);
+            if (hasHigher)
+                throw new InvalidOperationException("Only the highest level can be removed. Remove the higher offense levels first.");
 
             dbContext.OrdinancePenalties.Remove(penalty);
             await dbContext.SaveChangesAsync();

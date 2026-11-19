@@ -4,7 +4,8 @@ export type Division = 'Bpd' | 'Pnp' | 'Cenro' | 'Other';
 export type ViolationStatus =
   | 'Pending' | 'Paid' | 'ForSeminar' | 'ForCounseling' | 'ForCommunityService'
   | 'CaseFiled' | 'Dismissed' | 'Closed' | 'DidNotComply' | 'WarningIssued';
-export type OffenseLevel = 'First' | 'Second' | 'Third' | 'Fourth';
+/** 1 = 1st offense, 2 = 2nd, ... Each level is a higher offense than the one before; there is no upper limit. */
+export type OffenseLevel = number;
 export type OffenderType = 'Individual' | 'JuridicalPerson' | 'Minor' | 'ParentOrGuardian' | 'Establishment';
 export type BusinessPermitAction = 'None' | 'Suspension' | 'Cancellation';
 export type SeminarType = 'SmokingCessation' | 'VapingCessation' | 'SolidWasteManagement';
@@ -209,7 +210,8 @@ export interface OrdinancePenaltyDTO {
 
 export interface AddOrdinancePenaltyDTO {
   ordinanceSectionId?: string | null;
-  offenseLevel: OffenseLevel;
+  /** Leave out to add the next level. */
+  offenseLevel?: OffenseLevel | null;
   offenderType?: OffenderType | null;
   fineAmount?: number | null;
   seminarDays?: number | null;

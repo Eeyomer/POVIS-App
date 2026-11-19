@@ -106,7 +106,7 @@ namespace POVISAPI.Models.DTO
         public string OvrNumber { get; set; } = string.Empty;
         public DateOnly DateOfOccurrence { get; set; }
         public string OrdinanceShortName { get; set; } = string.Empty;
-        public OffenseLevel OffenseLevel { get; set; }
+        public int OffenseLevel { get; set; }
         public ViolationStatus Status { get; set; }
     }
 }

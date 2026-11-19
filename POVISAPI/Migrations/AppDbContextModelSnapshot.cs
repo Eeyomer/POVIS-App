@@ -312,10 +312,8 @@ namespace POVISAPI.Migrations
                     b.Property<int?>("OffenderType")
                         .HasColumnType("integer");
 
-                    b.Property<string>("OffenseLevel")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("character varying(30)");
+                    b.Property<int>("OffenseLevel")
+                        .HasColumnType("integer");
 
                     b.Property<Guid>("OrdinanceId")
                         .HasColumnType("uuid");
@@ -646,10 +644,8 @@ namespace POVISAPI.Migrations
                     b.Property<bool>("IsWarningTicket")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("OffenseLevel")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("character varying(30)");
+                    b.Property<int>("OffenseLevel")
+                        .HasColumnType("integer");
 
                     b.Property<Guid>("OrdinanceId")
                         .HasColumnType("uuid");
