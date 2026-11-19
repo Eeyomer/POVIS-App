@@ -43,6 +43,8 @@ public class CreateUserDTO
 public class UpdateUserDTO
 {
     public Guid Id { get; set; }
+    /// <summary>Null/blank keeps the current username.</summary>
+    public string? Username { get; set; }
     public Role Role { get; set; }
     public bool IsActive { get; set; }
     public string? FullName { get; set; }

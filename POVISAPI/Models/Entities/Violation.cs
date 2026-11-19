@@ -39,7 +39,16 @@ public class Violation : BaseEntity, IArchivable
     public Guid? BarangayOfOccurrenceId { get; set; }
     public Barangay? BarangayOfOccurrence { get; set; }
 
+    /// <summary>The user account that encoded this violation (null for records created before this was tracked).</summary>
+    public Guid? RecordedByUserId { get; set; }
+
     public string? Witness { get; set; }
+    /// <summary>The registered Apprehending Officer (Users &amp; Roles) who made the apprehension.
+    /// Null for officers who are not registered in the system (paper tickets).
+    /// ApprehendingOfficer / ApprehendingOfficerDeputationNumber below are a snapshot of that user's name and deputation no.</summary>
+    public Guid? ApprehendingOfficerId { get; set; }
+    public User? ApprehendingOfficerUser { get; set; }
+
     public string? ApprehendingOfficer { get; set; }
 
     /// <summary>Optional. For apprehending officers who are not registered in the system but already

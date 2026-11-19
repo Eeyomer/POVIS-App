@@ -614,6 +614,9 @@ namespace POVISAPI.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
+                    b.Property<Guid?>("ApprehendingOfficerId")
+                        .HasColumnType("uuid");
+
                     b.Property<DateTime?>("ArchivedAt")
                         .HasColumnType("timestamp without time zone");
 
@@ -663,6 +666,9 @@ namespace POVISAPI.Migrations
                         .HasMaxLength(300)
                         .HasColumnType("character varying(300)");
 
+                    b.Property<Guid?>("RecordedByUserId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Remarks")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
@@ -696,6 +702,8 @@ namespace POVISAPI.Migrations
                         .HasColumnType("character varying(150)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ApprehendingOfficerId");
 
                     b.HasIndex("BarangayOfOccurrenceId");
 
@@ -908,6 +916,11 @@ namespace POVISAPI.Migrations
 
             modelBuilder.Entity("POVISAPI.Models.Entity.Violation", b =>
                 {
+                    b.HasOne("POVISAPI.Models.Entity.User", "ApprehendingOfficerUser")
+                        .WithMany()
+                        .HasForeignKey("ApprehendingOfficerId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("POVISAPI.Models.Entity.Barangay", "BarangayOfOccurrence")
                         .WithMany("ViolationsOccurred")
                         .HasForeignKey("BarangayOfOccurrenceId")
@@ -929,6 +942,8 @@ namespace POVISAPI.Migrations
                         .HasForeignKey("ViolatorId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("ApprehendingOfficerUser");
 
                     b.Navigation("BarangayOfOccurrence");
 

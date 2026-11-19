@@ -10,12 +10,14 @@ namespace POVISAPI.Services.BulkImport
         private static readonly XLColor Navy = XLColor.FromHtml("#1E3A63");
         private static readonly XLColor Steel = XLColor.FromHtml("#5B7BA8");
 
-        public static byte[] Build(BulkModule m)
+        public static byte[] Build(BulkModule m, BulkReferenceList? reference = null)
         {
             using var wb = new XLWorkbook();
             Instructions(wb.Worksheets.Add("Instructions"), m);
-            DataSheet(wb.Worksheets.Add(m.SheetName), m, withExample: false);
+            var dataSheet = wb.Worksheets.Add(m.SheetName);
+            DataSheet(dataSheet, m, withExample: false);
             DataSheet(wb.Worksheets.Add("Example"), m, withExample: true);
+            if (reference != null) ReferenceSheet(wb.Worksheets.Add(reference.SheetName), dataSheet, m, reference);
             Lists(wb.Worksheets.Add("Lists"), m);
             wb.Worksheet("Instructions").SetTabColor(Navy);
             wb.Worksheet(m.SheetName).SetTabColor(XLColor.FromHtml("#2E8B57"));
@@ -138,6 +140,49 @@ namespace POVISAPI.Services.BulkImport
             note.Style.Font.Bold = true;
             note.Style.Font.FontColor = XLColor.FromHtml("#C00000");
             ws.Column(cols.Count + 2).Width = 60;
+        }
+
+        /// <summary>Protected, read-only list of live system records. The linked column of the data sheet only accepts
+        /// values from its first column (the server re-checks this on upload, so unprotecting the sheet gains nothing).</summary>
+        private static void ReferenceSheet(IXLWorksheet ws, IXLWorksheet dataSheet, BulkModule m, BulkReferenceList reference)
+        {
+            ws.ShowGridLines = false;
+            ws.Cell(1, 1).Value = reference.Description;
+            ws.Cell(1, 1).Style.Font.Bold = true;
+            ws.Cell(1, 1).Style.Font.FontColor = XLColor.FromHtml("#C00000");
+
+            const int headerRow = 3;
+            for (var i = 0; i < reference.Headers.Length; i++)
+            {
+                var h = ws.Cell(headerRow, i + 1);
+                h.Value = reference.Headers[i];
+                h.Style.Font.Bold = true;
+                h.Style.Font.FontColor = XLColor.White;
+                h.Style.Fill.BackgroundColor = Navy;
+                ws.Column(i + 1).Width = i == 0 ? 48 : 26;
+                ws.Column(i + 1).Style.NumberFormat.Format = "@";
+            }
+            for (var r = 0; r < reference.Rows.Count; r++)
+                for (var c = 0; c < reference.Headers.Length && c < reference.Rows[r].Length; c++)
+                    ws.Cell(headerRow + 1 + r, c + 1).SetValue(reference.Rows[r][c]);
+            ws.SheetView.FreezeRows(headerRow);
+            ws.SetTabColor(XLColor.FromHtml("#7B4FA3"));
+
+            var linked = m.Columns.ToList().FindIndex(c => c.Header == reference.LinkedColumnHeader);
+            if (linked >= 0)
+            {
+                var last = headerRow + Math.Max(reference.Rows.Count, 1);
+                var dv = dataSheet.Range(2, linked + 1, 1000, linked + 1).CreateDataValidation();
+                dv.List(ws.Range(headerRow + 1, 1, last, 1), true);
+                dv.IgnoreBlanks = true;
+                dv.ShowErrorMessage = true;
+                dv.ErrorStyle = XLErrorStyle.Stop;
+                dv.ErrorTitle = "Not a registered officer";
+                dv.ErrorMessage = $"Pick a value from the \"{reference.SheetName}\" sheet. Add new officers in POVIS > Users & Roles, then download a fresh template.";
+            }
+
+            // Read-only: the list changes only when an officer is added or changed in the system.
+            ws.Protect("povis-reference-list").AllowElement(XLSheetProtectionElements.SelectLockedCells);
         }
 
         private static void Lists(IXLWorksheet ws, BulkModule m)

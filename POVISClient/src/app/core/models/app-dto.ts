@@ -91,6 +91,7 @@ export interface ViolationDTO {
   barangayOfOccurrenceId?: string | null;
   barangayOfOccurrenceName?: string | null;
   witness?: string | null;
+  apprehendingOfficerId?: string | null;
   apprehendingOfficer?: string | null;
   apprehendingOfficerDeputationNumber?: string | null;
   evidenceCount?: number;
@@ -123,6 +124,7 @@ export interface AddViolationDTO {
   placeOfOccurrence?: string | null;
   barangayOfOccurrenceId?: string | null;
   witness?: string | null;
+  apprehendingOfficerId?: string | null;
   apprehendingOfficer?: string | null;
   apprehendingOfficerDeputationNumber?: string | null;
   /** Evidence photos as base64 data URLs (JPEG/PNG), at most 5. */
@@ -144,6 +146,7 @@ export interface UpdateViolationDTO {
   placeOfOccurrence?: string | null;
   barangayOfOccurrenceId?: string | null;
   witness?: string | null;
+  apprehendingOfficerId?: string | null;
   apprehendingOfficer?: string | null;
   apprehendingOfficerDeputationNumber?: string | null;
   /** New evidence photos as base64 data URLs; the total per violation is capped at 5. */
@@ -168,8 +171,16 @@ export interface ViolationFilterDTO {
   dateFrom?: string | null;
   dateTo?: string | null;
   search?: string | null;
+  mine?: boolean;
   page: number;
   pageSize: number;
+}
+
+/** A registered Apprehending Officer (Users & Roles) for the violation form. */
+export interface OfficerOption {
+  id: string;
+  name: string;
+  deputationNumber?: string | null;
 }
 
 export interface ApplicablePenaltyDTO {
@@ -506,6 +517,7 @@ export interface CreateUserDTO {
 
 export interface UpdateUserDTO {
   id: string;
+  username?: string | null;
   fullName?: string | null;
   contactNumber?: string | null;
   email?: string | null;

@@ -26,9 +26,9 @@ namespace POVISAPI.Controllers
         });
 
         [HttpGet("{module}/template")]
-        public IActionResult GetTemplate(string module)
+        public async Task<IActionResult> GetTemplate(string module)
         {
-            var bytes = importService.GetTemplate(module);
+            var bytes = await importService.GetTemplate(module);
             return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"{module}-bulk-upload-template.xlsx");
         }
 

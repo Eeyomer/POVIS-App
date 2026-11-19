@@ -13,6 +13,9 @@ namespace POVISAPI.Models.DTO
     public class ViolationDTO
     {
         public string ViolationId { get; set; } = string.Empty;
+        [System.Text.Json.Serialization.JsonIgnore]
+        public Guid? RecordedByUserId { get; set; }
+        public string? ApprehendingOfficerId { get; set; }
         public string ViolatorId { get; set; } = string.Empty;
         public string ViolatorFullName { get; set; } = string.Empty;
         public string OvrNumber { get; set; } = string.Empty;
@@ -49,6 +52,10 @@ namespace POVISAPI.Models.DTO
 
     public class AddViolationDTO
     {
+        /// <summary>Set by the controller from the logged-in user; never read from the request body.</summary>
+        [System.Text.Json.Serialization.JsonIgnore]
+        public Guid? RecordedByUserId { get; set; }
+
         [Required(ErrorMessage = "Violator is required")]
         public required string ViolatorId { get; set; }
 
@@ -78,6 +85,9 @@ namespace POVISAPI.Models.DTO
 
         [StringLength(150, ErrorMessage = "Witness cannot exceed 150 characters")]
         public string? Witness { get; set; }
+
+        /// <summary>Registered Apprehending Officer (user id). When set, name and deputation no. are taken from that account.</summary>
+        public string? ApprehendingOfficerId { get; set; }
 
         [StringLength(150, ErrorMessage = "Apprehending officer cannot exceed 150 characters")]
         public string? ApprehendingOfficer { get; set; }
@@ -130,6 +140,9 @@ namespace POVISAPI.Models.DTO
         [StringLength(150, ErrorMessage = "Witness cannot exceed 150 characters")]
         public string? Witness { get; set; }
 
+        /// <summary>Registered Apprehending Officer (user id). When set, name and deputation no. are taken from that account.</summary>
+        public string? ApprehendingOfficerId { get; set; }
+
         [StringLength(150, ErrorMessage = "Apprehending officer cannot exceed 150 characters")]
         public string? ApprehendingOfficer { get; set; }
 
@@ -157,6 +170,13 @@ namespace POVISAPI.Models.DTO
 
     public class ViolationFilterDTO
     {
+        /// <summary>When true, only violations recorded by the logged-in user are returned.</summary>
+        public bool Mine { get; set; }
+
+        /// <summary>Set by the controller from the logged-in user when Mine is true.</summary>
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Microsoft.AspNetCore.Mvc.ModelBinding.BindNever]
+        public Guid? RecordedByUserId { get; set; }
         public string? OrdinanceId { get; set; }
         public string? BarangayId { get; set; }
         public ViolationStatus? Status { get; set; }
@@ -183,5 +203,13 @@ namespace POVISAPI.Models.DTO
         public OffenseLevel OffenseLevel { get; set; }
         public decimal? FineAmount { get; set; }
         public string PenaltyText { get; set; } = string.Empty;
+    }
+
+    /// <summary>A registered Apprehending Officer, for the violation form's officer picker.</summary>
+    public class OfficerOptionDTO
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string? DeputationNumber { get; set; }
     }
 }

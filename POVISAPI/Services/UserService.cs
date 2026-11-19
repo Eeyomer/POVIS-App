@@ -88,6 +88,17 @@ public class UserService : IUserService
         var user = await context.Users.Include(u => u.Barangay).FirstOrDefaultAsync(u => u.Id == dto.Id)
             ?? throw new KeyNotFoundException("User does not exist.");
 
+        var newUsername = dto.Username?.Trim();
+        if (!string.IsNullOrEmpty(newUsername) && newUsername != user.Username)
+        {
+            if (newUsername.Length > 100)
+                throw new ArgumentException("Username cannot exceed 100 characters.");
+            var taken = await context.Users.AnyAsync(u => u.Username == newUsername && u.Id != user.Id);
+            if (taken)
+                throw new ArgumentException("Username is already taken.");
+            user.Username = newUsername;
+        }
+
         var barangay = await ResolveBarangayAsync(dto.BarangayId);
         user.Barangay = barangay;
         user.BarangayId = barangay?.Id;

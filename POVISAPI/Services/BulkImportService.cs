@@ -33,7 +33,11 @@ namespace POVISAPI.Services
             Modules.FirstOrDefault(m => string.Equals(m.Key, key, StringComparison.OrdinalIgnoreCase))
             ?? throw new KeyNotFoundException($"Unknown bulk upload module '{key}'.");
 
-        public byte[] GetTemplate(string module) => BulkTemplateBuilder.Build(Find(module));
+        public async Task<byte[]> GetTemplate(string module)
+        {
+            var m = Find(module);
+            return BulkTemplateBuilder.Build(m, await m.GetReferenceListAsync(db));
+        }
 
         public async Task<BulkImportResultDTO> ImportAsync(string module, Stream workbook, string uploader)
         {

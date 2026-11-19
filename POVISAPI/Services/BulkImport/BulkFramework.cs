@@ -30,9 +30,24 @@ namespace POVISAPI.Services.BulkImport
         /// <summary>What must already exist before this sheet can be uploaded.</summary>
         public virtual string? Prerequisites => null;
 
+        /// <summary>A read-only, protected sheet of live system data (e.g. registered officers) added to the template,
+        /// which one column of the data sheet is restricted to. Null when the module has none.</summary>
+        public virtual Task<BulkReferenceList?> GetReferenceListAsync(AppDbContext db) => Task.FromResult<BulkReferenceList?>(null);
+
         /// <summary>Validate every row and add entities to the context. Do NOT save; the engine saves once if there are no errors.</summary>
         public abstract Task StageAsync(AppDbContext db, IReadOnlyList<BulkRow> rows, BulkContext ctx);
     }
+
+    /// <summary>
+    /// Reference sheet shown in the template. The values in the first column are the only ones accepted in
+    /// <see cref="LinkedColumnHeader"/> of the data sheet (dropdown with a stop-on-invalid alert).
+    /// </summary>
+    public sealed record BulkReferenceList(
+        string SheetName,
+        string Description,
+        string[] Headers,
+        IReadOnlyList<string[]> Rows,
+        string LinkedColumnHeader);
 
     public sealed class BulkContext
     {

@@ -18,6 +18,7 @@ import {
   OrdinanceListDTO,
   ViolationDTO,
   ViolationStatus,
+  OfficerOption,
   ViolatorDTO,
 } from '../../core/models/app-dto';
 import { manilaToday } from '../../core/utils/manila-time';
@@ -41,6 +42,8 @@ export class Violations implements OnInit {
   violators = signal<ViolatorDTO[]>([]);
   ordinances = signal<OrdinanceListDTO[]>([]);
   barangays = signal<BarangayDTO[]>([]);
+  /** Registered Apprehending Officers (Users & Roles). */
+  officers = signal<OfficerOption[]>([]);
   selectedOrdinanceDetail = signal<OrdinanceDTO | null>(null);
 
   showForm = signal(false);
@@ -48,6 +51,8 @@ export class Violations implements OnInit {
 
   search = signal('');
   statusFilter = signal<ViolationStatus | ''>('');
+  /** false = all recorded violations, true = only those recorded by the logged-in user. */
+  mineOnly = signal(false);
 
   private fb = inject(FormBuilder);
 
@@ -62,6 +67,7 @@ export class Violations implements OnInit {
     placeOfOccurrence: [''],
     barangayOfOccurrenceId: [''],
     witness: [''],
+    apprehendingOfficerId: [''],
     apprehendingOfficer: [''],
     apprehendingOfficerDeputationNumber: ['', [Validators.maxLength(50)]],
     ordinanceId: ['', Validators.required],
@@ -127,6 +133,7 @@ export class Violations implements OnInit {
     this.form.controls.violatorId.valueChanges.subscribe(() => this.updateAge());
     this.form.controls.dateOfOccurrence.valueChanges.subscribe(() => this.updateAge());
     this.searchViolators('');
+    this.violationsService.getOfficers().subscribe((data) => this.officers.set(data));
     this.ordinancesService.list().subscribe((data) => this.ordinances.set([...data].sort((a, b) => a.shortName.localeCompare(b.shortName))));
     this.barangaysService.list().subscribe((data) => this.barangays.set([...data].sort((a, b) => a.name.localeCompare(b.name))));
     this.refresh();
@@ -157,7 +164,7 @@ export class Violations implements OnInit {
 
   refresh(): void {
     this.loading.set(true);
-    this.violationsService.list({ status: this.statusFilter() || undefined, search: this.search() || undefined, page: this.page(), pageSize: this.pageSize })
+    this.violationsService.list({ status: this.statusFilter() || undefined, search: this.search() || undefined, mine: this.mineOnly() || undefined, page: this.page(), pageSize: this.pageSize })
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe((result) => {
       this.violations.set(result.items);
@@ -225,6 +232,12 @@ export class Violations implements OnInit {
     this.refresh();
   }
 
+  onRecordedByChange(value: string): void {
+    this.mineOnly.set(value === 'mine');
+    this.page.set(1);
+    this.refresh();
+  }
+
   onStatusFilterChange(value: string): void {
     this.statusFilter.set(value as ViolationStatus | '');
     this.page.set(1);
@@ -274,6 +287,7 @@ export class Violations implements OnInit {
       placeOfOccurrence: violation.placeOfOccurrence ?? '',
       barangayOfOccurrenceId: violation.barangayOfOccurrenceId ?? '',
       witness: violation.witness ?? '',
+      apprehendingOfficerId: violation.apprehendingOfficerId ?? '',
       apprehendingOfficer: violation.apprehendingOfficer ?? '',
       apprehendingOfficerDeputationNumber: violation.apprehendingOfficerDeputationNumber ?? '',
       ordinanceId: violation.ordinanceId,
@@ -312,6 +326,7 @@ export class Violations implements OnInit {
           placeOfOccurrence: raw.placeOfOccurrence || null,
           barangayOfOccurrenceId: raw.barangayOfOccurrenceId || null,
           witness: raw.witness || null,
+          apprehendingOfficerId: raw.apprehendingOfficerId || null,
           apprehendingOfficer: raw.apprehendingOfficer || null,
           apprehendingOfficerDeputationNumber: raw.apprehendingOfficerDeputationNumber?.trim() || null,
           ordinanceSectionId: raw.ordinanceSectionId || null,
@@ -332,6 +347,7 @@ export class Violations implements OnInit {
           placeOfOccurrence: raw.placeOfOccurrence || null,
           barangayOfOccurrenceId: raw.barangayOfOccurrenceId || null,
           witness: raw.witness || null,
+          apprehendingOfficerId: raw.apprehendingOfficerId || null,
           apprehendingOfficer: raw.apprehendingOfficer || null,
           apprehendingOfficerDeputationNumber: raw.apprehendingOfficerDeputationNumber?.trim() || null,
           ordinanceId: raw.ordinanceId!,

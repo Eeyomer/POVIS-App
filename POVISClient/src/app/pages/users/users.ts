@@ -182,6 +182,7 @@ export class Users implements OnInit {
     const request = current
       ? this.usersService.update(current.id, {
           id: current.id,
+          username: username!.trim(),
           ...profile,
           // null keeps the stored photo; "" removes it.
           photo: this.photoChanged ? (this.photo() ?? '') : null,

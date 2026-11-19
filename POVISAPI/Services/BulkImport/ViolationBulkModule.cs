@@ -12,6 +12,36 @@ namespace POVISAPI.Services.BulkImport
         public override string SheetName => "Violations";
         public override int MaxRows => 10000;
 
+        private const string OfficerHeader = "Apprehending Officer *";
+
+        /// <summary>Text shown in the dropdown and expected in the cell, e.g. "JUAN DELA CRUZ (Dep. No. 2025-01-440)".</summary>
+        private static string OfficerLabel(string name, string? deputation) =>
+            string.IsNullOrWhiteSpace(deputation) ? name : $"{name} (Dep. No. {deputation})";
+
+        private static IQueryable<User> ActiveOfficers(AppDbContext db) =>
+            db.Users.AsNoTracking().Where(u => u.Role == Role.ApprehendingOfficer && u.IsActive);
+
+        public override async Task<BulkReferenceList?> GetReferenceListAsync(AppDbContext db)
+        {
+            var officers = await ActiveOfficers(db).OrderBy(u => u.FullName ?? u.Username).ToListAsync();
+            var rows = officers
+                .Select(u => new[]
+                {
+                    OfficerLabel((u.FullName ?? u.Username).Trim(), u.DeputationNumber),
+                    u.DeputationNumber ?? string.Empty,
+                    u.Username,
+                    u.ContactNumber ?? string.Empty,
+                    u.Email ?? string.Empty
+                })
+                .ToList();
+            return new BulkReferenceList(
+                "Officers",
+                "Registered Apprehending Officers. READ-ONLY - the Apprehending Officer column only accepts the values in the first column. To add an officer, register them in POVIS > Users & Roles and download a fresh template.",
+                new[] { "Apprehending Officer (pick this in the data sheet)", "Deputation Number", "Username", "Contact Number", "Email" },
+                rows,
+                OfficerHeader);
+        }
+
         public override string? Prerequisites =>
             "Upload order: Barangays and Ordinances first (they are matched by name / number). Violators are matched by name + birthday and created automatically when not found.";
 
@@ -35,8 +65,7 @@ namespace POVISAPI.Services.BulkImport
             new BulkColumn("Place Of Occurrence", false, "Optional. Up to 300 characters."),
             new BulkColumn("Barangay Of Occurrence", false, "Optional. Must match a barangay name already in POVIS. Drives the per-barangay reports."),
             new BulkColumn("Witness", false, "Optional. Up to 150 characters."),
-            new BulkColumn("Apprehending Officer", false, "Optional. Name, up to 150 characters. Used by the incentive reports."),
-            new BulkColumn("Apprehending Officer Deputation Number", false, "Optional. Up to 50 characters."),
+            new BulkColumn(OfficerHeader, true, "Required. Pick from the dropdown - it is tied to the \"Officers\" sheet (registered Apprehending Officers with their Deputation Numbers). Any other value is rejected."),
             new BulkColumn("Is Warning Ticket", false, "Yes or No. Default No.", Opt.YesNo),
             new BulkColumn("Offense Level", false, "First, Second, Third or Fourth. Leave blank to have it computed from the violator's earlier tickets for the same ordinance (in date order).", Opt.Of<OffenseLevel>()),
             new BulkColumn("Status", false, "Optional. Pending, Paid, ForSeminar, ForCounseling, ForCommunityService, CaseFiled, Dismissed, Closed, DidNotComply or WarningIssued. Default Pending (WarningIssued for warning tickets).", Opt.Of<ViolationStatus>()),
@@ -47,14 +76,15 @@ namespace POVISAPI.Services.BulkImport
 
         public override IReadOnlyList<string[]> Examples { get; } = new[]
         {
-            new[] { "027620", "19", "2025", "Section 21", "Dela Cruz", "Juan", "Santos", "Jr.", "1990-05-14", "Male", "2026-06-02", "14:30", "2026-06-03", "BPD", "", "Plaza Rizal", "Ugong", "", "ROGER ALCANTARA JR", "2023-02-010", "No", "", "Pending", "", "", "No" },
-            new[] { "027621", "07", "2019", "", "Reyes", "Maria", "", "", "", "Female", "2026-06-05", "", "", "PNP", "27", "Market area", "Santolan", "", "", "", "No", "", "", "", "", "No" }
+            new[] { "027620", "19", "2025", "Section 21", "Dela Cruz", "Juan", "Santos", "Jr.", "1990-05-14", "Male", "2026-06-02", "14:30", "2026-06-03", "BPD", "", "Plaza Rizal", "Ugong", "", "JUAN DELA CRUZ (Dep. No. 2025-01-440)", "No", "", "Pending", "", "", "No" },
+            new[] { "027621", "07", "2019", "", "Reyes", "Maria", "", "", "", "Female", "2026-06-05", "", "", "PNP", "27", "Market area", "Santolan", "", "JUAN DELA CRUZ (Dep. No. 2025-01-440)", "No", "", "", "", "", "No" }
         };
 
         public override IReadOnlyList<(string, string)> Notes { get; } = new[]
         {
             ("Violators", "Rows are matched to an existing violator by Last Name + First Name (+ Middle Name, + Birthday when given). If none matches, a new violator is created (Gender required). If several match, add the Birthday or Middle Name to say which one."),
             ("Offense level", "When Offense Level is blank it is computed per violator and ordinance from earlier tickets, both already in POVIS and earlier dates in this file. Warning tickets and dismissed tickets do not count."),
+            ("Apprehending Officer", "Every violation must be tied to a registered Apprehending Officer. The column is a dropdown linked to the protected \"Officers\" sheet (name and Deputation Number). Values not on that list are rejected, and the list only changes when an officer is added or changed in Users & Roles - download a fresh template after that."),
             ("Existing records", "A ticket with the same OVR Number + ordinance that already exists is skipped, not changed."),
             ("Same OVR, two violations", "If one OVR ticket covers two ordinances, use one row per ordinance with the same OVR Number."),
             ("Next steps", "Payments, seminars, counseling, community service and filed cases are uploaded in their own templates and refer to a ticket by OVR Number.")
@@ -82,6 +112,11 @@ namespace POVISAPI.Services.BulkImport
                 .ToDictionary(x => (x.ViolatorId, x.OrdinanceId), x => x.Count);
 
             var today = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(8));
+            // Registered, active Apprehending Officers keyed by the exact text the template dropdown offers.
+            var officersByLabel = (await ActiveOfficers(db).ToListAsync())
+                .GroupBy(u => OfficerLabel((u.FullName ?? u.Username).Trim(), u.DeputationNumber).ToLowerInvariant())
+                .ToDictionary(g => g.Key, g => g.First());
+
 
             // ── Pass 1: validate + resolve every row ────────────────────────────
             var parsed = new List<Parsed>();
@@ -107,8 +142,7 @@ namespace POVISAPI.Services.BulkImport
                 p.Place = r.Text("Place Of Occurrence", 300);
                 var barangayName = r.Text("Barangay Of Occurrence");
                 p.Witness = r.Text("Witness", 150);
-                p.Officer = r.Text("Apprehending Officer", 150);
-                p.OfficerDeputation = r.Text("Apprehending Officer Deputation Number", 50);
+                var officerText = r.Required(OfficerHeader, 250);
                 p.Warning = r.Bool("Is Warning Ticket");
                 p.Level = r.Choice<OffenseLevel>("Offense Level");
                 p.Status = r.Choice<ViolationStatus>("Status");
@@ -140,6 +174,16 @@ namespace POVISAPI.Services.BulkImport
                         else r.Error($"Barangay '{barangayName}' does not exist. Upload it in Barangays first or fix the spelling.");
                     }
                     p.Age = age;
+                    if (officerText != null)
+                    {
+                        if (officersByLabel.TryGetValue(officerText.Trim().ToLowerInvariant(), out var officer))
+                        {
+                            p.OfficerId = officer.Id;
+                            p.OfficerName = (officer.FullName ?? officer.Username).Trim();
+                            p.OfficerDeputation = officer.DeputationNumber;
+                        }
+                        else r.Error($"Apprehending Officer '{officerText}' is not a registered Apprehending Officer. Pick one from the dropdown (Officers sheet); new officers must first be added in Users & Roles.");
+                    }
                 }
                 if (!r.HasErrors) parsed.Add(p);
             }
@@ -208,7 +252,9 @@ namespace POVISAPI.Services.BulkImport
                     PlaceOfOccurrence = p.Place,
                     BarangayOfOccurrenceId = p.BarangayId,
                     Witness = p.Witness,
-                    ApprehendingOfficer = p.Officer,
+                    ApprehendingOfficerId = p.OfficerId,
+                    RecordedByUserId = p.OfficerId,
+                    ApprehendingOfficer = p.OfficerName,
                     ApprehendingOfficerDeputationNumber = p.OfficerDeputation,
                     OrdinanceId = p.Ordinance.Id,
                     OrdinanceSectionId = p.SectionId,
@@ -231,7 +277,8 @@ namespace POVISAPI.Services.BulkImport
         {
             public BulkRow Row = null!;
             public string Ovr = "", Last = "", First = "";
-            public string? Middle, Suffix, Place, Witness, Officer, OfficerDeputation, Remarks, Remarks2;
+            public string? Middle, Suffix, Place, Witness, OfficerName, OfficerDeputation, Remarks, Remarks2;
+            public Guid OfficerId;
             public Ordinance? Ordinance;
             public Guid? SectionId, BarangayId;
             public DateOnly? Birthday, Submission;

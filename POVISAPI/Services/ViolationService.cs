@@ -16,6 +16,8 @@ namespace POVISAPI.Services
         private static ViolationDTO MapToDTO(Violation v) => new()
         {
             ViolationId = v.Id.ToString(),
+            RecordedByUserId = v.RecordedByUserId,
+            ApprehendingOfficerId = v.ApprehendingOfficerId?.ToString(),
             ViolatorId = v.ViolatorId.ToString(),
             ViolatorFullName = v.Violator.LastName + ", " + v.Violator.FirstName +
                 (v.Violator.MiddleName != null ? " " + v.Violator.MiddleName : ""),
@@ -59,6 +61,9 @@ namespace POVISAPI.Services
         public async Task<PagedResult<ViolationDTO>> GetAllAsync(ViolationFilterDTO filter)
         {
             var query = IncludedQuery().AsNoTracking().AsQueryable();
+
+            if (filter.RecordedByUserId.HasValue)
+                query = query.Where(v => v.RecordedByUserId == filter.RecordedByUserId);
 
             if (!string.IsNullOrWhiteSpace(filter.OrdinanceId))
             {
@@ -115,6 +120,40 @@ namespace POVISAPI.Services
                 Page = page,
                 PageSize = pageSize
             };
+        }
+
+        public async Task<List<OfficerOptionDTO>> GetOfficersAsync() =>
+            await dbContext.Users.AsNoTracking()
+                .Where(u => u.Role == Role.ApprehendingOfficer && u.IsActive)
+                .OrderBy(u => u.FullName ?? u.Username)
+                .Select(u => new OfficerOptionDTO
+                {
+                    Id = u.Id.ToString(),
+                    Name = u.FullName ?? u.Username,
+                    DeputationNumber = u.DeputationNumber
+                })
+                .ToListAsync();
+
+        /// <summary>
+        /// Resolves the officer fields. A registered officer (user id) must be an Apprehending Officer account,
+        /// and their name and deputation no. are copied onto the violation; otherwise the typed values are kept
+        /// for officers who are not registered.
+        /// </summary>
+        private async Task<(Guid? Id, string? Name, string? Deputation)> ResolveOfficerAsync(
+            string? officerId, string? name, string? deputation, Guid? currentId = null)
+        {
+            if (string.IsNullOrWhiteSpace(officerId))
+                return (null, name?.Trim(), string.IsNullOrWhiteSpace(deputation) ? null : deputation.Trim());
+
+            if (!Guid.TryParse(officerId, out Guid id))
+                throw new ArgumentException("Invalid Apprehending Officer Id format.");
+
+            var officer = await dbContext.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id && u.Role == Role.ApprehendingOfficer)
+                ?? throw new ArgumentException("Selected apprehending officer is not a registered Apprehending Officer.");
+            if (!officer.IsActive && id != currentId)
+                throw new ArgumentException("Selected apprehending officer account is inactive.");
+
+            return (officer.Id, officer.FullName ?? officer.Username, officer.DeputationNumber);
         }
 
         public async Task<ViolationDTO> GetByIdAsync(string id)
@@ -199,10 +238,13 @@ namespace POVISAPI.Services
             if ((dto.EvidencePhotos?.Count ?? 0) > MaxEvidencePhotos)
                 throw new ArgumentException($"A violation can have at most {MaxEvidencePhotos} evidence photos.");
             var evidence = BuildEvidence(dto.EvidencePhotos);
+            var officer = await ResolveOfficerAsync(dto.ApprehendingOfficerId, dto.ApprehendingOfficer, dto.ApprehendingOfficerDeputationNumber);
 
             var entity = new Violation
             {
                 Evidence = evidence,
+                // Violations are recorded by the Apprehending Officer; fall back to the logged-in user for unregistered officers.
+                RecordedByUserId = officer.Id ?? dto.RecordedByUserId,
                 ViolatorId = violatorId,
                 OvrNumber = dto.OvrNumber.Trim(),
                 DateOfSubmission = dto.DateOfSubmission,
@@ -213,8 +255,9 @@ namespace POVISAPI.Services
                 PlaceOfOccurrence = dto.PlaceOfOccurrence?.Trim(),
                 BarangayOfOccurrenceId = barangayOfOccurrenceId,
                 Witness = dto.Witness?.Trim(),
-                ApprehendingOfficer = dto.ApprehendingOfficer?.Trim(),
-                ApprehendingOfficerDeputationNumber = string.IsNullOrWhiteSpace(dto.ApprehendingOfficerDeputationNumber) ? null : dto.ApprehendingOfficerDeputationNumber.Trim(),
+                ApprehendingOfficerId = officer.Id,
+                ApprehendingOfficer = officer.Name,
+                ApprehendingOfficerDeputationNumber = officer.Deputation,
                 OrdinanceId = ordinanceId,
                 OrdinanceSectionId = ordinanceSectionId,
                 OffenseLevel = offenseLevel,
@@ -271,8 +314,10 @@ namespace POVISAPI.Services
             entity.PlaceOfOccurrence = dto.PlaceOfOccurrence?.Trim();
             entity.BarangayOfOccurrenceId = barangayOfOccurrenceId;
             entity.Witness = dto.Witness?.Trim();
-            entity.ApprehendingOfficer = dto.ApprehendingOfficer?.Trim();
-            entity.ApprehendingOfficerDeputationNumber = string.IsNullOrWhiteSpace(dto.ApprehendingOfficerDeputationNumber) ? null : dto.ApprehendingOfficerDeputationNumber.Trim();
+            var officer = await ResolveOfficerAsync(dto.ApprehendingOfficerId, dto.ApprehendingOfficer, dto.ApprehendingOfficerDeputationNumber, entity.ApprehendingOfficerId);
+            entity.ApprehendingOfficerId = officer.Id;
+            entity.ApprehendingOfficer = officer.Name;
+            entity.ApprehendingOfficerDeputationNumber = officer.Deputation;
             entity.OrdinanceSectionId = ordinanceSectionId;
             entity.Status = dto.Status;
             entity.Remarks = dto.Remarks?.Trim();

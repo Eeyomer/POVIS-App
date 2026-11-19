@@ -6,6 +6,8 @@ namespace POVISAPI.Interfaces
     {
         Task<PagedResult<ViolationDTO>> GetAllAsync(ViolationFilterDTO filter);
         Task<ViolationDTO> GetByIdAsync(string id);
+        /// <summary>Active, registered Apprehending Officers (Users &amp; Roles).</summary>
+        Task<List<OfficerOptionDTO>> GetOfficersAsync();
         Task<ViolationDTO> CreateAsync(AddViolationDTO dto);
         Task<ViolationDTO> UpdateAsync(UpdateViolationDTO dto);
         Task DeleteAsync(string id);

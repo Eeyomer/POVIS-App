@@ -161,6 +161,11 @@ public class AppDbContext : DbContext
              .HasForeignKey(v => v.BarangayOfOccurrenceId)
              .OnDelete(DeleteBehavior.SetNull);
 
+            e.HasOne(v => v.ApprehendingOfficerUser)
+             .WithMany()
+             .HasForeignKey(v => v.ApprehendingOfficerId)
+             .OnDelete(DeleteBehavior.SetNull);
+
             // Dual violations share one OVR ticket, so uniqueness is per ordinance
             e.HasIndex(v => new { v.OvrNumber, v.OrdinanceId }).IsUnique();
 

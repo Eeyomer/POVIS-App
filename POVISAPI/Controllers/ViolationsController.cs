@@ -19,9 +19,19 @@ namespace POVISAPI.Controllers
             this.violationService = violationService;
         }
 
+        // The JWT's "sub" (username) shares a claim type with the user id, so pick the claim that is a Guid.
+        private Guid? CurrentUserId() => User.Claims
+            .Where(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier || c.Type == "nameid")
+            .Select(c => Guid.TryParse(c.Value, out var g) ? g : (Guid?)null)
+            .FirstOrDefault(g => g.HasValue);
+
         [HttpGet]
         public async Task<IActionResult> GetAllViolations([FromQuery] ViolationFilterDTO filter)
         {
+            // "Recorded by me" filter: scope to the logged-in user's own entries.
+            if (filter.Mine)
+                filter.RecordedByUserId = CurrentUserId() ?? Guid.Empty;
+
             var violations = await violationService.GetAllAsync(filter);
             return Ok(new APIResponse<object>
             {
@@ -29,6 +39,13 @@ namespace POVISAPI.Controllers
                 Message = "Violations retrieved successfully",
                 Data = violations
             });
+        }
+
+        [HttpGet("officers")]
+        public async Task<IActionResult> GetOfficers()
+        {
+            var officers = await violationService.GetOfficersAsync();
+            return Ok(new APIResponse<object> { Success = true, Message = "Officers retrieved successfully", Data = officers });
         }
 
         [HttpGet("{id}")]
@@ -60,6 +77,7 @@ namespace POVISAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> AddViolation(AddViolationDTO dto)
         {
+            dto.RecordedByUserId = CurrentUserId();
             var response = await violationService.CreateAsync(dto);
             return Ok(new APIResponse<object>
             {

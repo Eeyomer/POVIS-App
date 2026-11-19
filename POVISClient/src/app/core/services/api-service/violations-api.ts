@@ -6,6 +6,7 @@ import { APIResponse, PagedResult } from '../../models/app-model';
 import {
   AddViolationDTO,
   ApplicablePenaltyDTO,
+  OfficerOption,
   UpdateViolationDTO,
   ViolationDTO,
   ViolationFilterDTO,
@@ -26,6 +27,10 @@ export class ViolationsApi {
     return Object.fromEntries(
       Object.entries(filter).filter(([, v]) => v !== undefined && v !== null && v !== ""),
     ) as Record<string, string | number | boolean>;
+  }
+
+  getOfficers(): Observable<APIResponse<OfficerOption[]>> {
+    return this.http.get<APIResponse<OfficerOption[]>>(`${this.apiUrl}/officers`);
   }
 
   getById(id: string): Observable<APIResponse<ViolationDTO>> {

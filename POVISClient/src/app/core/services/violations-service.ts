@@ -5,6 +5,7 @@ import { PagedResult } from '../models/app-model';
 import {
   AddViolationDTO,
   ApplicablePenaltyDTO,
+  OfficerOption,
   UpdateViolationDTO,
   ViolationDTO,
   ViolationFilterDTO,
@@ -29,6 +30,13 @@ export class ViolationsService {
     return this.api.getById(id).pipe(
       map((res) => res.data),
       catchError(() => of(null)),
+    );
+  }
+
+  getOfficers(): Observable<OfficerOption[]> {
+    return this.api.getOfficers().pipe(
+      map((res) => (res.success ? res.data ?? [] : [])),
+      catchError(() => of([])),
     );
   }
 
