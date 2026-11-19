@@ -38,8 +38,8 @@ export class OrdinancesApi {
     return this.http.put<APIResponse<OrdinanceDTO>>(`${this.apiUrl}/${id}`, dto);
   }
 
-  delete(id: string): Observable<APIResponse<null>> {
-    return this.http.delete<APIResponse<null>>(`${this.apiUrl}/${id}`);
+  delete(id: string): Observable<APIResponse<{ archived: boolean }>> {
+    return this.http.delete<APIResponse<{ archived: boolean }>>(`${this.apiUrl}/${id}`);
   }
 
   addSection(id: string, dto: AddOrdinanceSectionDTO): Observable<APIResponse<OrdinanceSectionDTO>> {

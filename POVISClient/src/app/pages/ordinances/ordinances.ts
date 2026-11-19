@@ -53,6 +53,7 @@ export class Ordinances implements OnInit {
     title: ['', Validators.required],
     shortName: ['', Validators.required],
     isExecutiveOrder: [false],
+    isActive: [true],
   });
 
   sectionForm = this.fb.group({
@@ -141,7 +142,7 @@ export class Ordinances implements OnInit {
 
   openAdd(): void {
     this.editing.set(null);
-    this.form.reset({ series: manilaYear(), isExecutiveOrder: false });
+    this.form.reset({ series: manilaYear(), isExecutiveOrder: false, isActive: true });
     this.showForm.set(true);
   }
 
@@ -155,6 +156,7 @@ export class Ordinances implements OnInit {
         title: full.title,
         shortName: full.shortName,
         isExecutiveOrder: full.isExecutiveOrder,
+        isActive: full.isActive,
       });
       this.showForm.set(true);
     });
@@ -181,7 +183,7 @@ export class Ordinances implements OnInit {
           title: raw.title!,
           shortName: raw.shortName!,
           isExecutiveOrder: !!raw.isExecutiveOrder,
-          isActive: current.isActive,
+          isActive: !!raw.isActive,
         })
       : this.ordinancesService.create({
           ordinanceNumber: raw.ordinanceNumber!,
@@ -247,6 +249,18 @@ export class Ordinances implements OnInit {
         this.toast.success(editingId ? 'Section updated.' : 'Section added.');
         this.cancelSectionEdit();
         this.viewDetail({ ordinanceId: detail.ordinanceId } as OrdinanceListDTO);
+      },
+      error: (err) => this.toast.error(err.message),
+    });
+  }
+
+  deleteOrdinance(o: OrdinanceListDTO): void {
+    if (!confirm(`Delete ${o.shortName}? If it is already used by violations it will be archived (set to inactive) instead.`)) return;
+    this.ordinancesService.remove(o.ordinanceId).subscribe({
+      next: (archived) => {
+        this.toast.success(archived ? 'Ordinance is in use, so it was archived (set to inactive).' : 'Ordinance deleted.');
+        if (this.selected()?.ordinanceId === o.ordinanceId) this.closeDetail();
+        this.refresh();
       },
       error: (err) => this.toast.error(err.message),
     });

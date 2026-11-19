@@ -71,9 +71,10 @@ export class OrdinancesService {
     );
   }
 
-  remove(id: string): Observable<void> {
+  /** Emits true when the ordinance was archived (still referenced) rather than deleted. */
+  remove(id: string): Observable<boolean> {
     return this.api.delete(id).pipe(
-      map(() => void 0),
+      map((res) => !!res.data?.archived),
       tap(() => this.invalidate()),
       catchError((err) => this.rethrowAsError(err)),
     );

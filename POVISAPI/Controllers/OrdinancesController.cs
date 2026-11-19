@@ -111,11 +111,14 @@ namespace POVISAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteOrdinance(string id)
         {
-            await ordinanceService.DeleteAsync(id);
+            var archived = await ordinanceService.DeleteAsync(id);
             return Ok(new APIResponse<object>
             {
                 Success = true,
-                Message = "Ordinance deleted successfully",
+                Message = archived
+                    ? "Ordinance is used by existing records, so it was archived (set to inactive) instead of deleted"
+                    : "Ordinance deleted successfully",
+                Data = new { archived }
             });
         }
 

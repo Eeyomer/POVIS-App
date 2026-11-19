@@ -8,7 +8,8 @@ namespace POVISAPI.Interfaces
         Task<OrdinanceDTO> GetByIdAsync(string id);
         Task<OrdinanceDTO> CreateAsync(AddOrdinanceDTO dto);
         Task<OrdinanceDTO> UpdateAsync(UpdateOrdinanceDTO dto);
-        Task DeleteAsync(string id);
+        /// <summary>Deletes the ordinance, or archives (deactivates) it when other records reference it. Returns true if archived.</summary>
+        Task<bool> DeleteAsync(string id);
 
         Task<OrdinanceSectionDTO> AddSectionAsync(string ordinanceId, AddOrdinanceSectionDTO dto);
         Task<OrdinanceSectionDTO> UpdateSectionAsync(string ordinanceId, string sectionId, AddOrdinanceSectionDTO dto);

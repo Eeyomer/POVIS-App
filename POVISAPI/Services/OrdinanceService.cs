@@ -117,12 +117,14 @@ namespace POVISAPI.Services
             return MapToDTO(entity);
         }
 
-        public async Task DeleteAsync(string id)
+        public async Task<bool> DeleteAsync(string id)
         {
             var entity = await GetTrackedOrdinance(id, includeSections: false);
 
-            var hasViolations = await dbContext.Violations.AnyAsync(v => v.OrdinanceId == entity.Id);
-            if (hasViolations)
+            // Archived violations are hidden by a query filter but still reference the ordinance.
+            var isReferenced = await dbContext.Violations.IgnoreQueryFilters()
+                .AnyAsync(v => v.OrdinanceId == entity.Id);
+            if (isReferenced)
             {
                 entity.IsActive = false;
             }
@@ -132,6 +134,7 @@ namespace POVISAPI.Services
             }
             await dbContext.SaveChangesAsync();
             InvalidatePenalties(entity.Id);
+            return isReferenced;
         }
 
         public async Task<OrdinanceSectionDTO> AddSectionAsync(string ordinanceId, AddOrdinanceSectionDTO dto)
