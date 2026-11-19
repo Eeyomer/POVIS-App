@@ -202,18 +202,24 @@ export class Ordinances implements OnInit {
 
   closeDetail(): void {
     this.selected.set(null);
+    this.showSectionForm.set(false);
   }
 
   /** The section being edited, or null while adding a new one. */
   editingSectionId = signal<string | null>(null);
 
+  /** The section form stays hidden until the user clicks "Add section" or edits one. */
+  showSectionForm = signal(false);
+
   editSection(section: OrdinanceSectionDTO): void {
     this.editingSectionId.set(section.ordinanceSectionId);
+    this.showSectionForm.set(true);
     this.sectionForm.reset({ sectionCode: section.sectionCode, description: section.description ?? '' });
   }
 
   cancelSectionEdit(): void {
     this.editingSectionId.set(null);
+    this.showSectionForm.set(false);
     this.sectionForm.reset();
   }
 

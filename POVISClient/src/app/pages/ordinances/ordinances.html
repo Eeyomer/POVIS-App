@@ -108,15 +108,17 @@
           <li class="text-[13px] text-[#7a889c]">No sections yet.</li>
           }
         </ul>
-        @if (authService.canManageUsers()) {
+        @if (authService.canManageUsers() && !showSectionForm()) {
+        <button type="button" (click)="showSectionForm.set(true)" class="px-3 py-2 rounded-lg bg-[#1e3a63] text-white text-[13px] font-semibold">Add section</button>
+        }
+        @if (authService.canManageUsers() && showSectionForm()) {
         <form [formGroup]="sectionForm" (ngSubmit)="addSection()" class="flex flex-col gap-2">
+          <div class="text-[13px] font-semibold text-[#152238]">{{ editingSectionId() ? 'Edit section' : 'Add new section' }}</div>
           <input type="text" formControlName="sectionCode" maxlength="50" placeholder="Section code" class="w-full px-3 py-2 rounded-lg border border-[#d3dae5] text-[13px]" />
           <textarea formControlName="description" maxlength="5000" rows="4" placeholder="Description" class="w-full px-3 py-2 rounded-lg border border-[#d3dae5] text-[13px] resize-y"></textarea>
           <div class="flex gap-2">
             <button type="submit" class="px-3 py-2 rounded-lg bg-[#1e3a63] text-white text-[13px] font-semibold">{{ editingSectionId() ? 'Save' : 'Add' }}</button>
-            @if (editingSectionId()) {
             <button type="button" (click)="cancelSectionEdit()" class="px-3 py-2 rounded-lg border border-[#d3dae5] text-[13px] font-semibold text-[#152238]">Cancel</button>
-            }
           </div>
         </form>
         }
