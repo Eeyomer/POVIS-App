@@ -68,6 +68,16 @@ namespace POVISAPI.Models.DTO
         public List<OrdinancePenaltyDTO> Penalties { get; set; } = new();
     }
 
+    public class UpdateOrdinancePenaltyDTO
+    {
+        [Range(0, 1000000, ErrorMessage = "Fine amount must be between 0 and 1,000,000")]
+        public decimal? FineAmount { get; set; }
+
+        [Required(ErrorMessage = "Penalty text is required")]
+        [StringLength(1000, ErrorMessage = "Penalty text cannot exceed 1,000 characters")]
+        public required string PenaltyText { get; set; }
+    }
+
     public class AddOrdinanceSectionDTO
     {
         [Required(ErrorMessage = "Section code is required")]

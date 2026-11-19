@@ -11,6 +11,7 @@ import {
   OrdinancePenaltyDTO,
   OrdinanceSectionDTO,
   UpdateOrdinanceDTO,
+  UpdateOrdinancePenaltyDTO,
 } from '../models/app-dto';
 import { OrdinancesApi } from './api-service/ordinances-api';
 import { TtlCache } from '../utils/ttl-cache';
@@ -81,6 +82,22 @@ export class OrdinancesService {
   addSection(id: string, dto: AddOrdinanceSectionDTO): Observable<OrdinanceSectionDTO> {
     return this.api.addSection(id, dto).pipe(
       map((res) => res.data as OrdinanceSectionDTO),
+      tap(() => this.invalidate()),
+      catchError((err) => this.rethrowAsError(err)),
+    );
+  }
+
+  updateSection(id: string, sectionId: string, dto: AddOrdinanceSectionDTO): Observable<OrdinanceSectionDTO> {
+    return this.api.updateSection(id, sectionId, dto).pipe(
+      map((res) => res.data as OrdinanceSectionDTO),
+      tap(() => this.invalidate()),
+      catchError((err) => this.rethrowAsError(err)),
+    );
+  }
+
+  updatePenalty(id: string, penaltyId: string, dto: UpdateOrdinancePenaltyDTO): Observable<OrdinancePenaltyDTO> {
+    return this.api.updatePenalty(id, penaltyId, dto).pipe(
+      map((res) => res.data as OrdinancePenaltyDTO),
       tap(() => this.invalidate()),
       catchError((err) => this.rethrowAsError(err)),
     );

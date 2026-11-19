@@ -13,6 +13,7 @@ import {
   OrdinancePenaltyDTO,
   OrdinanceSectionDTO,
   UpdateOrdinanceDTO,
+  UpdateOrdinancePenaltyDTO,
 } from '../../models/app-dto';
 
 @Injectable({ providedIn: 'root' })
@@ -43,6 +44,14 @@ export class OrdinancesApi {
 
   addSection(id: string, dto: AddOrdinanceSectionDTO): Observable<APIResponse<OrdinanceSectionDTO>> {
     return this.http.post<APIResponse<OrdinanceSectionDTO>>(`${this.apiUrl}/${id}/sections`, dto);
+  }
+
+  updateSection(id: string, sectionId: string, dto: AddOrdinanceSectionDTO): Observable<APIResponse<OrdinanceSectionDTO>> {
+    return this.http.put<APIResponse<OrdinanceSectionDTO>>(`${this.apiUrl}/${id}/sections/${sectionId}`, dto);
+  }
+
+  updatePenalty(id: string, penaltyId: string, dto: UpdateOrdinancePenaltyDTO): Observable<APIResponse<OrdinancePenaltyDTO>> {
+    return this.http.put<APIResponse<OrdinancePenaltyDTO>>(`${this.apiUrl}/${id}/penalties/${penaltyId}`, dto);
   }
 
   removeSection(id: string, sectionId: string): Observable<APIResponse<null>> {

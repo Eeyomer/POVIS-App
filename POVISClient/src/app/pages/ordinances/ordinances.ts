@@ -6,7 +6,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { OrdinancesService } from '../../core/services/ordinances-service';
 import { AuthService } from '../../core/services/auth-service';
-import { OrdinanceDTO, OrdinanceImportResultDTO, OrdinanceListDTO, OrdinancePenaltyDTO } from '../../core/models/app-dto';
+import { OrdinanceDTO, OrdinanceImportResultDTO, OrdinanceListDTO, OrdinancePenaltyDTO, OrdinanceSectionDTO } from '../../core/models/app-dto';
 import { ordinal } from '../../core/utils/offense-level';
 import { manilaYear } from '../../core/utils/manila-time';
 import { ToastService } from '../../shared/toast/toast-service';
@@ -204,6 +204,19 @@ export class Ordinances implements OnInit {
     this.selected.set(null);
   }
 
+  /** The section being edited, or null while adding a new one. */
+  editingSectionId = signal<string | null>(null);
+
+  editSection(section: OrdinanceSectionDTO): void {
+    this.editingSectionId.set(section.ordinanceSectionId);
+    this.sectionForm.reset({ sectionCode: section.sectionCode, description: section.description ?? '' });
+  }
+
+  cancelSectionEdit(): void {
+    this.editingSectionId.set(null);
+    this.sectionForm.reset();
+  }
+
   addSection(): void {
     const detail = this.selected();
     if (!detail || this.sectionForm.invalid) {
@@ -211,14 +224,19 @@ export class Ordinances implements OnInit {
       return;
     }
     const raw = this.sectionForm.getRawValue();
-    this.ordinancesService.addSection(detail.ordinanceId, { sectionCode: raw.sectionCode!, description: raw.description || null })
-      .subscribe({
-        next: () => {
-          this.sectionForm.reset();
-          this.viewDetail({ ordinanceId: detail.ordinanceId } as OrdinanceListDTO);
-        },
-        error: (err) => this.toast.error(err.message),
-      });
+    const dto = { sectionCode: raw.sectionCode!.trim(), description: raw.description?.trim() || null };
+    const editingId = this.editingSectionId();
+    const request = editingId
+      ? this.ordinancesService.updateSection(detail.ordinanceId, editingId, dto)
+      : this.ordinancesService.addSection(detail.ordinanceId, dto);
+    request.subscribe({
+      next: () => {
+        this.toast.success(editingId ? 'Section updated.' : 'Section added.');
+        this.cancelSectionEdit();
+        this.viewDetail({ ordinanceId: detail.ordinanceId } as OrdinanceListDTO);
+      },
+      error: (err) => this.toast.error(err.message),
+    });
   }
 
   removeSection(sectionId: string): void {
@@ -232,13 +250,25 @@ export class Ordinances implements OnInit {
 
   levelError = signal<string | null>(null);
 
+  /** The penalty being edited, or null while adding the next level. */
+  editingPenaltyId = signal<string | null>(null);
+
+  editPenalty(scope: PenaltyScope, penalty: OrdinancePenaltyDTO): void {
+    this.levelError.set(null);
+    this.editingPenaltyId.set(penalty.ordinancePenaltyId);
+    this.levelForm.reset({ fineAmount: penalty.fineAmount ?? null, penaltyText: penalty.penaltyText });
+    this.addingFor.set(scope.key);
+  }
+
   startAdd(key: string): void {
+    this.editingPenaltyId.set(null);
     this.levelError.set(null);
     this.levelForm.reset({ fineAmount: null, penaltyText: '' });
     this.addingFor.set(key);
   }
 
   cancelAdd(): void {
+    this.editingPenaltyId.set(null);
     this.addingFor.set(null);
   }
 
@@ -253,6 +283,23 @@ export class Ordinances implements OnInit {
       return;
     }
     this.levelError.set(null);
+
+    const editingId = this.editingPenaltyId();
+    if (editingId) {
+      this.ordinancesService.updatePenalty(detail.ordinanceId, editingId, {
+        fineAmount: raw.fineAmount,
+        penaltyText: text || `Fine of ₱${raw.fineAmount}`,
+      }).subscribe({
+        next: () => {
+          this.toast.success('Penalty updated.');
+          this.cancelAdd();
+          this.viewDetail({ ordinanceId: detail.ordinanceId } as OrdinanceListDTO);
+        },
+        error: (err) => this.levelError.set(err.message),
+      });
+      return;
+    }
+
     const previous = scope.penalties.at(-1);
     if (previous?.fineAmount != null && raw.fineAmount != null && raw.fineAmount < previous.fineAmount) {
       this.levelError.set(`The ${ordinal(scope.nextLevel)} offense must be higher than the ${ordinal(previous.offenseLevel)} offense (fine of at least ₱${previous.fineAmount}).`);

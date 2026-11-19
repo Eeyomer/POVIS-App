@@ -155,6 +155,30 @@ namespace POVISAPI.Services
             };
         }
 
+        public async Task<OrdinanceSectionDTO> UpdateSectionAsync(string ordinanceId, string sectionId, AddOrdinanceSectionDTO dto)
+        {
+            if (!Guid.TryParse(ordinanceId, out Guid parsedOrdinanceId))
+                throw new ArgumentException("Invalid Ordinance Id format.");
+            if (!Guid.TryParse(sectionId, out Guid parsedSectionId))
+                throw new ArgumentException("Invalid Section Id format.");
+
+            var section = await dbContext.OrdinanceSections
+                .FirstOrDefaultAsync(s => s.Id == parsedSectionId && s.OrdinanceId == parsedOrdinanceId);
+            if (section == null)
+                throw new KeyNotFoundException("Section does not exist.");
+
+            section.SectionCode = dto.SectionCode.Trim();
+            section.Description = dto.Description?.Trim();
+            await dbContext.SaveChangesAsync();
+
+            return new OrdinanceSectionDTO
+            {
+                OrdinanceSectionId = section.Id.ToString(),
+                SectionCode = section.SectionCode,
+                Description = section.Description
+            };
+        }
+
         public async Task RemoveSectionAsync(string ordinanceId, string sectionId)
         {
             if (!Guid.TryParse(ordinanceId, out Guid parsedOrdinanceId))
@@ -225,6 +249,40 @@ namespace POVISAPI.Services
             await dbContext.OrdinancePenalties.AddAsync(penalty);
             await dbContext.SaveChangesAsync();
             InvalidatePenalties(ordinance.Id);
+            return MapPenalty(penalty);
+        }
+
+        public async Task<OrdinancePenaltyDTO> UpdatePenaltyAsync(string ordinanceId, string penaltyId, UpdateOrdinancePenaltyDTO dto)
+        {
+            if (!Guid.TryParse(ordinanceId, out Guid parsedOrdinanceId))
+                throw new ArgumentException("Invalid Ordinance Id format.");
+            if (!Guid.TryParse(penaltyId, out Guid parsedPenaltyId))
+                throw new ArgumentException("Invalid Penalty Id format.");
+
+            var penalty = await dbContext.OrdinancePenalties
+                .FirstOrDefaultAsync(p => p.Id == parsedPenaltyId && p.OrdinanceId == parsedOrdinanceId);
+            if (penalty == null)
+                throw new KeyNotFoundException("Penalty does not exist.");
+
+            // Keep the ladder escalating: the fine must sit between the level below and the level above.
+            var siblings = await dbContext.OrdinancePenalties.AsNoTracking()
+                .Where(p => p.OrdinanceId == penalty.OrdinanceId && p.OrdinanceSectionId == penalty.OrdinanceSectionId
+                    && p.OffenderType == penalty.OffenderType && p.Id != penalty.Id)
+                .ToListAsync();
+            var below = siblings.Where(p => p.OffenseLevel < penalty.OffenseLevel && p.FineAmount != null).OrderByDescending(p => p.OffenseLevel).FirstOrDefault();
+            var above = siblings.Where(p => p.OffenseLevel > penalty.OffenseLevel && p.FineAmount != null).OrderBy(p => p.OffenseLevel).FirstOrDefault();
+            if (dto.FineAmount is decimal fine)
+            {
+                if (below?.FineAmount is decimal low && fine < low)
+                    throw new ArgumentException($"The {OffenseLevels.Ordinal(penalty.OffenseLevel)} offense must be higher than the {OffenseLevels.Ordinal(below.OffenseLevel)} offense (fine of ₱{low:N2}). Enter a fine of at least that amount.");
+                if (above?.FineAmount is decimal high && fine > high)
+                    throw new ArgumentException($"The {OffenseLevels.Ordinal(penalty.OffenseLevel)} offense cannot exceed the {OffenseLevels.Ordinal(above.OffenseLevel)} offense (fine of ₱{high:N2}).");
+            }
+
+            penalty.FineAmount = dto.FineAmount;
+            penalty.PenaltyText = dto.PenaltyText.Trim();
+            await dbContext.SaveChangesAsync();
+            InvalidatePenalties(parsedOrdinanceId);
             return MapPenalty(penalty);
         }
 

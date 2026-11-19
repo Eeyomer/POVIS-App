@@ -208,6 +208,11 @@ export interface OrdinancePenaltyDTO {
   penaltyText: string;
 }
 
+export interface UpdateOrdinancePenaltyDTO {
+  fineAmount?: number | null;
+  penaltyText: string;
+}
+
 export interface AddOrdinancePenaltyDTO {
   ordinanceSectionId?: string | null;
   /** Leave out to add the next level. */

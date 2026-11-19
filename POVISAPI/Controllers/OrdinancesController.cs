@@ -134,6 +134,14 @@ namespace POVISAPI.Controllers
         }
 
         [Authorize(Roles = "MISPersonnel")]
+        [HttpPut("{id}/sections/{sectionId}")]
+        public async Task<IActionResult> UpdateSection(string id, string sectionId, AddOrdinanceSectionDTO dto)
+        {
+            var response = await ordinanceService.UpdateSectionAsync(id, sectionId, dto);
+            return Ok(new APIResponse<object> { Success = true, Message = "Section updated successfully", Data = response });
+        }
+
+        [Authorize(Roles = "MISPersonnel")]
         [HttpDelete("{id}/sections/{sectionId}")]
         public async Task<IActionResult> RemoveSection(string id, string sectionId)
         {
@@ -157,6 +165,14 @@ namespace POVISAPI.Controllers
                 Message = "Penalty added successfully",
                 Data = response
             });
+        }
+
+        [Authorize(Roles = "MISPersonnel")]
+        [HttpPut("{id}/penalties/{penaltyId}")]
+        public async Task<IActionResult> UpdatePenalty(string id, string penaltyId, UpdateOrdinancePenaltyDTO dto)
+        {
+            var response = await ordinanceService.UpdatePenaltyAsync(id, penaltyId, dto);
+            return Ok(new APIResponse<object> { Success = true, Message = "Penalty updated successfully", Data = response });
         }
 
         [Authorize(Roles = "MISPersonnel")]
