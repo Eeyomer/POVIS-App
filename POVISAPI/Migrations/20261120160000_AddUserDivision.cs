@@ -14,11 +14,10 @@ namespace POVISAPI.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
+            migrationBuilder.AddColumn<int>(
                 name: "Division",
                 table: "Users",
-                type: "character varying(30)",
-                maxLength: 30,
+                type: "integer",
                 nullable: true);
         }
 
