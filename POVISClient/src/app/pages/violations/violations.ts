@@ -329,6 +329,7 @@ export class Violations implements OnInit {
           apprehendingOfficerId: raw.apprehendingOfficerId || null,
           apprehendingOfficer: raw.apprehendingOfficer || null,
           apprehendingOfficerDeputationNumber: raw.apprehendingOfficerDeputationNumber?.trim() || null,
+          ordinanceId: raw.ordinanceId || current.ordinanceId,
           ordinanceSectionId: raw.ordinanceSectionId || null,
           newEvidencePhotos: this.evidence().filter((e) => !e.id).map((e) => e.data),
           removeEvidenceIds: this.removedEvidenceIds,

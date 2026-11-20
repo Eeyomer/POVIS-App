@@ -162,6 +162,7 @@ export interface UpdateViolationDTO {
   /** New evidence photos as base64 data URLs; the total per violation is capped at 5. */
   newEvidencePhotos?: string[];
   removeEvidenceIds?: string[];
+  ordinanceId?: string;
   ordinanceSectionId?: string | null;
   status: ViolationStatus;
   remarks?: string | null;

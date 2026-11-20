@@ -323,6 +323,35 @@ namespace POVISAPI.Services
             entity.ApprehendingOfficerId = officer.Id;
             entity.ApprehendingOfficer = officer.Name;
             entity.ApprehendingOfficerDeputationNumber = officer.Deputation;
+            Guid newOrdinanceId = entity.OrdinanceId;
+            if (!string.IsNullOrWhiteSpace(dto.OrdinanceId))
+            {
+                if (!Guid.TryParse(dto.OrdinanceId, out newOrdinanceId))
+                    throw new ArgumentException("Invalid Ordinance Id format.");
+            }
+
+            if (newOrdinanceId != entity.OrdinanceId)
+            {
+                bool ordinanceExists = await dbContext.Ordinances.AnyAsync(o => o.Id == newOrdinanceId && o.IsActive);
+                if (!ordinanceExists)
+                    throw new KeyNotFoundException("Ordinance does not exist or is inactive.");
+            }
+
+            if (newOrdinanceId != entity.OrdinanceId || ordinanceSectionId != entity.OrdinanceSectionId)
+            {
+                // Offense level is per ordinance section; recompute from the violator's other violations.
+                var entityId = entity.Id;
+                var priorCount = await dbContext.Violations.CountAsync(v =>
+                    v.Id != entityId &&
+                    v.ViolatorId == entity.ViolatorId &&
+                    v.OrdinanceId == newOrdinanceId &&
+                    v.OrdinanceSectionId == ordinanceSectionId &&
+                    !v.IsWarningTicket &&
+                    v.Status != ViolationStatus.Dismissed);
+                entity.OffenseLevel = priorCount + 1;
+            }
+
+            entity.OrdinanceId = newOrdinanceId;
             entity.OrdinanceSectionId = ordinanceSectionId;
             entity.Status = dto.Status;
             entity.Remarks = dto.Remarks?.Trim();

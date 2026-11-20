@@ -159,6 +159,9 @@ namespace POVISAPI.Models.DTO
         /// <summary>Ids of existing evidence photos to delete.</summary>
         public List<string>? RemoveEvidenceIds { get; set; }
 
+        /// <summary>When set and different from the current ordinance, the violation is moved to it and its offense level recomputed.</summary>
+        public string? OrdinanceId { get; set; }
+
         public string? OrdinanceSectionId { get; set; }
 
         [Required(ErrorMessage = "Status is required")]
