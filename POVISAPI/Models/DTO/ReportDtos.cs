@@ -199,3 +199,32 @@ namespace POVISAPI.Models.DTO
         public List<DashboardCountDTO> TopOrdinances { get; set; } = new();
     }
 }
+
+namespace POVISAPI.Models.DTO
+{
+    /// <summary>One apprehension (violation ticket) line of the Apprehension Report.</summary>
+    public class ApprehensionRowDTO
+    {
+        public string OvrNumber { get; set; } = string.Empty;
+        public DateOnly DateOfOccurrence { get; set; }
+        public TimeOnly? TimeOfOccurrence { get; set; }
+        public string ViolatorName { get; set; } = string.Empty;
+        public string Barangay { get; set; } = string.Empty;
+        public string Place { get; set; } = string.Empty;
+        public string Ordinance { get; set; } = string.Empty;
+        public string Section { get; set; } = string.Empty;
+        public int OffenseLevel { get; set; }
+        public string Status { get; set; } = string.Empty;
+        public string Officer { get; set; } = string.Empty;
+        public string DeputationNumber { get; set; } = string.Empty;
+    }
+
+    public class ApprehensionReportDTO
+    {
+        public DateOnly From { get; set; }
+        public DateOnly To { get; set; }
+        /// <summary>Names of the officers the report was limited to (empty = all officers).</summary>
+        public List<string> OfficerNames { get; set; } = new();
+        public List<ApprehensionRowDTO> Rows { get; set; } = new();
+    }
+}

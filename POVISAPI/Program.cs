@@ -35,6 +35,7 @@ builder.Services.Scan(scan => scan
    .WithScopedLifetime());
 
 builder.Services.AddMemoryCache();
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
        options.UseNpgsql(

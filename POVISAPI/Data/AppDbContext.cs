@@ -5,8 +5,12 @@ namespace POVISAPI.Data;
 
 public class AppDbContext : DbContext
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+    private readonly Microsoft.AspNetCore.Http.IHttpContextAccessor? httpContextAccessor;
+
+    public AppDbContext(DbContextOptions<AppDbContext> options,
+        Microsoft.AspNetCore.Http.IHttpContextAccessor? httpContextAccessor = null) : base(options)
     {
+        this.httpContextAccessor = httpContextAccessor;
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
     }
 
@@ -298,6 +302,13 @@ public class AppDbContext : DbContext
     // Auto-maintain BaseEntity audit timestamps
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
+        var username = httpContextAccessor?.HttpContext?.User?.FindFirst("sub")?.Value;
+        foreach (var entry in ChangeTracker.Entries<Violation>())
+        {
+            if (username == null) break;
+            if (entry.State == EntityState.Added) entry.Entity.CreatedBy ??= username;
+            else if (entry.State == EntityState.Modified) entry.Entity.UpdatedBy = username;
+        }
         foreach (var entry in ChangeTracker.Entries<BaseEntity>())
         {
             switch (entry.State)

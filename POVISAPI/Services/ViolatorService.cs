@@ -74,6 +74,7 @@ namespace POVISAPI.Services
 
             var entities = await dbContext.Violations
                 .Include(v => v.Ordinance)
+                .Include(v => v.OrdinanceSection)
                 .Where(v => v.ViolatorId == parsedId)
                 .OrderByDescending(v => v.DateOfOccurrence)
                 .ToListAsync();
@@ -84,8 +85,11 @@ namespace POVISAPI.Services
                 OvrNumber = v.OvrNumber,
                 DateOfOccurrence = v.DateOfOccurrence,
                 OrdinanceShortName = v.Ordinance.ShortName,
+                OrdinanceSectionCode = v.OrdinanceSection?.SectionCode,
                 OffenseLevel = v.OffenseLevel,
-                Status = v.Status
+                Status = v.Status,
+                EncodedBy = v.CreatedBy,
+                LastEditedBy = v.UpdatedBy ?? v.CreatedBy
             }).ToList();
         }
 

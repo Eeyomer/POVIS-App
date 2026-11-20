@@ -6,8 +6,9 @@ namespace POVISAPI.Interfaces
 
     public interface IReportExportService
     {
-        /// <param name="report">overall | per-barangay | seminar | incentives | enforcers</param>
+        /// <param name="report">overall | per-barangay | seminar | incentives | enforcers | apprehension</param>
         /// <param name="format">pdf | xlsx</param>
-        Task<ReportFile> ExportAsync(string report, string format, DateOnly from, DateOnly to, Guid? barangayId, Division? division);
+        /// <param name="officerIds">apprehension only: limit to violations recorded by these officers (null/empty = all).</param>
+        Task<ReportFile> ExportAsync(string report, string format, DateOnly from, DateOnly to, Guid? barangayId, Division? division, List<Guid>? officerIds = null);
     }
 }

@@ -73,8 +73,11 @@ export interface ViolatorHistoryDTO {
   ovrNumber: string;
   dateOfOccurrence: string;
   ordinanceShortName: string;
+  ordinanceSectionCode?: string | null;
   offenseLevel: OffenseLevel;
   status: ViolationStatus;
+  encodedBy?: string | null;
+  lastEditedBy?: string | null;
 }
 
 // ── Violations ───────────────────────────────────────────────────────────
@@ -112,6 +115,10 @@ export interface ViolationDTO {
   isReviewed: boolean;
   reviewedAt?: string | null;
   reviewedBy?: string | null;
+  createdBy?: string | null;
+  updatedBy?: string | null;
+  createdAt?: string;
+  updatedAt?: string | null;
 }
 
 export interface AddViolationDTO {
@@ -538,6 +545,16 @@ export interface UpdateUserDTO {
   barangayId?: string | null;
 }
 
+export interface UpdateProfileDTO {
+  fullName: string;
+  contactNumber?: string | null;
+  email?: string | null;
+  address?: string | null;
+  maritalStatus?: MaritalStatus | null;
+  /** null keeps the current photo, "" removes it, a data URL replaces it. */
+  photo?: string | null;
+}
+
 export interface ChangePasswordDTO {
   currentPassword: string;
   newPassword: string;
@@ -630,7 +647,7 @@ export interface TechnicalLogFilter {
   pageSize?: number;
 }
 
-export type ReportExportType = 'overall' | 'per-barangay' | 'seminar' | 'incentives' | 'enforcers';
+export type ReportExportType = 'overall' | 'per-barangay' | 'seminar' | 'incentives' | 'enforcers' | 'apprehension';
 export type ReportExportFormat = 'pdf' | 'xlsx';
 
 // -- Bulk upload (MIS Personnel) ------------------------------------------

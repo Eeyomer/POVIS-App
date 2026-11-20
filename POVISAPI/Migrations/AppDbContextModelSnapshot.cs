@@ -624,6 +624,9 @@ namespace POVISAPI.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp without time zone");
 
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
                     b.Property<DateOnly>("DateOfOccurrence")
                         .HasColumnType("date");
 
@@ -689,6 +692,9 @@ namespace POVISAPI.Migrations
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text");
 
                     b.Property<Guid>("ViolatorId")
                         .HasColumnType("uuid");

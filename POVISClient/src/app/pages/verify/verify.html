@@ -46,18 +46,21 @@
 
     <h3 class="text-[13px] font-semibold text-[#152238] mb-2">Violation & Compliance History</h3>
     <div class="overflow-x-auto">
-      <table class="w-full min-w-[560px] text-[13px]">
+      <table class="w-full min-w-[860px] text-[13px]">
         <thead class="bg-[#f3f5f8] text-[#7a889c] text-left">
           <tr>
             <th class="px-3 py-2">OVR #</th>
             <th class="px-3 py-2">Date</th>
-            <th class="px-3 py-2">Ordinance</th>
+            <th class="px-3 py-2">Ordinance Violated</th>
+            <th class="px-3 py-2">Section</th>
             <th class="px-3 py-2">Offense</th>
             <th class="px-3 py-2">Compliance Status</th>
+            <th class="px-3 py-2">Encoded By</th>
+            <th class="px-3 py-2">Last Edited By</th>
           </tr>
         </thead>
         @if (loadingHistory()) {
-        <tbody app-skeleton-rows [columns]="5" [rows]="5"></tbody>
+        <tbody app-skeleton-rows [columns]="8" [rows]="5"></tbody>
         } @else {
         <tbody>
           @for (h of history(); track h.violationId) {
@@ -65,11 +68,14 @@
             <td class="px-3 py-2 font-medium text-[#152238]">{{ h.ovrNumber }}</td>
             <td class="px-3 py-2">{{ h.dateOfOccurrence }}</td>
             <td class="px-3 py-2">{{ h.ordinanceShortName }}</td>
+            <td class="px-3 py-2">{{ h.ordinanceSectionCode ?? '—' }}</td>
             <td class="px-3 py-2">{{ ordinal(h.offenseLevel) }}</td>
             <td class="px-3 py-2">{{ complianceLabel(h.status) }}</td>
+            <td class="px-3 py-2">{{ h.encodedBy ?? '—' }}</td>
+            <td class="px-3 py-2">{{ h.lastEditedBy ?? '—' }}</td>
           </tr>
           } @empty {
-          <tr><td colspan="5" class="px-3 py-6 text-center text-[#7a889c]">
+          <tr><td colspan="8" class="px-3 py-6 text-center text-[#7a889c]">
             {{ loadingHistory() ? 'Loading...' : 'No violation history on file.' }}
           </td></tr>
           }

@@ -2,7 +2,7 @@ import { Injectable, Inject, PLATFORM_ID, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, map, tap, throwError } from 'rxjs';
-import { ChangePasswordDTO, LoginDTO, RegisterDTO, Role, ROLE_LABELS } from '../models/app-dto';
+import { ChangePasswordDTO, LoginDTO, RegisterDTO, Role, ROLE_LABELS, UpdateProfileDTO, User } from '../models/app-dto';
 import { AuthResponse, MyProfile } from '../models/auth-model';
 import { AuthApi } from './api-service/auth-api';
 
@@ -58,6 +58,21 @@ export class AuthService {
     return this.api.changePassword(dto).pipe(
       map((res) => res.data as AuthResponse),
       tap((auth) => this.storeSession(auth)),
+      catchError((err) => this.rethrowAsError(err)),
+    );
+  }
+
+  getProfile(): Observable<User> {
+    return this.api.getMyDetails().pipe(
+      map((res) => res.data as User),
+      catchError((err) => this.rethrowAsError(err)),
+    );
+  }
+
+  updateProfile(dto: UpdateProfileDTO): Observable<User> {
+    return this.api.updateMe(dto).pipe(
+      map((res) => res.data as User),
+      tap(() => this.loadProfile()),
       catchError((err) => this.rethrowAsError(err)),
     );
   }

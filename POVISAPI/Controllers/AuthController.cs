@@ -13,9 +13,36 @@ namespace POVISAPI.Controllers
     public class AuthController : Controller
     {
         private readonly IAuthService authService;
-        public AuthController(IAuthService authService)
+        private readonly IUserService userService;
+        public AuthController(IAuthService authService, IUserService userService)
         {
             this.authService = authService;
+            this.userService = userService;
+        }
+
+        private Guid? CurrentUserId() => User.Claims
+            .Where(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier || c.Type == "nameid")
+            .Select(c => Guid.TryParse(c.Value, out var g) ? g : (Guid?)null)
+            .FirstOrDefault(g => g.HasValue);
+
+        [Authorize]
+        [HttpGet("me/details")]
+        public async Task<IActionResult> GetMyDetails()
+        {
+            var userId = CurrentUserId();
+            if (userId is null) return Unauthorized();
+            var user = await userService.GetByIdAsync(userId.Value);
+            return Ok(new APIResponse<object> { Success = true, Message = "OK", Data = user });
+        }
+
+        [Authorize]
+        [HttpPut("me")]
+        public async Task<IActionResult> UpdateMe(UpdateProfileDTO dto)
+        {
+            var userId = CurrentUserId();
+            if (userId is null) return Unauthorized();
+            var user = await userService.UpdateProfileAsync(userId.Value, dto);
+            return Ok(new APIResponse<object> { Success = true, Message = "Profile updated successfully", Data = user });
         }
 
         [AllowAnonymous]

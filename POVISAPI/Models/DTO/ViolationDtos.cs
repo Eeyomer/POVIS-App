@@ -48,6 +48,10 @@ namespace POVISAPI.Models.DTO
         public bool IsReviewed { get; set; }
         public DateTime? ReviewedAt { get; set; }
         public string? ReviewedBy { get; set; }
+        public string? CreatedBy { get; set; }
+        public string? UpdatedBy { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
     }
 
     public class AddViolationDTO

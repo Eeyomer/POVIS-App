@@ -142,7 +142,7 @@ export class Violations implements OnInit {
   violatorOptions = computed<SelectOption[]>(() =>
     this.violators().map((v) => ({
       value: v.violatorId,
-      label: `${v.lastName}, ${v.firstName}${v.middleName ? ' ' + v.middleName : ''}${v.barangayName ? ' — ' + v.barangayName : ''}`,
+      label: `${v.lastName}, ${v.firstName}${v.middleName ? ' ' + v.middleName : ''}`,
     })),
   );
 

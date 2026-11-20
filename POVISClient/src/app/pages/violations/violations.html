@@ -15,7 +15,7 @@
       <select [value]="statusFilter()" (change)="onStatusFilterChange($any($event.target).value)"
         class="px-3 py-2 rounded-lg border border-[#d3dae5] text-[13px]">
         <option value="">All statuses</option>
-        <option value="Pending">Pending</option>
+        <option value="Pending">Not Complied</option>
         <option value="Paid">Paid</option>
         <option value="ForSeminar">For Seminar</option>
         <option value="ForCounseling">For Counseling</option>
@@ -120,7 +120,12 @@
       </div>
       }
 
-      @if (!editing()) {
+      @if (editing(); as ev) {
+      <div>
+        <label class="block text-[13px] font-semibold text-[#152238] mb-1">Ordinance</label>
+        <div class="w-full px-3 py-2 rounded-lg border border-[#d3dae5] bg-[#f3f5f8] text-[14px] text-[#152238]">{{ ev.ordinanceShortName }}</div>
+      </div>
+      } @else {
       <div>
         <label class="block text-[13px] font-semibold text-[#152238] mb-1">Ordinance</label>
         <select formControlName="ordinanceId" (change)="onOrdinanceChange($any($event.target).value)"
@@ -181,6 +186,14 @@
         </div>
       </div>
 
+      @if (editing(); as ev) {
+      <div class="sm:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-4 text-[13px] border-t border-[#eef2f8] pt-4">
+        <div><span class="text-[#7a889c]">Added by:</span> <span class="font-medium text-[#152238]">{{ ev.createdBy ?? '—' }}</span></div>
+        <div><span class="text-[#7a889c]">Last edited by:</span> <span class="font-medium text-[#152238]">{{ ev.updatedBy ?? ev.createdBy ?? '—' }}</span></div>
+        <div><span class="text-[#7a889c]">Approved by:</span> <span class="font-medium text-[#152238]">{{ ev.isReviewed ? (ev.reviewedBy ?? '—') : 'Not yet approved' }}</span></div>
+      </div>
+      }
+
       <div class="sm:col-span-3 flex gap-3">
         @if (!viewOnly()) {
         <button type="submit" class="px-4 py-2 rounded-lg bg-[#1e3a63] text-white text-[13px] font-semibold">Save</button>
@@ -218,7 +231,7 @@
           <td class="px-4 py-3">{{ v.ordinanceShortName }}</td>
           <td class="px-4 py-3">{{ v.dateOfOccurrence }}</td>
           <td class="px-4 py-3">{{ v.apprehendingOfficer }}@if (v.apprehendingOfficerDeputationNumber) { <span class="block text-[11px] text-[#7a889c]">Dep. No. {{ v.apprehendingOfficerDeputationNumber }}</span> }</td>
-          <td class="px-4 py-3">{{ v.status }}</td>
+          <td class="px-4 py-3">{{ v.status === 'Pending' ? 'Not Complied' : v.status }}</td>
           <td class="px-4 py-3">
             @if (v.isReviewed) {
             <span class="text-green-600 font-semibold">Reviewed</span>

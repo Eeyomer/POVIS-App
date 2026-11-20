@@ -59,6 +59,19 @@ public class UpdateUserDTO
     public Guid? BarangayId { get; set; }
 }
 
+/// <summary>Self-service profile edit. Username, role and status can't be changed here.</summary>
+public class UpdateProfileDTO
+{
+    public string? FullName { get; set; }
+    public string? ContactNumber { get; set; }
+    public string? Email { get; set; }
+    public string? Address { get; set; }
+    public MaritalStatus? MaritalStatus { get; set; }
+
+    /// <summary>Null keeps the current photo, an empty string removes it, a base64 data URL replaces it.</summary>
+    public string? Photo { get; set; }
+}
+
 public class ChangePasswordDTO
 {
     public string CurrentPassword { get; set; } = string.Empty;

@@ -29,7 +29,7 @@
   <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
     <h2 class="text-[15px] font-semibold text-[#152238] mb-1">Download Report</h2>
     <p class="text-[12px] text-[#7a889c] mb-4">
-      Generates a PDF or Excel file (with the Pasig City logo and POD header) from the records in POVIS for the dates selected above.
+      Preview the report (with the Pasig City logo and POD header) for the dates selected above, then download it as PDF or Excel.
     </p>
     <div class="flex flex-wrap items-end gap-4">
       <div>
@@ -65,16 +65,60 @@
         </select>
       </div>
       }
-      <button type="button" (click)="download('pdf')" [disabled]="exporting() !== null"
+      @if (exportType() === 'apprehension') {
+      <div class="relative">
+        <label class="block text-[13px] font-semibold text-[#152238] mb-1">Apprehending Officer</label>
+        <button type="button" (click)="officerMenuOpen.set(!officerMenuOpen())" aria-haspopup="listbox" [attr.aria-expanded]="officerMenuOpen()"
+          class="min-w-[220px] max-w-[320px] px-3 py-2 rounded-lg border border-[#d3dae5] text-[14px] bg-white flex items-center justify-between gap-2 text-left">
+          <span class="truncate">{{ officerFilterLabel() }}</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7a889c" stroke-width="2.5" class="shrink-0"><path d="m6 9 6 6 6-6" /></svg>
+        </button>
+        @if (officerMenuOpen()) {
+        <button type="button" class="fixed inset-0 z-20 cursor-default" aria-label="Close officer list" (click)="officerMenuOpen.set(false)"></button>
+        <div class="absolute z-30 mt-1 w-full min-w-[260px] max-h-64 overflow-y-auto rounded-lg border border-[#d3dae5] bg-white shadow-lg py-1 text-[13.5px]" role="listbox" aria-multiselectable="true">
+          <button type="button" (click)="clearOfficers()" [disabled]="selectedOfficerIds().length === 0"
+            class="w-full text-left px-3 py-2 text-[12.5px] font-semibold text-[#1e3a63] hover:bg-[#f3f5f8] disabled:text-[#7a889c] disabled:hover:bg-transparent">
+            All officers (clear selection)
+          </button>
+          @for (o of officers(); track o.id) {
+          <label class="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-[#f3f5f8] text-[#152238]">
+            <input type="checkbox" [checked]="isOfficerSelected(o.id)" (change)="toggleOfficer(o.id)" />
+            <span class="flex-1">{{ o.name }}@if (o.deputationNumber) { <span class="text-[11px] text-[#7a889c]"> · {{ o.deputationNumber }}</span> }</span>
+          </label>
+          } @empty {
+          <div class="px-3 py-2 text-[#7a889c]">No apprehending officers found.</div>
+          }
+        </div>
+        }
+      </div>
+      }
+      <button type="button" (click)="openPreview()" [disabled]="previewing()"
         class="px-4 py-2 rounded-lg bg-[#1e3a63] text-white text-[13px] font-semibold hover:bg-[#284d82] disabled:opacity-60">
-        {{ exporting() === 'pdf' ? 'Generating…' : 'Download PDF' }}
-      </button>
-      <button type="button" (click)="download('xlsx')" [disabled]="exporting() !== null"
-        class="px-4 py-2 rounded-lg border border-[#d3dae5] text-[13px] font-semibold text-[#152238] disabled:opacity-60">
-        {{ exporting() === 'xlsx' ? 'Generating…' : 'Download Excel' }}
+        {{ previewing() ? 'Generating…' : 'Preview Report' }}
       </button>
     </div>
   </div>
+
+  @if (preview(); as p) {
+  <div class="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" (click)="closePreview()">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-5xl h-[92vh] flex flex-col" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+      <div class="flex flex-wrap items-center justify-between gap-3 px-6 py-4 border-b border-[#eef2f8]">
+        <h2 class="text-[15px] font-semibold text-[#152238]">Report Preview</h2>
+        <div class="flex gap-3">
+          <button type="button" (click)="download('pdf')"
+            class="px-4 py-2 rounded-lg bg-[#1e3a63] text-white text-[13px] font-semibold hover:bg-[#284d82]">Download PDF</button>
+          <button type="button" (click)="download('xlsx')" [disabled]="exporting() !== null"
+            class="px-4 py-2 rounded-lg border border-[#d3dae5] text-[13px] font-semibold text-[#152238] disabled:opacity-60">
+            {{ exporting() === 'xlsx' ? 'Generating…' : 'Download Excel' }}
+          </button>
+          <button type="button" (click)="closePreview()"
+            class="px-4 py-2 rounded-lg border border-[#d3dae5] text-[13px] font-semibold text-[#152238]">Close</button>
+        </div>
+      </div>
+      <iframe [src]="p.url" title="Report preview" class="flex-1 w-full rounded-b-2xl"></iframe>
+    </div>
+  </div>
+  }
 
   @if (loading() && !ordinanceSummary()) {
   <div class="bg-white rounded-2xl shadow-sm p-6 mb-6" role="status" aria-label="Loading">

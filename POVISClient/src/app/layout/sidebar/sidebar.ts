@@ -1,6 +1,10 @@
 import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MaritalStatus } from '../../core/models/app-dto';
+import { IMAGE_ACCEPT, readImageAsDataUrl } from '../../core/utils/image-upload';
+import { ToastService } from '../../shared/toast/toast-service';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { filter } from 'rxjs';
 import { AuthService } from '../../core/services/auth-service';
@@ -27,7 +31,7 @@ const GROUP_BY_PATH: Record<string, NavGroup> = {
 
 @Component({
   selector: 'app-admin-sidebar',
-  imports: [CommonModule, RouterLink, RouterLinkActive],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, RouterLinkActive],
   templateUrl: './sidebar.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -85,6 +89,93 @@ export class Sidebar implements OnInit {
 
   onNavigate(): void {
     this.sidebarService.close();
+  }
+
+  // ----- Profile modal -----
+  showProfile = signal(false);
+  savingProfile = signal(false);
+  profilePhoto = signal<string | null>(null);
+  maritalStatuses: MaritalStatus[] = ['Single', 'Married', 'Widowed', 'Separated', 'Divorced'];
+  imageAccept = IMAGE_ACCEPT;
+  private photoChanged = false;
+
+  profileForm = inject(FormBuilder).group({
+    fullName: ['', [Validators.required, Validators.maxLength(150)]],
+    contactNumber: ['', [Validators.maxLength(30)]],
+    email: ['', [Validators.email, Validators.maxLength(150)]],
+    address: ['', [Validators.maxLength(300)]],
+    maritalStatus: [''],
+  });
+
+  private toast = inject(ToastService);
+
+  openProfile(): void {
+    this.photoChanged = false;
+    this.authService.getProfile().subscribe({
+      next: (u) => {
+        this.profileForm.reset({
+          fullName: u.fullName ?? '',
+          contactNumber: u.contactNumber ?? '',
+          email: u.email ?? '',
+          address: u.address ?? '',
+          maritalStatus: u.maritalStatus ?? '',
+        });
+        this.profilePhoto.set(u.photo ?? null);
+        this.showProfile.set(true);
+      },
+      error: (err) => this.toast.error(err.message),
+    });
+  }
+
+  closeProfile(): void {
+    this.showProfile.set(false);
+  }
+
+  async onProfilePhotoSelected(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+    try {
+      this.profilePhoto.set(await readImageAsDataUrl(file, { maxDimension: 400, maxBytes: 900_000 }));
+      this.photoChanged = true;
+    } catch (e) {
+      this.toast.error((e as Error).message);
+    }
+  }
+
+  removeProfilePhoto(): void {
+    this.profilePhoto.set(null);
+    this.photoChanged = true;
+  }
+
+  saveProfile(): void {
+    if (this.profileForm.invalid) {
+      this.profileForm.markAllAsTouched();
+      return;
+    }
+    const v = this.profileForm.getRawValue();
+    this.savingProfile.set(true);
+    this.authService
+      .updateProfile({
+        fullName: v.fullName!.trim(),
+        contactNumber: v.contactNumber?.trim() || null,
+        email: v.email?.trim() || null,
+        address: v.address?.trim() || null,
+        maritalStatus: (v.maritalStatus || null) as MaritalStatus | null,
+        photo: this.photoChanged ? (this.profilePhoto() ?? '') : null,
+      })
+      .subscribe({
+        next: () => {
+          this.savingProfile.set(false);
+          this.showProfile.set(false);
+          this.toast.success('Profile updated.');
+        },
+        error: (err) => {
+          this.savingProfile.set(false);
+          this.toast.error(err.message);
+        },
+      });
   }
 
   logout(): void {

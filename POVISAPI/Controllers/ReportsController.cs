@@ -28,12 +28,18 @@ namespace POVISAPI.Controllers
         /// </summary>
         [HttpGet("export/{report}")]
         public async Task<IActionResult> Export(string report, [FromQuery] string format, [FromQuery] DateOnly from, [FromQuery] DateOnly to,
-            [FromQuery] Guid? barangayId, [FromQuery] Division? division)
+            [FromQuery] Guid? barangayId, [FromQuery] Division? division, [FromQuery] string? officerIds)
         {
             if (to < from)
                 throw new ArgumentException("'to' must be on or after 'from'.");
 
-            var file = await exportService.ExportAsync(report, format, from, to, barangayId, division);
+            // Comma-separated officer ids (apprehension report only).
+            var officers = (officerIds ?? string.Empty)
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Select(s => Guid.TryParse(s, out var g) ? g : throw new ArgumentException("Invalid officer id."))
+                .ToList();
+
+            var file = await exportService.ExportAsync(report, format, from, to, barangayId, division, officers);
             return File(file.Content, file.ContentType, file.FileName);
         }
 

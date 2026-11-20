@@ -36,22 +36,32 @@ export class ReportsService {
     );
   }
 
-  /** Fetches the PDF/Excel file and hands it to the browser as a download. */
-  download(report: ReportExportType, format: ReportExportFormat, params: Record<string, string>): Observable<void> {
+  /** Fetches the generated PDF/Excel file without saving it. */
+  fetchExport(report: ReportExportType, format: ReportExportFormat, params: Record<string, string>): Observable<{ blob: Blob; fileName: string }> {
     return this.api.exportReport(report, format, params).pipe(
       map((res) => {
         const disposition = res.headers.get('content-disposition') ?? '';
         const match = /filename*?=(?:UTF-8'')?"?([^";]+)"?/i.exec(disposition);
         const fileName = match ? decodeURIComponent(match[1]) : `povis-${report}.${format}`;
-        const url = URL.createObjectURL(res.body as Blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = fileName;
-        link.click();
-        URL.revokeObjectURL(url);
+        return { blob: res.body as Blob, fileName };
       }),
       catchError((err: HttpErrorResponse) => from(this.blobError(err))),
     );
+  }
+
+  /** Hands a fetched file to the browser as a download. */
+  save(file: { blob: Blob; fileName: string }): void {
+    const url = URL.createObjectURL(file.blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = file.fileName;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  /** Fetches the PDF/Excel file and hands it to the browser as a download. */
+  download(report: ReportExportType, format: ReportExportFormat, params: Record<string, string>): Observable<void> {
+    return this.fetchExport(report, format, params).pipe(map((file) => this.save(file)));
   }
 
   private async blobError(err: HttpErrorResponse): Promise<never> {

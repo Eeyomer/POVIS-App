@@ -150,13 +150,14 @@
 
   <!-- Profile -->
   <div class="mt-auto pt-[18px] border-t border-white/10 flex items-center gap-2.5">
-    <div class="w-[34px] h-[34px] rounded-full bg-[#1e3a63] flex items-center justify-center text-white text-[13px] font-bold shrink-0 overflow-hidden">
+    <button type="button" (click)="openProfile()" title="Edit my profile"
+      class="w-[34px] h-[34px] rounded-full bg-[#1e3a63] flex items-center justify-center text-white text-[13px] font-bold shrink-0 overflow-hidden hover:ring-2 hover:ring-white/40">
       @if (authService.profile()?.photo; as photo) {
       <img [src]="photo" alt="" class="w-full h-full object-cover" />
       } @else {
       {{ initials() }}
       }
-    </div>
+    </button>
     <div class="flex-1 min-w-0">
       <div class="text-[13px] font-semibold text-white truncate">{{ displayName() }}</div>
       <div class="text-[11.5px] text-[#8a9bb8]">{{ roleLabel }}</div>
@@ -167,3 +168,71 @@
     </button>
   </div>
 </div>
+
+@if (showProfile()) {
+<div class="fixed inset-0 z-[60] bg-black/40 flex items-center justify-center p-4" (click)="closeProfile()">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-xl max-h-[90vh] overflow-y-auto p-6" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+    <h2 class="text-[15px] font-semibold text-[#152238] mb-4">My Profile</h2>
+    <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div class="sm:col-span-2 flex items-center gap-4">
+        @if (profilePhoto(); as p) {
+        <img [src]="p" alt="Profile photo" class="w-20 h-20 rounded-full object-cover border border-[#d3dae5]" />
+        } @else {
+        <div class="w-20 h-20 rounded-full bg-[#f3f5f8] border border-dashed border-[#d3dae5] flex items-center justify-center text-[11px] text-[#7a889c]">No photo</div>
+        }
+        <div>
+          <div class="flex flex-wrap items-center gap-2">
+            <label class="px-3 py-2 rounded-lg border border-[#1e3a63] text-[#1e3a63] text-[13px] font-semibold hover:bg-[#f3f5f8] cursor-pointer">
+              {{ profilePhoto() ? 'Change photo' : 'Upload photo' }}
+              <input type="file" [accept]="imageAccept" class="hidden" (change)="onProfilePhotoSelected($event)" />
+            </label>
+            @if (profilePhoto()) {
+            <button type="button" (click)="removeProfilePhoto()" class="px-3 py-2 rounded-lg border border-[#d3dae5] text-[13px] font-semibold text-red-500">Remove</button>
+            }
+          </div>
+          <p class="text-[11px] text-[#7a889c] mt-1">JPEG, JPG or PNG.</p>
+        </div>
+      </div>
+      <div>
+        <label class="block text-[13px] font-semibold text-[#152238] mb-1">Username</label>
+        <input type="text" [value]="username" readonly class="w-full px-3 py-2 rounded-lg border border-[#d3dae5] text-[14px] bg-[#f3f5f8] text-[#7a889c]" />
+      </div>
+      <div>
+        <label class="block text-[13px] font-semibold text-[#152238] mb-1">Full Name</label>
+        <input type="text" formControlName="fullName" maxlength="150" class="w-full px-3 py-2 rounded-lg border border-[#d3dae5] text-[14px]" />
+        @if (profileForm.controls.fullName.touched && profileForm.controls.fullName.hasError('required')) {
+        <p class="text-[11px] text-red-500 mt-1">Full name is required.</p>
+        }
+      </div>
+      <div>
+        <label class="block text-[13px] font-semibold text-[#152238] mb-1">Contact Number</label>
+        <input type="text" formControlName="contactNumber" maxlength="30" class="w-full px-3 py-2 rounded-lg border border-[#d3dae5] text-[14px]" />
+      </div>
+      <div>
+        <label class="block text-[13px] font-semibold text-[#152238] mb-1">Email Address</label>
+        <input type="email" formControlName="email" maxlength="150" class="w-full px-3 py-2 rounded-lg border border-[#d3dae5] text-[14px]" />
+        @if (profileForm.controls.email.touched && profileForm.controls.email.hasError('email')) {
+        <p class="text-[11px] text-red-500 mt-1">Enter a valid email address.</p>
+        }
+      </div>
+      <div>
+        <label class="block text-[13px] font-semibold text-[#152238] mb-1">Marital Status</label>
+        <select formControlName="maritalStatus" class="w-full px-3 py-2 rounded-lg border border-[#d3dae5] text-[14px]">
+          <option value="">-</option>
+          @for (m of maritalStatuses; track m) {
+          <option [value]="m">{{ m }}</option>
+          }
+        </select>
+      </div>
+      <div>
+        <label class="block text-[13px] font-semibold text-[#152238] mb-1">Address</label>
+        <input type="text" formControlName="address" maxlength="300" class="w-full px-3 py-2 rounded-lg border border-[#d3dae5] text-[14px]" />
+      </div>
+      <div class="sm:col-span-2 flex gap-3">
+        <button type="submit" [disabled]="savingProfile()" class="px-4 py-2 rounded-lg bg-[#1e3a63] text-white text-[13px] font-semibold disabled:opacity-60">Save</button>
+        <button type="button" (click)="closeProfile()" class="px-4 py-2 rounded-lg border border-[#d3dae5] text-[13px] font-semibold text-[#152238]">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+}

@@ -9,7 +9,7 @@ namespace POVISAPI.Services
         private readonly IReportService _reports;
         public ReportExportService(IReportService reports) => _reports = reports;
 
-        public async Task<ReportFile> ExportAsync(string report, string format, DateOnly from, DateOnly to, Guid? barangayId, Division? division)
+        public async Task<ReportFile> ExportAsync(string report, string format, DateOnly from, DateOnly to, Guid? barangayId, Division? division, List<Guid>? officerIds = null)
         {
             var doc = report.ToLowerInvariant() switch
             {
@@ -18,7 +18,8 @@ namespace POVISAPI.Services
                 "seminar" => ReportDocumentBuilder.SeminarPerBarangay(await _reports.GetSeminarPerBarangayAsync(from, to, barangayId)),
                 "incentives" => ReportDocumentBuilder.Incentives(await _reports.GetIncentivesAsync(from, to, division)),
                 "enforcers" => ReportDocumentBuilder.Enforcers(await _reports.GetEnforcersAsync()),
-                _ => throw new ArgumentException("Unknown report. Use overall, per-barangay, seminar, incentives or enforcers.")
+                "apprehension" => ReportDocumentBuilder.Apprehension(await _reports.GetApprehensionAsync(from, to, officerIds)),
+                _ => throw new ArgumentException("Unknown report. Use overall, per-barangay, seminar, incentives, enforcers or apprehension.")
             };
 
             return format.ToLowerInvariant() switch

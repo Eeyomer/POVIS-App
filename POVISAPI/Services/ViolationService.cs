@@ -52,7 +52,11 @@ namespace POVISAPI.Services
             HasFiledCase = v.FiledCase != null,
             IsReviewed = v.IsReviewed,
             ReviewedAt = v.ReviewedAt,
-            ReviewedBy = v.ReviewedBy
+            ReviewedBy = v.ReviewedBy,
+            CreatedBy = v.CreatedBy,
+            UpdatedBy = v.UpdatedBy,
+            CreatedAt = v.CreatedAt,
+            UpdatedAt = v.UpdatedAt
         };
 
         private IQueryable<Violation> IncludedQuery() =>
@@ -105,7 +109,7 @@ namespace POVISAPI.Services
             var pageSize = Math.Clamp(filter.PageSize, 1, 100);
 
             var entities = await query
-                .OrderByDescending(v => v.DateOfOccurrence).ThenBy(v => v.OvrNumber)
+                .OrderBy(v => v.OvrNumber.Length).ThenBy(v => v.OvrNumber)
                 .Skip((page - 1) * pageSize).Take(pageSize)
                 .ToListAsync();
 

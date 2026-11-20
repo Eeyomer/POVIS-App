@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environment/environment';
 import { APIResponse } from '../../models/app-model';
-import { ChangePasswordDTO, LoginDTO, RegisterDTO } from '../../models/app-dto';
+import { ChangePasswordDTO, LoginDTO, RegisterDTO, UpdateProfileDTO, User } from '../../models/app-dto';
 import { AuthResponse, MyProfile } from '../../models/auth-model';
 
 @Injectable({ providedIn: 'root' })
@@ -26,6 +26,15 @@ export class AuthApi {
 
   me(): Observable<APIResponse<MyProfile>> {
     return this.http.get<APIResponse<MyProfile>>(`${this.apiUrl}/me`);
+  }
+
+  /** Full profile of the signed-in user (for the edit-profile modal). */
+  getMyDetails(): Observable<APIResponse<User>> {
+    return this.http.get<APIResponse<User>>(`${this.apiUrl}/me/details`);
+  }
+
+  updateMe(dto: UpdateProfileDTO): Observable<APIResponse<User>> {
+    return this.http.put<APIResponse<User>>(`${this.apiUrl}/me`, dto);
   }
 
   adminExists(): Observable<APIResponse<{ exists: boolean }>> {

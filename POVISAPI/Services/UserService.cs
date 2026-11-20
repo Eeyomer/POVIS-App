@@ -138,6 +138,27 @@ public class UserService : IUserService
         return ToDto(user);
     }
 
+    public async Task<UserDTO> UpdateProfileAsync(Guid id, UpdateProfileDTO dto)
+    {
+        var user = await context.Users.Include(u => u.Barangay).FirstOrDefaultAsync(u => u.Id == id)
+            ?? throw new KeyNotFoundException("User does not exist.");
+
+        var profile = ValidateProfile(dto.FullName, dto.ContactNumber, dto.Email, dto.Address);
+        if (profile.FullName == null)
+            throw new ArgumentException("Full name is required.");
+
+        user.FullName = profile.FullName;
+        user.ContactNumber = profile.ContactNumber;
+        user.Email = profile.Email;
+        user.Address = profile.Address;
+        user.MaritalStatus = dto.MaritalStatus;
+        if (dto.Photo != null)
+            user.Photo = ValidatePhoto(dto.Photo); // "" clears it
+
+        await context.SaveChangesAsync();
+        return ToDto(user);
+    }
+
     public async Task<string> ResetPasswordAsync(Guid id)
     {
         var user = await context.Users.FindAsync(id)

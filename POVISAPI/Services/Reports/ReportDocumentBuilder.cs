@@ -1,4 +1,5 @@
 using POVISAPI.Models.DTO;
+using POVISAPI.Models.Entity.Enums;
 
 namespace POVISAPI.Services.Reports
 {
@@ -272,6 +273,48 @@ namespace POVISAPI.Services.Reports
                     }
                 }
             };
+        }
+
+        // ── APPREHENSION REPORT ──────────────────────────────────────────────
+        public static ReportDocument Apprehension(ApprehensionReportDTO r)
+        {
+            var table = new ReportTable
+            {
+                Columns =
+                {
+                    Col("NO", 0.8), Col("OVR NO.", 1.6, ColumnKind.Center), Col("DATE", 1.9, ColumnKind.Date),
+                    Col("TIME", 1.2, ColumnKind.Center), Col("VIOLATOR", 4, ColumnKind.Text),
+                    Col("BARANGAY", 2.4, ColumnKind.Text), Col("PLACE", 3, ColumnKind.Text),
+                    Col("ORDINANCE", 3.6, ColumnKind.Text), Col("SECTION", 1.8, ColumnKind.Text),
+                    Col("OFFENSE", 1.4, ColumnKind.Center), Col("STATUS", 2, ColumnKind.Center),
+                    Col("APPREHENDING OFFICER", 3.4, ColumnKind.Text), Col("DEPUTATION NO.", 2, ColumnKind.Center)
+                },
+                EmptyMessage = "No apprehensions recorded for this selection."
+            };
+            var n = 0;
+            foreach (var x in r.Rows)
+            {
+                n++;
+                table.Rows.Add(new object?[]
+                {
+                    n, x.OvrNumber, x.DateOfOccurrence, x.TimeOfOccurrence?.ToString("HH:mm") ?? "", x.ViolatorName.ToUpperInvariant(),
+                    x.Barangay, x.Place, x.Ordinance, x.Section, OffenseLevels.Ordinal(x.OffenseLevel), x.Status, x.Officer.ToUpperInvariant(), x.DeputationNumber
+                });
+            }
+
+            var sheet = new ReportSheet
+            {
+                Name = "APPREHENSION",
+                Wide = true,
+                TitleLines = { "APPREHENSION REPORT", Period(r.From, r.To) },
+                Tables = { table },
+                Notes = { $"TOTAL APPREHENSIONS: {r.Rows.Count:N0}" }
+            };
+            sheet.InfoLines.Add(r.OfficerNames.Count == 0
+                ? "Apprehending officer: All officers"
+                : "Apprehending officer(s): " + string.Join("; ", r.OfficerNames));
+
+            return new ReportDocument { FileBaseName = $"povis-apprehension-{r.From:yyyyMMdd}-{r.To:yyyyMMdd}", Sheets = { sheet } };
         }
 
         private static string JoinAnd(List<string> items) => items.Count switch

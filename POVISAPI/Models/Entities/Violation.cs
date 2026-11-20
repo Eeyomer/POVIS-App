@@ -83,6 +83,10 @@ public class Violation : BaseEntity, IArchivable
     public DateTime? ReviewedAt { get; set; }
     public string? ReviewedBy { get; set; }
 
+    /// <summary>Username who encoded this record / last edited it (set automatically on save).</summary>
+    public string? CreatedBy { get; set; }
+    public string? UpdatedBy { get; set; }
+
     // ----- Child records -----
     public Payment? Payment { get; set; }
     public FiledCase? FiledCase { get; set; }

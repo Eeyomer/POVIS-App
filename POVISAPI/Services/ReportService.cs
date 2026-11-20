@@ -344,6 +344,48 @@ namespace POVISAPI.Services
             return new IncentiveReportDTO { From = from, To = to, Rate = IncentiveRate, Divisions = divisions };
         }
 
+        public async Task<ApprehensionReportDTO> GetApprehensionAsync(DateOnly from, DateOnly to, List<Guid>? officerIds)
+        {
+            var query = _db.Violations.AsNoTracking()
+                .Where(v => v.DateOfOccurrence >= from && v.DateOfOccurrence <= to);
+
+            var officerNames = new List<string>();
+            if (officerIds is { Count: > 0 })
+            {
+                // "Recorded by": the registered officer on the ticket, or the account that encoded it.
+                query = query.Where(v =>
+                    (v.ApprehendingOfficerId != null && officerIds.Contains(v.ApprehendingOfficerId.Value)) ||
+                    (v.RecordedByUserId != null && officerIds.Contains(v.RecordedByUserId.Value)));
+                officerNames = await _db.Users.AsNoTracking()
+                    .Where(u => officerIds.Contains(u.Id))
+                    .OrderBy(u => u.FullName ?? u.Username)
+                    .Select(u => u.FullName ?? u.Username)
+                    .ToListAsync();
+            }
+
+            var rows = await query
+                .OrderBy(v => v.OvrNumber.Length).ThenBy(v => v.OvrNumber)
+                .Select(v => new ApprehensionRowDTO
+                {
+                    OvrNumber = v.OvrNumber,
+                    DateOfOccurrence = v.DateOfOccurrence,
+                    TimeOfOccurrence = v.TimeOfOccurrence,
+                    ViolatorName = v.Violator.LastName + ", " + v.Violator.FirstName +
+                        (v.Violator.MiddleName != null ? " " + v.Violator.MiddleName : ""),
+                    Barangay = v.BarangayOfOccurrence != null ? v.BarangayOfOccurrence.Name : "",
+                    Place = v.PlaceOfOccurrence ?? "",
+                    Ordinance = v.Ordinance.ShortName,
+                    Section = v.OrdinanceSection != null ? v.OrdinanceSection.SectionCode : "",
+                    OffenseLevel = v.OffenseLevel,
+                    Status = v.Status.ToString(),
+                    Officer = v.ApprehendingOfficer ?? "",
+                    DeputationNumber = v.ApprehendingOfficerDeputationNumber ?? ""
+                })
+                .ToListAsync();
+
+            return new ApprehensionReportDTO { From = from, To = to, OfficerNames = officerNames, Rows = rows };
+        }
+
         public async Task<EnforcerListDTO> GetEnforcersAsync()
         {
             var officers = await _db.Users.AsNoTracking()
