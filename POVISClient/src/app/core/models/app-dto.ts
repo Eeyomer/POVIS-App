@@ -1,6 +1,8 @@
 // ── Enums ────────────────────────────────────────────────────────────────
 export type Gender = 'Male' | 'Female';
-export type Division = 'Bpd' | 'Pnp' | 'Cenro' | 'Other';
+export type Division = 'POD' | 'BPD' | 'ALD' | 'PSD' | 'KRPD' | 'SOG' | 'BSF' | 'PNP' | 'Other';
+/** Departments an Apprehending Officer can belong to ("Other" exists only on older records). */
+export const DIVISIONS: Division[] = ['POD', 'BPD', 'ALD', 'PSD', 'KRPD', 'SOG', 'BSF', 'PNP'];
 export type ViolationStatus =
   | 'Pending' | 'Paid' | 'ForSeminar' | 'ForCounseling' | 'ForCommunityService'
   | 'CaseFiled' | 'Dismissed' | 'Closed' | 'DidNotComply' | 'WarningIssued';
@@ -508,6 +510,7 @@ export interface User {
   photo?: string | null;
   deputationNumber?: string | null;
   barangayId?: string | null;
+  division?: Division | null;
   barangayName?: string | null;
   mustChangePassword: boolean;
   /** Only present in the response to create, shown once to MIS Personnel. */
@@ -527,6 +530,7 @@ export interface CreateUserDTO {
   role: Role;
   deputationNumber?: string | null;
   barangayId?: string | null;
+  division?: Division | null;
 }
 
 export interface UpdateUserDTO {
@@ -543,6 +547,7 @@ export interface UpdateUserDTO {
   isActive: boolean;
   deputationNumber?: string | null;
   barangayId?: string | null;
+  division?: Division | null;
 }
 
 export interface UpdateProfileDTO {

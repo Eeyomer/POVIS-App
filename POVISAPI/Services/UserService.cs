@@ -49,6 +49,8 @@ public class UserService : IUserService
             throw new ArgumentException("Username is already taken.");
 
         var deputationNumber = await ResolveDeputationNumberForCreateAsync(dto.Role, dto.DeputationNumber);
+        if (dto.Role == Role.ApprehendingOfficer && dto.Division == null)
+            throw new ArgumentException("Department is required for an Apprehending Officer.");
 
         var profile = ValidateProfile(dto.FullName, dto.ContactNumber, dto.Email, dto.Address);
         if (profile.FullName == null)
@@ -69,6 +71,7 @@ public class UserService : IUserService
             MaritalStatus = dto.MaritalStatus,
             Photo = ValidatePhoto(dto.Photo),
             DeputationNumber = deputationNumber,
+            Division = dto.Role == Role.ApprehendingOfficer ? dto.Division : null,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(temporaryPassword),
             MustChangePassword = true,
             Role = dto.Role,
@@ -120,6 +123,8 @@ public class UserService : IUserService
         }
 
         user.DeputationNumber = await ResolveDeputationNumberForUpdateAsync(user, dto);
+        // Keep the stored department when none is sent (e.g. when only toggling active); only officers have one.
+        user.Division = dto.Role == Role.ApprehendingOfficer ? dto.Division ?? user.Division : null;
         var profile = ValidateProfile(dto.FullName, dto.ContactNumber, dto.Email, dto.Address);
         // Existing accounts created before these fields existed may have no name; never blank out a name that is set.
         user.FullName = profile.FullName ?? user.FullName;
@@ -251,6 +256,7 @@ public class UserService : IUserService
         DeputationNumber = u.DeputationNumber,
         BarangayId = u.BarangayId,
         BarangayName = u.Barangay?.Name,
+        Division = u.Division,
         FullName = u.FullName,
         ContactNumber = u.ContactNumber,
         Email = u.Email,

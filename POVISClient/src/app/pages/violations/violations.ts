@@ -60,7 +60,7 @@ export class Violations implements OnInit {
     violatorId: ['', Validators.required],
     ovrNumber: ['', Validators.required],
     dateOfSubmission: ['', Validators.required],
-    division: ['Bpd' as Division, Validators.required],
+    division: ['BPD' as Division, Validators.required],
     ageAtApprehension: [null as number | null],
     dateOfOccurrence: ['', Validators.required],
     timeOfOccurrence: [''],
@@ -258,7 +258,7 @@ export class Violations implements OnInit {
     this.editing.set(null);
     this.resetEvidence();
     this.selectedOrdinanceDetail.set(null);
-    this.form.reset({ division: 'Bpd', isWarningTicket: false });
+    this.form.reset({ division: 'BPD', isWarningTicket: false });
     this.showForm.set(true);
   }
 

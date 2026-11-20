@@ -7,7 +7,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UsersService } from '../../core/services/users-service';
 import { AuthService } from '../../core/services/auth-service';
 import { BulkUpload } from '../../shared/components/bulk-upload/bulk-upload';
-import { BarangayDTO, MaritalStatus, ROLE_LABELS, Role, User } from '../../core/models/app-dto';
+import { BarangayDTO, DIVISIONS, Division, MaritalStatus, ROLE_LABELS, Role, User } from '../../core/models/app-dto';
 import { BarangaysService } from '../../core/services/barangays-service';
 import { IMAGE_ACCEPT, readImageAsDataUrl } from '../../core/utils/image-upload';
 import { ToastService } from '../../shared/toast/toast-service';
@@ -27,7 +27,7 @@ export class Users implements OnInit {
     const term = this.search().trim().toLowerCase();
     if (!term) return this.users();
     return this.users().filter((u) =>
-      `${u.fullName ?? ''} ${u.username} ${ROLE_LABELS[u.role]} ${u.deputationNumber ?? ''} ${u.barangayName ?? ''} ${u.email ?? ''} ${u.contactNumber ?? ''}`.toLowerCase().includes(term),
+      `${u.fullName ?? ''} ${u.username} ${ROLE_LABELS[u.role]} ${u.deputationNumber ?? ''} ${u.division ?? ''} ${u.barangayName ?? ''} ${u.email ?? ''} ${u.contactNumber ?? ''}`.toLowerCase().includes(term),
     );
   });
   showForm = signal(false);
@@ -44,6 +44,7 @@ export class Users implements OnInit {
 
   roles: Role[] = ['MISPersonnel', 'OVRSupervisor', 'ApprehendingOfficer', 'PNPBarangayStaff'];
   roleLabels = ROLE_LABELS;
+  divisions = DIVISIONS;
 
   private fb = inject(FormBuilder);
 
@@ -56,6 +57,7 @@ export class Users implements OnInit {
     maritalStatus: [''],
     role: ['ApprehendingOfficer' as Role, Validators.required],
     deputationNumber: ['', [Validators.maxLength(50)]],
+    division: [''],
     barangayId: [''],
   });
 
@@ -93,6 +95,7 @@ export class Users implements OnInit {
       maritalStatus: '',
       role: 'ApprehendingOfficer',
       deputationNumber: '',
+      division: '',
       barangayId: '',
     });
     this.syncDeputationValidator();
@@ -112,6 +115,7 @@ export class Users implements OnInit {
       maritalStatus: user.maritalStatus ?? '',
       role: user.role,
       deputationNumber: user.deputationNumber ?? '',
+      division: user.division ?? '',
       barangayId: user.barangayId ?? '',
     });
     this.syncDeputationValidator();
@@ -155,6 +159,10 @@ export class Users implements OnInit {
     const control = this.form.controls.deputationNumber;
     control.setValidators(this.isOfficer() ? [Validators.required, Validators.maxLength(50)] : [Validators.maxLength(50)]);
     control.updateValueAndValidity();
+
+    const division = this.form.controls.division;
+    division.setValidators(this.isOfficer() ? [Validators.required] : []);
+    division.updateValueAndValidity();
   }
 
   cancel(): void {
@@ -168,7 +176,7 @@ export class Users implements OnInit {
       return;
     }
 
-    const { username, fullName, contactNumber, email, address, maritalStatus, role, deputationNumber, barangayId } = this.form.getRawValue();
+    const { username, fullName, contactNumber, email, address, maritalStatus, role, deputationNumber, division, barangayId } = this.form.getRawValue();
     const profile = {
       fullName: fullName!.trim(),
       contactNumber: contactNumber?.trim() || null,
@@ -177,6 +185,7 @@ export class Users implements OnInit {
       maritalStatus: (maritalStatus || null) as MaritalStatus | null,
     };
     const deputation = role === 'ApprehendingOfficer' ? deputationNumber?.trim() || null : null;
+    const department = role === 'ApprehendingOfficer' ? ((division || null) as Division | null) : null;
     const current = this.editing();
 
     const request = current
@@ -189,9 +198,10 @@ export class Users implements OnInit {
           role: role!,
           isActive: current.isActive,
           deputationNumber: deputation,
+          division: department,
           barangayId: barangayId || null,
         })
-      : this.usersService.create({ username: username!, ...profile, photo: this.photo(), role: role!, deputationNumber: deputation, barangayId: barangayId || null });
+      : this.usersService.create({ username: username!, ...profile, photo: this.photo(), role: role!, deputationNumber: deputation, division: department, barangayId: barangayId || null });
 
     request.subscribe({
       next: (saved) => {
@@ -219,6 +229,7 @@ export class Users implements OnInit {
         role: user.role,
         isActive: !user.isActive,
         deputationNumber: user.deputationNumber,
+        division: user.division,
         barangayId: user.barangayId,
       }).subscribe({
       next: () => this.refresh(),

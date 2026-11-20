@@ -16,6 +16,7 @@ public class UserDTO
     public string? Photo { get; set; }
     public string? DeputationNumber { get; set; }
     public Guid? BarangayId { get; set; }
+    public Division? Division { get; set; }
     public string? BarangayName { get; set; }
     public bool MustChangePassword { get; set; }
 
@@ -38,6 +39,7 @@ public class CreateUserDTO
     public Role Role { get; set; }
     public string? DeputationNumber { get; set; }
     public Guid? BarangayId { get; set; }
+    public Division? Division { get; set; }
 }
 
 public class UpdateUserDTO
@@ -57,6 +59,7 @@ public class UpdateUserDTO
     public string? Photo { get; set; }
     public string? DeputationNumber { get; set; }
     public Guid? BarangayId { get; set; }
+    public Division? Division { get; set; }
 }
 
 /// <summary>Self-service profile edit. Username, role and status can't be changed here.</summary>

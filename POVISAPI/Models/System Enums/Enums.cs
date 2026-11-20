@@ -15,7 +15,7 @@ public enum MaritalStatus
     Divorced = 5
 }
 
-/// <summary>Apprehending unit (DIVISION column: BPD, PNP, etc.)</summary>
+/// <summary>Apprehending unit / department (DIVISION column): POD, BPD, ALD, PSD, KRPD, SOG, BSF, PNP. "Other" is kept only for older records.</summary>
 public enum Division
 {
     POD = 1,   // Barangay Police / Public Order Division
@@ -23,6 +23,8 @@ public enum Division
     ALD = 3,
     PSD = 4,
     PNP = 5,
+    KRPD = 7,
+    BSF = 8,
     SOG = 6,
     Other = 99
 }

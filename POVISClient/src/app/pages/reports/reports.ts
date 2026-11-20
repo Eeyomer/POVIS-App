@@ -5,7 +5,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ReportsService } from '../../core/services/reports-service';
 import { ToastService } from '../../shared/toast/toast-service';
-import { BarangayDTO, OfficerOption, OrdinanceSummaryReport, PerBarangayReport, ReportExportFormat, ReportExportType } from '../../core/models/app-dto';
+import { BarangayDTO, DIVISIONS, OfficerOption, OrdinanceSummaryReport, PerBarangayReport, ReportExportFormat, ReportExportType } from '../../core/models/app-dto';
 import { BarangaysService } from '../../core/services/barangays-service';
 import { ViolationsService } from '../../core/services/violations-service';
 import { manilaFirstDayOfMonth, manilaToday } from '../../core/utils/manila-time';
@@ -49,7 +49,7 @@ export class Reports {
     { value: 'enforcers', label: 'Deputized Enforcers' },
     { value: 'apprehension', label: 'Apprehension Report' },
   ];
-  readonly divisions = ['ALD', 'BPD', 'PNP', 'POD', 'PSD', 'SOG', 'Other'];
+  readonly divisions = DIVISIONS;
 
   constructor(
     private reportsService: ReportsService,
