@@ -6,6 +6,10 @@ public class User : BaseEntity
 {
     public string Username { get; set; } = string.Empty;
     public string PasswordHash { get; set; } = string.Empty;
+
+    /// <summary>Hash of the password the user had when a forgot-password / reset replaced it with a temporary one.
+    /// The new password they choose afterwards may not match it. Cleared once they have changed their password.</summary>
+    public string? PreviousPasswordHash { get; set; }
     public Role Role { get; set; }
     public bool IsActive { get; set; } = true;
 

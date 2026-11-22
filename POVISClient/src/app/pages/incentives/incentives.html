@@ -54,6 +54,7 @@
         }
       </select>
       }
+      @if (!mine) {
       <select [value]="division()" (change)="onDivisionChange($any($event.target).value)" aria-label="Division"
         class="px-3 py-2 rounded-lg border border-[#d3dae5] text-[13px] bg-white">
         <option value="">All divisions</option>
@@ -61,6 +62,7 @@
         <option [value]="d" [selected]="d === division()">{{ d }}</option>
         }
       </select>
+      }
       <input type="text" placeholder="Search OVR no., violator, receipt..." [value]="search()"
         (input)="onSearchChange($any($event.target).value)"
         class="px-3 py-2 rounded-lg border border-[#d3dae5] text-[13px] w-full sm:w-72" />

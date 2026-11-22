@@ -199,9 +199,8 @@ public class UserService : IUserService
         var user = await context.Users.FindAsync(id)
             ?? throw new KeyNotFoundException("User does not exist.");
 
-        var temporaryPassword = PasswordGenerator.GenerateTemporary();
-        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(temporaryPassword);
-        user.MustChangePassword = true;
+        var temporaryPassword = PasswordGenerator.GenerateTemporaryFor(user);
+        PasswordGenerator.ApplyTemporary(user, temporaryPassword);
         await context.SaveChangesAsync();
         return temporaryPassword;
     }

@@ -256,6 +256,7 @@ public class AppDbContext : DbContext
         {
             e.Property(u => u.Username).HasMaxLength(100).IsRequired();
             e.Property(u => u.PasswordHash).HasMaxLength(200).IsRequired();
+            e.Property(u => u.PreviousPasswordHash).HasMaxLength(200);
             e.HasIndex(u => u.Username).IsUnique();
             e.Property(u => u.DeputationNumber).HasMaxLength(50);
             e.Property(u => u.FullName).HasMaxLength(150);

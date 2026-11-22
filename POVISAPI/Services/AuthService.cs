@@ -71,14 +71,13 @@ public class AuthService : IAuthService
         if (user is null || entered is null || registered is null || entered != registered)
             throw new ArgumentException("The username and cellphone number do not match our records.");
 
-        var temporaryPassword = PasswordGenerator.GenerateTemporary();
+        var temporaryPassword = PasswordGenerator.GenerateTemporaryFor(user);
 
         // Text first: if the SMS fails the old password keeps working instead of locking the user out.
         await smsService.SendAsync(registered,
             $"POVIS: Your temporary password is {temporaryPassword}. Sign in with it and you will be asked to set a new password. Do not share this with anyone.");
 
-        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(temporaryPassword);
-        user.MustChangePassword = true;
+        PasswordGenerator.ApplyTemporary(user, temporaryPassword);
         await context.SaveChangesAsync();
 
         return new ForgotPasswordResultDTO { MaskedNumber = new string('*', registered.Length - 3) + registered[^3..] };
@@ -135,7 +134,12 @@ public class AuthService : IAuthService
         if (BCrypt.Net.BCrypt.Verify(dto.NewPassword, user.PasswordHash))
             throw new ArgumentException("New password must be different from the current password.");
 
+        // After a forgot-password / reset, the password they had before may not be chosen again.
+        if (user.PreviousPasswordHash != null && BCrypt.Net.BCrypt.Verify(dto.NewPassword, user.PreviousPasswordHash))
+            throw new ArgumentException("New password cannot be the same as your old password. Please choose a different one.");
+
         user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+        user.PreviousPasswordHash = null;
         user.MustChangePassword = false;
         await context.SaveChangesAsync();
 

@@ -576,6 +576,10 @@ namespace POVISAPI.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<string>("PreviousPasswordHash")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
                     b.Property<string>("Photo")
                         .HasColumnType("text");
 
