@@ -25,4 +25,11 @@ public class Payment : BaseEntity, IArchivable
     public string? PaidAt { get; set; }
 
     public string? Remarks { get; set; }
+
+    /// <summary>Incentive percentage (e.g. 10 = 10%) that applied to the apprehending officer when this payment was
+    /// recorded. A snapshot: later changes to the system-wide rate never alter it.</summary>
+    public decimal IncentiveRate { get; set; }
+
+    /// <summary>Incentive earned on this payment = Amount x IncentiveRate / 100, frozen at the snapshot rate.</summary>
+    public decimal IncentiveAmount { get; set; }
 }

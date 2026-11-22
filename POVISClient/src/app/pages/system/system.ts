@@ -43,7 +43,44 @@ export class System implements OnInit {
     });
   }
 
+  // ----- Incentive rate -----
+  incentiveRate = signal<number | null>(null);
+  incentiveRateInput = '';
+  savingRate = signal(false);
+
+  loadIncentiveRate(): void {
+    this.systemService.incentiveRate().subscribe({
+      next: (rate) => {
+        this.incentiveRate.set(rate);
+        this.incentiveRateInput = String(rate);
+      },
+      error: (err) => this.toast.error(err.message),
+    });
+  }
+
+  saveIncentiveRate(): void {
+    const rate = Number(this.incentiveRateInput);
+    if (this.incentiveRateInput.trim() === '' || !Number.isFinite(rate) || rate < 0 || rate > 100) {
+      this.toast.error('Enter a percentage between 0 and 100.');
+      return;
+    }
+    this.savingRate.set(true);
+    this.systemService.setIncentiveRate(rate).subscribe({
+      next: (saved) => {
+        this.incentiveRate.set(saved);
+        this.incentiveRateInput = String(saved);
+        this.savingRate.set(false);
+        this.toast.success(`Incentive rate set to ${saved}%. It applies to payments recorded from now on.`);
+      },
+      error: (err) => {
+        this.savingRate.set(false);
+        this.toast.error(err.message);
+      },
+    });
+  }
+
   ngOnInit(): void {
+    this.loadIncentiveRate();
     this.refreshHealth();
     this.refreshLogs();
   }

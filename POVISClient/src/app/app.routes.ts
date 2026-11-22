@@ -8,6 +8,7 @@ import { Ordinances } from './pages/ordinances/ordinances';
 import { Violations } from './pages/violations/violations';
 import { FiledCases } from './pages/filed-cases/filed-cases';
 import { Payments } from './pages/payments/payments';
+import { Incentives } from './pages/incentives/incentives';
 import { SeminarRecords } from './pages/seminar-records/seminar-records';
 import { CounselingRecords } from './pages/counseling-records/counseling-records';
 import { CommunityServiceRecords } from './pages/community-service-records/community-service-records';
@@ -21,7 +22,7 @@ import { roleGuard } from './core/guard/role-guard';
 import { availableGuard, unavailablePageGuard } from './core/guard/availability-guard';
 import { ServiceUnavailable } from './pages/service-unavailable/service-unavailable';
 
-// Everyone except Apprehending Officers (who only get Dashboard, Violators, Ordinances and Violations).
+// Everyone except Apprehending Officers (who only get Dashboard, Violators, Ordinances, Violations and their own Incentives).
 const notOfficer = roleGuard('MISPersonnel', 'OVRSupervisor', 'PNPBarangayStaff');
 
 export const routes: Routes = [
@@ -42,6 +43,7 @@ export const routes: Routes = [
       { path: 'violations', component: Violations },
       { path: 'filed-cases', component: FiledCases, canActivate: [notOfficer] },
       { path: 'payments', component: Payments, canActivate: [notOfficer] },
+      { path: 'incentives', component: Incentives, canActivate: [roleGuard('MISPersonnel', 'OVRSupervisor', 'ApprehendingOfficer')] },
       { path: 'seminar-records', component: SeminarRecords, canActivate: [notOfficer] },
       { path: 'counseling-records', component: CounselingRecords, canActivate: [notOfficer] },
       { path: 'community-service-records', component: CommunityServiceRecords, canActivate: [notOfficer] },

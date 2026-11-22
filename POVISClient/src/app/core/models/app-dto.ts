@@ -347,6 +347,9 @@ export interface PaymentDTO {
   receiptNumber?: string | null;
   paidAt?: string | null;
   remarks?: string | null;
+  /** Incentive % frozen when the payment was recorded. */
+  incentiveRate?: number;
+  incentiveAmount?: number;
 }
 
 export interface AddPaymentDTO {
@@ -516,6 +519,9 @@ export interface User {
   mustChangePassword: boolean;
   /** Only present in the response to create, shown once to MIS Personnel. */
   temporaryPassword?: string | null;
+  /** Only in the response to create: whether the temporary password was also texted to the user. */
+  smsSent?: boolean | null;
+  smsNote?: string | null;
   createdAt: string;
 }
 
@@ -713,4 +719,69 @@ export interface DashboardSummary {
   enforcersByOffice: DashboardCount[];
   topBarangays: DashboardCount[];
   topOrdinances: DashboardCount[];
+}
+
+// ── Incentives ───────────────────────────────────────────────────────────
+export type IncentivePeriod = 'daily' | 'weekly' | 'monthly' | 'annual' | 'custom';
+
+export interface IncentiveFilter {
+  period: IncentivePeriod;
+  /** Any date inside the wanted day / week / month / year (yyyy-MM-dd). */
+  date?: string | null;
+  from?: string | null;
+  to?: string | null;
+  officerId?: string | null;
+  division?: Division | null;
+  search?: string | null;
+  page?: number;
+  pageSize?: number;
+}
+
+/** One paid OVR and the incentive the apprehending officer earned on it (rate frozen at payment time). */
+export interface IncentiveRow {
+  paymentId: string;
+  violationId: string;
+  dateOfPayment: string;
+  receiptNumber?: string | null;
+  amount: number;
+  /** Percentage in force when the payment was recorded (10 = 10%). */
+  incentiveRate: number;
+  incentiveAmount: number;
+  officerId?: string | null;
+  officerName: string;
+  division: string;
+  ovrNumber: string;
+  violatorFullName: string;
+  dateOfOccurrence: string;
+  placeOfOccurrence?: string | null;
+  ordinance: string;
+  section?: string | null;
+  offenseLevel: string;
+  status: string;
+}
+
+export interface IncentiveOfficerTotal {
+  officerId?: string | null;
+  officerName: string;
+  count: number;
+  totalAmount: number;
+  totalIncentive: number;
+}
+
+export interface IncentiveList {
+  period: IncentivePeriod;
+  from: string;
+  to: string;
+  totalCount: number;
+  totalAmount: number;
+  totalIncentive: number;
+  page: number;
+  pageSize: number;
+  items: IncentiveRow[];
+  officerTotals: IncentiveOfficerTotal[];
+}
+
+export interface ForgotPasswordDTO {
+  username: string;
+  contactNumber: string;
 }

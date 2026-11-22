@@ -73,6 +73,50 @@ export class Login implements OnInit {
     this.showConfirmPassword.update((v) => !v);
   }
 
+  // ----- Forgot password -----
+  forgotMode = signal(false);
+  forgotSentTo = signal<string | null>(null);
+
+  forgotForm = this.fb.group({
+    username: ['', Validators.required],
+    contactNumber: ['', [Validators.required, Validators.pattern(/^(\+?63|0)?\s?9[\d\s-]{9,12}$/)]],
+  });
+
+  openForgot(event?: Event): void {
+    event?.preventDefault();
+    this.errorMessage.set(null);
+    this.forgotSentTo.set(null);
+    this.forgotForm.reset({ username: this.form.value.username ?? '', contactNumber: '' });
+    this.forgotMode.set(true);
+  }
+
+  backToSignIn(event?: Event): void {
+    event?.preventDefault();
+    this.errorMessage.set(null);
+    this.forgotMode.set(false);
+  }
+
+  submitForgot(): void {
+    if (this.forgotForm.invalid) {
+      this.forgotForm.markAllAsTouched();
+      return;
+    }
+    this.errorMessage.set(null);
+    this.isSubmitting.set(true);
+
+    const { username, contactNumber } = this.forgotForm.getRawValue();
+    this.authService.forgotPassword({ username: username!.trim(), contactNumber: contactNumber!.trim() }).subscribe({
+      next: (masked) => {
+        this.isSubmitting.set(false);
+        this.forgotSentTo.set(masked || 'your registered number');
+      },
+      error: (err: Error) => {
+        this.isSubmitting.set(false);
+        this.errorMessage.set(err.message);
+      },
+    });
+  }
+
   submit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();

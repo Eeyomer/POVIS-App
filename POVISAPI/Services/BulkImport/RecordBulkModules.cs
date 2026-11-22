@@ -118,6 +118,7 @@ namespace POVISAPI.Services.BulkImport
             var tickets = await ResolveAsync(db, rows, q => q.Include(v => v.Payment).Include(v => v.FiledCase));
             var today = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(8));
             var seen = new HashSet<Guid>();
+            var incentiveRate = await AppSettingsService.ReadIncentiveRateAsync(db);
 
             foreach (var t in tickets)
             {
@@ -132,7 +133,7 @@ namespace POVISAPI.Services.BulkImport
                 if (r.HasErrors) continue;
 
                 if (t.Violation.Payment != null || !seen.Add(t.Violation.Id)) { ctx.Count("Payments skipped (violation already paid)"); continue; }
-                db.Payments.Add(new Payment { ViolationId = t.Violation.Id, DateOfPayment = date, Amount = amount!.Value, ReceiptNumber = receipt, PaidAt = paidAt, Remarks = remarks });
+                db.Payments.Add(new Payment { ViolationId = t.Violation.Id, DateOfPayment = date, Amount = amount!.Value, IncentiveRate = incentiveRate, IncentiveAmount = PaymentService.ComputeIncentive(amount.Value, incentiveRate), ReceiptNumber = receipt, PaidAt = paidAt, Remarks = remarks });
                 if (t.Violation.Status != ViolationStatus.Dismissed)
                     t.Violation.Status = t.Violation.FiledCase != null ? ViolationStatus.Closed : ViolationStatus.Paid;
                 ctx.Count("Payments added");

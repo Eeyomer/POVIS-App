@@ -3,7 +3,9 @@ using System.Security.Authentication;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+using POVISAPI.Common;
 using Microsoft.IdentityModel.Tokens;
 using POVISAPI.Data;
 using POVISAPI.Middleware;
@@ -19,11 +21,67 @@ public class AuthService : IAuthService
 {
     private readonly AppDbContext context;
     private readonly JwtSettings jwtSettings;
+    private readonly ISmsService smsService;
+    private readonly IMemoryCache cache;
 
-    public AuthService(AppDbContext context, IOptions<JwtSettings> jwtSettings)
+    private const int MaxAttemptsPerUsername = 5;
+    private const int MaxAttemptsPerIp = 20;
+    private static readonly TimeSpan AttemptWindow = TimeSpan.FromMinutes(15);
+
+    public AuthService(AppDbContext context, IOptions<JwtSettings> jwtSettings, ISmsService smsService, IMemoryCache cache)
     {
         this.context = context;
         this.jwtSettings = jwtSettings.Value;
+        this.smsService = smsService;
+        this.cache = cache;
+    }
+
+    private sealed class AttemptCounter { public int Count; }
+
+    /// <summary>Counts an attempt against a key for 15 minutes; true once the limit is exceeded.</summary>
+    private bool TooManyAttempts(string key, int max)
+    {
+        var counter = cache.GetOrCreate(key, e =>
+        {
+            e.AbsoluteExpirationRelativeToNow = AttemptWindow;
+            return new AttemptCounter();
+        })!;
+        return Interlocked.Increment(ref counter.Count) > max;
+    }
+
+    public async Task<ForgotPasswordResultDTO> ForgotPasswordAsync(ForgotPasswordDTO dto, string? ipAddress)
+    {
+        var username = dto.Username?.Trim() ?? string.Empty;
+        if (username.Length == 0 || string.IsNullOrWhiteSpace(dto.ContactNumber))
+            throw new ArgumentException("Enter your username and the cellphone number registered to your account.");
+
+        // Every attempt (right or wrong) counts, so the registered number cannot be guessed and the SMS cannot be spammed.
+        if (TooManyAttempts($"forgot-user:{username.ToLowerInvariant()}", MaxAttemptsPerUsername)
+            || TooManyAttempts($"forgot-ip:{ipAddress ?? "unknown"}", MaxAttemptsPerIp))
+            throw new InvalidOperationException("Too many attempts. Please try again in 15 minutes.");
+
+        if (!smsService.IsConfigured)
+            throw new InvalidOperationException("Password reset by SMS is currently unavailable. Please contact MIS Personnel.");
+
+        var user = await context.Users.FirstOrDefaultAsync(u => u.Username == username && u.IsActive);
+
+        // The same message for an unknown username, a missing number, or a wrong number: nothing is revealed about which one failed.
+        var entered = SmsService.NormalizeRecipient(dto.ContactNumber);
+        var registered = SmsService.NormalizeRecipient(user?.ContactNumber);
+        if (user is null || entered is null || registered is null || entered != registered)
+            throw new ArgumentException("The username and cellphone number do not match our records.");
+
+        var temporaryPassword = PasswordGenerator.GenerateTemporary();
+
+        // Text first: if the SMS fails the old password keeps working instead of locking the user out.
+        await smsService.SendAsync(registered,
+            $"POVIS: Your temporary password is {temporaryPassword}. Sign in with it and you will be asked to set a new password. Do not share this with anyone.");
+
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(temporaryPassword);
+        user.MustChangePassword = true;
+        await context.SaveChangesAsync();
+
+        return new ForgotPasswordResultDTO { MaskedNumber = new string('*', registered.Length - 3) + registered[^3..] };
     }
 
     public async Task<AuthResponseDTO> RegisterAsync(RegisterDTO dto)

@@ -11,10 +11,14 @@ namespace POVISAPI.Services;
 public class UserService : IUserService
 {
     private readonly AppDbContext context;
+    private readonly ISmsService smsService;
+    private readonly ILogger<UserService> logger;
 
-    public UserService(AppDbContext context)
+    public UserService(AppDbContext context, ISmsService smsService, ILogger<UserService> logger)
     {
         this.context = context;
+        this.smsService = smsService;
+        this.logger = logger;
     }
 
     public async Task<List<UserDTO>> GetAllAsync()
@@ -83,6 +87,32 @@ public class UserService : IUserService
 
         var created = ToDto(user);
         created.TemporaryPassword = temporaryPassword;
+
+        // Text the credentials to the registered number. The account already exists, so an SMS problem must not
+        // fail the request: MIS Personnel still gets the temporary password on screen and is told the text did not go out.
+        var number = SmsService.NormalizeRecipient(user.ContactNumber);
+        if (number is null)
+        {
+            created.SmsSent = false;
+            created.SmsNote = user.ContactNumber is null
+                ? "No cellphone number on the account, so no text was sent."
+                : "The cellphone number is not a valid Philippine mobile number, so no text was sent.";
+        }
+        else
+        {
+            try
+            {
+                await smsService.SendAsync(number,
+                    $"POVIS: Your account was created. Username: {user.Username}. Temporary password: {temporaryPassword}. You will be asked to set a new password when you sign in. Do not share this with anyone.");
+                created.SmsSent = true;
+            }
+            catch (Exception ex) when (ex is InvalidOperationException or ArgumentException)
+            {
+                logger.LogWarning("Account {Username} created but the temporary password SMS failed: {Reason}", user.Username, ex.Message);
+                created.SmsSent = false;
+                created.SmsNote = ex.Message;
+            }
+        }
         return created;
     }
 

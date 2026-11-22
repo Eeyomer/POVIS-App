@@ -21,6 +21,7 @@ const GROUP_BY_PATH: Record<string, NavGroup> = {
   violations: 'enforcement',
   'filed-cases': 'enforcement',
   payments: 'enforcement',
+  incentives: 'enforcement',
   'seminar-records': 'compliance',
   'counseling-records': 'compliance',
   'community-service-records': 'compliance',

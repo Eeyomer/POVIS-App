@@ -69,6 +69,20 @@ namespace POVISAPI.Controllers
             return Ok(new APIResponse<object> { Success = true, Message = "Login successful", Data = response });
         }
 
+        /// <summary>Forgot password: needs the username AND the cellphone number registered on the account; texts a temporary password.</summary>
+        [AllowAnonymous]
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordDTO dto)
+        {
+            var result = await authService.ForgotPasswordAsync(dto, HttpContext.Connection.RemoteIpAddress?.ToString());
+            return Ok(new APIResponse<ForgotPasswordResultDTO>
+            {
+                Success = true,
+                Message = "A temporary password has been sent to your registered cellphone number.",
+                Data = result
+            });
+        }
+
         /// <summary>The signed-in user's name and photo, for the sidebar.</summary>
         [Authorize]
         [HttpGet("me")]

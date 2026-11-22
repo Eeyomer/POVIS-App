@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environment/environment';
 import { APIResponse } from '../../models/app-model';
-import { ChangePasswordDTO, LoginDTO, RegisterDTO, UpdateProfileDTO, User } from '../../models/app-dto';
+import { ChangePasswordDTO, ForgotPasswordDTO, LoginDTO, RegisterDTO, UpdateProfileDTO, User } from '../../models/app-dto';
 import { AuthResponse, MyProfile } from '../../models/auth-model';
 
 @Injectable({ providedIn: 'root' })
@@ -22,6 +22,11 @@ export class AuthApi {
 
   changePassword(dto: ChangePasswordDTO): Observable<APIResponse<AuthResponse>> {
     return this.http.post<APIResponse<AuthResponse>>(`${this.apiUrl}/change-password`, dto);
+  }
+
+  /** Needs the username AND the cellphone number registered on the account; texts a temporary password. */
+  forgotPassword(dto: ForgotPasswordDTO): Observable<APIResponse<{ maskedNumber: string }>> {
+    return this.http.post<APIResponse<{ maskedNumber: string }>>(`${this.apiUrl}/forgot-password`, dto);
   }
 
   me(): Observable<APIResponse<MyProfile>> {

@@ -15,6 +15,24 @@ public class LoginDTO
     public string Password { get; set; } = string.Empty;
 }
 
+/// <summary>Forgot-password: the username and the cellphone number registered on the account must both match.</summary>
+public class ForgotPasswordDTO
+{
+    [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Username is required")]
+    [System.ComponentModel.DataAnnotations.StringLength(100)]
+    public string Username { get; set; } = string.Empty;
+
+    [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Cellphone number is required")]
+    [System.ComponentModel.DataAnnotations.StringLength(30)]
+    public string ContactNumber { get; set; } = string.Empty;
+}
+
+public class ForgotPasswordResultDTO
+{
+    /// <summary>The registered number the temporary password was sent to, masked (e.g. ********567).</summary>
+    public string MaskedNumber { get; set; } = string.Empty;
+}
+
 public class AuthResponseDTO
 {
     public string Token { get; set; } = string.Empty;

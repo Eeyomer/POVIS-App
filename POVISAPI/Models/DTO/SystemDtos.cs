@@ -43,4 +43,14 @@ public class AppSettingsDTO
 {
     /// <summary>When true, create/edit/view panels open in a modal for every user.</summary>
     public bool ModalForms { get; set; }
+
+    /// <summary>Incentive percentage (10 = 10%) given to apprehending officers on payments recorded from now on.
+    /// Read-only here: it is changed through PUT api/settings/incentive-rate, never by the modal-forms toggle.</summary>
+    public decimal IncentiveRate { get; set; }
+}
+
+public class IncentiveRateDTO
+{
+    [Range(0, 100, ErrorMessage = "Incentive rate must be between 0 and 100")]
+    public decimal Rate { get; set; }
 }

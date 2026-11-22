@@ -75,6 +75,11 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 builder.Services.Configure<JwtSettings>(
     builder.Configuration.GetSection("Jwt"));
 
+// PhilSMS credentials are secrets: set PhilSms__ApiKey and PhilSms__SenderId as environment variables (Render).
+builder.Services.Configure<PhilSmsSettings>(
+    builder.Configuration.GetSection("PhilSms"));
+builder.Services.AddHttpClient();
+
 var jwt = builder.Configuration.GetSection("Jwt");
 
 builder.Services.AddAuthentication(options =>

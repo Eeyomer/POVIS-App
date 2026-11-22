@@ -1,0 +1,183 @@
+<div class="p-4 sm:p-6 md:p-8">
+  <div class="mb-5">
+    <h1 class="font-poppins font-bold text-[19px] sm:text-[22px] text-[#152238]">{{ mine ? 'My Incentives' : 'Officer Incentives' }}</h1>
+    <p class="text-[12.5px] text-[#7a889c] mt-1">
+      {{ mine ? 'Incentives you earned on fines that were paid for your apprehensions.' : 'Incentives earned by apprehending officers on paid fines.' }}
+      Each incentive uses the rate that was in effect when the payment was recorded.
+    </p>
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-white rounded-2xl shadow-sm p-4 mb-5">
+    <div class="flex flex-wrap items-center gap-3">
+      <div class="inline-flex rounded-lg border border-[#d3dae5] overflow-hidden" role="group" aria-label="Period">
+        @for (p of periods; track p.value) {
+        <button type="button" (click)="setPeriod(p.value)" [attr.aria-pressed]="period() === p.value"
+          class="px-3.5 py-2 text-[13px] font-semibold border-r border-[#d3dae5] last:border-r-0"
+          [class]="period() === p.value ? 'bg-[#1e3a63] text-white' : 'bg-white text-[#152238] hover:bg-[#f3f5f8]'">
+          {{ p.label }}
+        </button>
+        }
+      </div>
+
+      @if (period() === 'custom') {
+      <label class="flex items-center gap-2 text-[13px] text-[#152238]">From
+        <input type="date" [value]="from()" (change)="onRangeChange('from', $any($event.target).value)"
+          class="px-3 py-2 rounded-lg border border-[#d3dae5] text-[13px]" /></label>
+      <label class="flex items-center gap-2 text-[13px] text-[#152238]">To
+        <input type="date" [value]="to()" (change)="onRangeChange('to', $any($event.target).value)"
+          class="px-3 py-2 rounded-lg border border-[#d3dae5] text-[13px]" /></label>
+      } @else {
+      <div class="flex items-center gap-1.5">
+        <button type="button" (click)="step(-1)" aria-label="Previous period"
+          class="w-9 h-9 rounded-lg border border-[#d3dae5] text-[#152238] hover:bg-[#f3f5f8] font-bold">‹</button>
+        <input type="date" [value]="date()" (change)="onDateChange($any($event.target).value)" aria-label="Pick a date within the period"
+          class="px-3 py-2 rounded-lg border border-[#d3dae5] text-[13px]" />
+        <button type="button" (click)="step(1)" aria-label="Next period"
+          class="w-9 h-9 rounded-lg border border-[#d3dae5] text-[#152238] hover:bg-[#f3f5f8] font-bold">›</button>
+        <button type="button" (click)="goToToday()"
+          class="px-3 py-2 rounded-lg border border-[#d3dae5] text-[13px] font-semibold text-[#152238] hover:bg-[#f3f5f8]">Today</button>
+      </div>
+      }
+      @if (rangeLabel()) {
+      <span class="text-[13px] font-semibold text-[#1e3a63]">{{ rangeLabel() }}</span>
+      }
+    </div>
+
+    <div class="flex flex-wrap items-center gap-3 mt-3">
+      @if (!mine) {
+      <select [value]="officerId()" (change)="onOfficerChange($any($event.target).value)" aria-label="Officer"
+        class="px-3 py-2 rounded-lg border border-[#d3dae5] text-[13px] bg-white">
+        <option value="">All officers</option>
+        @for (o of officers(); track o.id) {
+        <option [value]="o.id" [selected]="o.id === officerId()">{{ o.name }}</option>
+        }
+      </select>
+      }
+      <select [value]="division()" (change)="onDivisionChange($any($event.target).value)" aria-label="Division"
+        class="px-3 py-2 rounded-lg border border-[#d3dae5] text-[13px] bg-white">
+        <option value="">All divisions</option>
+        @for (d of divisions; track d) {
+        <option [value]="d" [selected]="d === division()">{{ d }}</option>
+        }
+      </select>
+      <input type="text" placeholder="Search OVR no., violator, receipt..." [value]="search()"
+        (input)="onSearchChange($any($event.target).value)"
+        class="px-3 py-2 rounded-lg border border-[#d3dae5] text-[13px] w-full sm:w-72" />
+    </div>
+  </div>
+
+  <!-- Summary -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
+    <div class="bg-white rounded-2xl shadow-sm p-5">
+      <div class="text-[12px] font-semibold uppercase tracking-wide text-[#7a889c]">Total incentive</div>
+      <div class="text-[26px] font-bold text-[#1e3a63] mt-1">₱{{ data().totalIncentive | number: '1.2-2' }}</div>
+    </div>
+    <div class="bg-white rounded-2xl shadow-sm p-5">
+      <div class="text-[12px] font-semibold uppercase tracking-wide text-[#7a889c]">Fines paid</div>
+      <div class="text-[26px] font-bold text-[#152238] mt-1">₱{{ data().totalAmount | number: '1.2-2' }}</div>
+    </div>
+    <div class="bg-white rounded-2xl shadow-sm p-5">
+      <div class="text-[12px] font-semibold uppercase tracking-wide text-[#7a889c]">Paid OVRs</div>
+      <div class="text-[26px] font-bold text-[#152238] mt-1">{{ data().totalCount | number }}</div>
+    </div>
+  </div>
+
+  <!-- Per officer (staff view) -->
+  @if (!mine && data().officerTotals.length > 1) {
+  <div class="bg-white rounded-2xl shadow-sm overflow-x-auto mb-5">
+    <table class="w-full min-w-[480px] text-[13px]">
+      <thead class="bg-[#f3f5f8] text-[#7a889c] text-left">
+        <tr>
+          <th class="px-4 py-3">Officer</th>
+          <th class="px-4 py-3 text-right">Paid OVRs</th>
+          <th class="px-4 py-3 text-right">Fines paid</th>
+          <th class="px-4 py-3 text-right">Incentive</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (o of data().officerTotals; track $index) {
+        <tr class="border-t border-[#eef2f8]">
+          <td class="px-4 py-3 font-medium text-[#152238]">
+            @if (o.officerId) {
+            <button type="button" (click)="filterOfficer(o.officerId)" class="text-[#1e3a63] hover:underline font-semibold text-left" title="Show only this officer">{{ o.officerName }}</button>
+            } @else {
+            {{ o.officerName }} <span class="text-[11.5px] text-[#7a889c]">(not registered)</span>
+            }
+          </td>
+          <td class="px-4 py-3 text-right">{{ o.count }}</td>
+          <td class="px-4 py-3 text-right">₱{{ o.totalAmount | number: '1.2-2' }}</td>
+          <td class="px-4 py-3 text-right font-semibold text-[#1e3a63]">₱{{ o.totalIncentive | number: '1.2-2' }}</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  }
+
+  <!-- Incentives with OVR information -->
+  <div class="bg-white rounded-2xl shadow-sm overflow-x-auto">
+    <table class="w-full min-w-[760px] text-[13px]">
+      <thead class="bg-[#f3f5f8] text-[#7a889c] text-left">
+        <tr>
+          <th class="px-4 py-3">Paid on</th>
+          <th class="px-4 py-3">OVR #</th>
+          @if (!mine) {
+          <th class="px-4 py-3">Officer</th>
+          }
+          <th class="px-4 py-3">Violator</th>
+          <th class="px-4 py-3 text-right">Fine paid</th>
+          <th class="px-4 py-3 text-right">Rate</th>
+          <th class="px-4 py-3 text-right">Incentive</th>
+          <th class="px-4 py-3"></th>
+        </tr>
+      </thead>
+      @if (loading()) {
+      <tbody app-skeleton-rows [columns]="mine ? 7 : 8"></tbody>
+      } @else {
+      <tbody>
+        @for (r of data().items; track r.paymentId) {
+        <tr class="border-t border-[#eef2f8]">
+          <td class="px-4 py-3 whitespace-nowrap">{{ r.dateOfPayment }}</td>
+          <td class="px-4 py-3 font-medium text-[#152238]">{{ r.ovrNumber }}</td>
+          @if (!mine) {
+          <td class="px-4 py-3">{{ r.officerName }} <span class="text-[11.5px] text-[#7a889c]">{{ r.division }}</span></td>
+          }
+          <td class="px-4 py-3">{{ r.violatorFullName }}</td>
+          <td class="px-4 py-3 text-right">₱{{ r.amount | number: '1.2-2' }}</td>
+          <td class="px-4 py-3 text-right">{{ r.incentiveRate | number: '1.0-2' }}%</td>
+          <td class="px-4 py-3 text-right font-semibold text-[#1e3a63]">₱{{ r.incentiveAmount | number: '1.2-2' }}</td>
+          <td class="px-4 py-3 text-right">
+            <button type="button" (click)="toggle(r)" [attr.aria-expanded]="expanded() === r.paymentId"
+              class="text-[#1e3a63] font-semibold whitespace-nowrap">{{ expanded() === r.paymentId ? 'Hide OVR' : 'OVR info' }}</button>
+          </td>
+        </tr>
+        @if (expanded() === r.paymentId) {
+        <tr class="bg-[#f8fafc]">
+          <td [attr.colspan]="mine ? 7 : 8" class="px-4 py-4">
+            <dl class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3 text-[13px]">
+              <div><dt class="text-[11px] font-semibold uppercase text-[#7a889c]">OVR number</dt><dd class="text-[#152238]">{{ r.ovrNumber }}</dd></div>
+              <div><dt class="text-[11px] font-semibold uppercase text-[#7a889c]">Violator</dt><dd class="text-[#152238]">{{ r.violatorFullName }}</dd></div>
+              <div><dt class="text-[11px] font-semibold uppercase text-[#7a889c]">Date of occurrence</dt><dd class="text-[#152238]">{{ r.dateOfOccurrence }}</dd></div>
+              <div class="sm:col-span-2"><dt class="text-[11px] font-semibold uppercase text-[#7a889c]">Ordinance violated</dt>
+                <dd class="text-[#152238]">{{ r.ordinance }}@if (r.section) { <span class="text-[#7a889c]"> · {{ r.section }}</span> }</dd></div>
+              <div><dt class="text-[11px] font-semibold uppercase text-[#7a889c]">Offense</dt><dd class="text-[#152238]">{{ r.offenseLevel }}</dd></div>
+              <div><dt class="text-[11px] font-semibold uppercase text-[#7a889c]">Place of occurrence</dt><dd class="text-[#152238]">{{ r.placeOfOccurrence || '—' }}</dd></div>
+              <div><dt class="text-[11px] font-semibold uppercase text-[#7a889c]">Status</dt><dd class="text-[#152238]">{{ r.status }}</dd></div>
+              <div><dt class="text-[11px] font-semibold uppercase text-[#7a889c]">Receipt no.</dt><dd class="text-[#152238]">{{ r.receiptNumber || '—' }}</dd></div>
+              <div><dt class="text-[11px] font-semibold uppercase text-[#7a889c]">Computation</dt>
+                <dd class="text-[#152238]">₱{{ r.amount | number: '1.2-2' }} × {{ r.incentiveRate | number: '1.0-2' }}% = <span class="font-semibold">₱{{ r.incentiveAmount | number: '1.2-2' }}</span></dd></div>
+            </dl>
+          </td>
+        </tr>
+        }
+        } @empty {
+        <tr><td [attr.colspan]="mine ? 7 : 8" class="px-4 py-6 text-center text-[#7a889c]">No incentives for this period.</td></tr>
+        }
+      </tbody>
+      }
+    </table>
+  </div>
+  <app-pagination [page]="page()" [pageSize]="pageSize" [total]="data().totalCount" (pageChange)="onPageChange($event)"
+    (pageSizeChange)="onPageSizeChange($event)" />
+</div>

@@ -67,6 +67,50 @@
           Authorized personnel only. Access is logged in compliance with RA 10173 (Data Privacy Act of 2012).
         </div>
       </form>
+      } @else if (forgotMode()) {
+      <!-- Forgot password: verify the account owner before sending a temporary password -->
+      <div class="text-[11px] font-bold text-[#5c6b82] tracking-[0.6px] mb-1">FORGOT PASSWORD</div>
+
+      @if (forgotSentTo(); as sentTo) {
+      <div class="rounded border border-green-300 bg-green-50 text-green-800 text-[13px] leading-normal p-3 mb-4" role="status">
+        A temporary password was sent to <span class="font-semibold">{{ sentTo }}</span>.
+        Sign in with it &mdash; you will be asked to set a new password right away.
+      </div>
+      <button type="button" (click)="backToSignIn()"
+        class="w-full bg-[#1e3a63] text-white border-none rounded py-3 text-[14px] font-bold tracking-[0.3px] cursor-pointer hover:bg-[#284d82] transition-colors">
+        Back to Sign In
+      </button>
+      } @else {
+      <div class="text-[12.5px] text-[#7a889c] mb-3.5 leading-normal">
+        To confirm the account is yours, enter your username and the cellphone number registered to it.
+        A temporary password will be texted to that number.
+      </div>
+
+      <form [formGroup]="forgotForm" (ngSubmit)="submitForgot()" class="flex flex-col">
+        <label for="forgot-username" class="block text-[12.5px] font-semibold text-[#2a3958] mb-1.5">Username</label>
+        <input id="forgot-username" type="text" formControlName="username" autocomplete="username"
+          class="w-full box-border px-3 py-[11px] rounded border border-[#d3dae5] text-[13.5px] text-[#1c2a44] mb-4 bg-[#f8f9fb] focus:outline-none focus:ring-2 focus:ring-[#1e3a63]" />
+
+        <label for="forgot-contact" class="block text-[12.5px] font-semibold text-[#2a3958] mb-1.5">Registered cellphone number</label>
+        <input id="forgot-contact" type="tel" inputmode="tel" formControlName="contactNumber" autocomplete="tel" placeholder="09XX XXX XXXX" maxlength="30"
+          class="w-full box-border px-3 py-[11px] rounded border border-[#d3dae5] text-[13.5px] text-[#1c2a44] bg-[#f8f9fb] focus:outline-none focus:ring-2 focus:ring-[#1e3a63]" />
+        @if (forgotForm.get('contactNumber')?.touched && forgotForm.get('contactNumber')?.invalid) {
+        <p class="text-[12.5px] text-red-600 mt-1">Enter a valid Philippine mobile number, e.g. 09171234567.</p>
+        }
+
+        @if (errorMessage()) {
+        <p class="text-[13px] text-red-600 mb-2 mt-3" role="alert">{{ errorMessage() }}</p>
+        }
+
+        <button type="submit" [disabled]="isSubmitting()"
+          class="w-full mt-5 bg-[#1e3a63] text-white border-none rounded py-3 text-[14px] font-bold tracking-[0.3px] cursor-pointer hover:bg-[#284d82] transition-colors disabled:opacity-60">
+          {{ isSubmitting() ? 'Verifying...' : 'Send Temporary Password' }}
+        </button>
+        <div class="text-center mt-3">
+          <a href="#" (click)="backToSignIn($event)" class="text-[12px] text-[#1e3a63] hover:text-[#284d82] no-underline">Back to Sign In</a>
+        </div>
+      </form>
+      }
       } @else {
       <!-- Sign in -->
       <div class="text-[11px] font-bold text-[#5c6b82] tracking-[0.6px] mb-[14px]">SIGN IN</div>
@@ -91,7 +135,7 @@
         </div>
 
         <div class="text-right mb-5">
-          <a href="#" class="text-[12px] text-[#1e3a63] hover:text-[#284d82] no-underline">Forgot password?</a>
+          <a href="#" (click)="openForgot($event)" class="text-[12px] text-[#1e3a63] hover:text-[#284d82] no-underline">Forgot password?</a>
         </div>
 
         @if (errorMessage()) {

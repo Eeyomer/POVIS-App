@@ -2,7 +2,7 @@ import { Injectable, Inject, PLATFORM_ID, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, map, tap, throwError } from 'rxjs';
-import { ChangePasswordDTO, LoginDTO, RegisterDTO, Role, ROLE_LABELS, UpdateProfileDTO, User } from '../models/app-dto';
+import { ChangePasswordDTO, ForgotPasswordDTO, LoginDTO, RegisterDTO, Role, ROLE_LABELS, UpdateProfileDTO, User } from '../models/app-dto';
 import { AuthResponse, MyProfile } from '../models/auth-model';
 import { AuthApi } from './api-service/auth-api';
 
@@ -58,6 +58,14 @@ export class AuthService {
     return this.api.changePassword(dto).pipe(
       map((res) => res.data as AuthResponse),
       tap((auth) => this.storeSession(auth)),
+      catchError((err) => this.rethrowAsError(err)),
+    );
+  }
+
+  /** Verifies username + registered cellphone number on the server, which then texts a temporary password. */
+  forgotPassword(dto: ForgotPasswordDTO): Observable<string> {
+    return this.api.forgotPassword(dto).pipe(
+      map((res) => res.data?.maskedNumber ?? ''),
       catchError((err) => this.rethrowAsError(err)),
     );
   }

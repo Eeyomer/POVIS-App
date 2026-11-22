@@ -33,7 +33,7 @@ export class Users implements OnInit {
   showForm = signal(false);
   editing = signal<User | null>(null);
   /** Temporary password issued by the system; shown once so MIS Personnel can hand it over. */
-  issuedPassword = signal<{ username: string; password: string } | null>(null);
+  issuedPassword = signal<{ username: string; password: string; sms?: string } | null>(null);
 
   maritalStatuses: MaritalStatus[] = ['Single', 'Married', 'Widowed', 'Separated', 'Divorced'];
   imageAccept = IMAGE_ACCEPT;
@@ -208,7 +208,11 @@ export class Users implements OnInit {
         this.toast.success(current ? 'User updated.' : 'User created.');
         this.authService.loadProfile(); // the sidebar shows the signed-in user's photo, which may have just changed
         if (!current && saved.temporaryPassword) {
-          this.issuedPassword.set({ username: saved.username, password: saved.temporaryPassword });
+          this.issuedPassword.set({
+            username: saved.username,
+            password: saved.temporaryPassword,
+            sms: saved.smsSent ? 'The temporary password was also sent to the user by SMS.' : (saved.smsNote ?? undefined),
+          });
         }
         this.cancel();
         this.refresh();

@@ -34,5 +34,15 @@ namespace POVISAPI.Controllers
             var updated = await settingsService.UpdateAsync(settings);
             return Ok(new APIResponse<AppSettingsDTO> { Success = true, Message = "Settings updated successfully", Data = updated });
         }
+
+        /// <summary>Sets the incentive %. Only payments recorded after this call use it; earlier payments keep the rate they were recorded with.</summary>
+        [Authorize(Roles = "MISPersonnel")]
+        [HttpPut("incentive-rate")]
+        public async Task<IActionResult> UpdateIncentiveRate([FromBody] IncentiveRateDTO dto)
+        {
+            await settingsService.UpdateIncentiveRateAsync(dto.Rate);
+            var settings = await settingsService.GetAsync();
+            return Ok(new APIResponse<AppSettingsDTO> { Success = true, Message = "Incentive rate updated successfully", Data = settings });
+        }
     }
 }

@@ -396,6 +396,14 @@ namespace POVISAPI.Migrations
                     b.Property<DateOnly>("DateOfPayment")
                         .HasColumnType("date");
 
+                    b.Property<decimal>("IncentiveAmount")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)");
+
+                    b.Property<decimal>("IncentiveRate")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)");
+
                     b.Property<bool>("IsArchived")
                         .HasColumnType("boolean");
 

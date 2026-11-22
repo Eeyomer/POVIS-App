@@ -46,6 +46,21 @@ export class SystemService {
     });
   }
 
+
+  incentiveRate(): Observable<number> {
+    return this.api.getSettings().pipe(
+      map((res) => res.data?.incentiveRate ?? 10),
+      catchError((err) => this.rethrowAsError(err)),
+    );
+  }
+
+  setIncentiveRate(rate: number): Observable<number> {
+    return this.api.setIncentiveRate(rate).pipe(
+      map((res) => res.data?.incentiveRate ?? rate),
+      catchError((err) => this.rethrowAsError(err)),
+    );
+  }
+
   private rethrowAsError(err: HttpErrorResponse) {
     return throwError(() => new Error(err?.error?.message || 'Something went wrong. Please try again.'));
   }

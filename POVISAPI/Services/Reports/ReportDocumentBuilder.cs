@@ -200,7 +200,7 @@ namespace POVISAPI.Services.Reports
         public static ReportDocument Incentives(IncentiveReportDTO r)
         {
             var doc = new ReportDocument { FileBaseName = $"povis-incentives-{r.From:yyyyMMdd}-{r.To:yyyyMMdd}" };
-            var rate = $"{r.Rate:P0}";
+            var rate = r.Rate.HasValue ? $"{r.Rate.Value:P0}" : "INCENTIVE";
 
             foreach (var d in r.Divisions)
             {
@@ -230,7 +230,7 @@ namespace POVISAPI.Services.Reports
                     Name = $"{d.Division} INCENTIVES",
                     TitleLines = { $"{d.Division} INCENTIVES", Period(r.From, r.To) },
                     Tables = { payments, totals },
-                    Notes = { $"Incentive = {rate} of each fine paid, credited to the apprehending deputized enforcer." }
+                    Notes = { r.Rate.HasValue ? $"Incentive = {rate} of each fine paid, credited to the apprehending deputized enforcer." : "Incentive = the rate in force when each fine was paid, credited to the apprehending deputized enforcer." }
                 });
             }
 

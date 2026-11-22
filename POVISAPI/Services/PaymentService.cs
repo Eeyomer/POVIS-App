@@ -22,8 +22,14 @@ namespace POVISAPI.Services
             Amount = p.Amount,
             ReceiptNumber = p.ReceiptNumber,
             PaidAt = p.PaidAt,
-            Remarks = p.Remarks
+            Remarks = p.Remarks,
+            IncentiveRate = p.IncentiveRate,
+            IncentiveAmount = p.IncentiveAmount
         };
+
+        /// <summary>Incentive for an amount at a percentage (10 = 10%), rounded to centavos.</summary>
+        public static decimal ComputeIncentive(decimal amount, decimal ratePercent) =>
+            Math.Round(amount * ratePercent / 100m, 2, MidpointRounding.AwayFromZero);
 
         private IQueryable<Payment> IncludedQuery() =>
             dbContext.Payments.Include(p => p.Violation).ThenInclude(v => v.Violator);
@@ -90,11 +96,16 @@ namespace POVISAPI.Services
             if (alreadyPaid)
                 throw new InvalidOperationException("This violation already has a payment.");
 
+            // Freeze the rate in force today on this payment; changing the setting later never touches it.
+            var incentiveRate = await AppSettingsService.ReadIncentiveRateAsync(dbContext);
+
             var entity = new Payment
             {
                 ViolationId = violationId,
                 DateOfPayment = dto.DateOfPayment,
                 Amount = dto.Amount,
+                IncentiveRate = incentiveRate,
+                IncentiveAmount = ComputeIncentive(dto.Amount, incentiveRate),
                 ReceiptNumber = dto.ReceiptNumber?.Trim(),
                 PaidAt = dto.PaidAt?.Trim(),
                 Remarks = dto.Remarks?.Trim()
@@ -114,6 +125,8 @@ namespace POVISAPI.Services
             var entity = await GetTrackedPayment(dto.PaymentId);
             entity.DateOfPayment = dto.DateOfPayment;
             entity.Amount = dto.Amount;
+            // A corrected amount is re-computed at the rate this payment was recorded with, not today's rate.
+            entity.IncentiveAmount = ComputeIncentive(dto.Amount, entity.IncentiveRate);
             entity.ReceiptNumber = dto.ReceiptNumber?.Trim();
             entity.PaidAt = dto.PaidAt?.Trim();
             entity.Remarks = dto.Remarks?.Trim();

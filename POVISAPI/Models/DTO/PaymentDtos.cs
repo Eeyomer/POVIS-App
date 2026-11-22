@@ -13,6 +13,9 @@ namespace POVISAPI.Models.DTO
         public string? ReceiptNumber { get; set; }
         public string? PaidAt { get; set; }
         public string? Remarks { get; set; }
+        /// <summary>Incentive % that applied to this payment when it was recorded (frozen).</summary>
+        public decimal IncentiveRate { get; set; }
+        public decimal IncentiveAmount { get; set; }
     }
 
     public class AddPaymentDTO

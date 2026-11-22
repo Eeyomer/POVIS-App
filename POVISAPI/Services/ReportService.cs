@@ -8,8 +8,6 @@ namespace POVISAPI.Services
 {
     public class ReportService : IReportService
     {
-        /// <summary>Share of each paid fine that goes to the apprehending deputized enforcer (the 10% column on the INCENTIVES sheets).</summary>
-        public const decimal IncentiveRate = 0.10m;
 
         private readonly AppDbContext _db;
         public ReportService(AppDbContext db) => _db = db;
@@ -305,7 +303,9 @@ namespace POVISAPI.Services
                     p.DateOfPayment,
                     p.Violation.Division,
                     p.Violation.ApprehendingOfficer,
-                    p.Amount
+                    p.Amount,
+                    p.IncentiveRate,
+                    p.IncentiveAmount
                 })
                 .ToListAsync();
 
@@ -321,7 +321,7 @@ namespace POVISAPI.Services
                             Division = g.Key.ToString(),
                             Deputized = string.IsNullOrWhiteSpace(p.ApprehendingOfficer) ? "UNSPECIFIED" : p.ApprehendingOfficer.Trim().ToUpperInvariant(),
                             Amount = p.Amount,
-                            Incentive = Math.Round(p.Amount * IncentiveRate, 2)
+                            Incentive = p.IncentiveAmount
                         })
                         .OrderBy(r => r.Deputized).ThenBy(r => r.DateOfPayment)
                         .ToList();
@@ -341,7 +341,8 @@ namespace POVISAPI.Services
                 })
                 .ToList();
 
-            return new IncentiveReportDTO { From = from, To = to, Rate = IncentiveRate, Divisions = divisions };
+            var rates = payments.Select(p => p.IncentiveRate).Distinct().ToList();
+            return new IncentiveReportDTO { From = from, To = to, Rate = rates.Count == 1 ? rates[0] / 100m : null, Divisions = divisions };
         }
 
         public async Task<ApprehensionReportDTO> GetApprehensionAsync(DateOnly from, DateOnly to, List<Guid>? officerIds)

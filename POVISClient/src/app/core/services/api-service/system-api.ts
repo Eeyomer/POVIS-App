@@ -37,4 +37,16 @@ export class SystemApi {
 
     return this.http.get<APIResponse<PagedResult<TechnicalLog>>>(`${this.apiUrl}/logs`, { params });
   }
+
+  getSettings(): Observable<APIResponse<{ modalForms: boolean; incentiveRate: number }>> {
+    return this.http.get<APIResponse<{ modalForms: boolean; incentiveRate: number }>>(`${environment.apiUrl}/api/settings`);
+  }
+
+  /** New rate applies only to payments recorded from now on; existing payments keep theirs. */
+  setIncentiveRate(rate: number): Observable<APIResponse<{ modalForms: boolean; incentiveRate: number }>> {
+    return this.http.put<APIResponse<{ modalForms: boolean; incentiveRate: number }>>(
+      `${environment.apiUrl}/api/settings/incentive-rate`,
+      { rate },
+    );
+  }
 }

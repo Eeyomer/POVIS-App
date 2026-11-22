@@ -182,6 +182,8 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Payment>(e =>
         {
             e.Property(p => p.Amount).HasPrecision(10, 2);
+            e.Property(p => p.IncentiveRate).HasPrecision(5, 2);
+            e.Property(p => p.IncentiveAmount).HasPrecision(10, 2);
             e.Property(p => p.ReceiptNumber).HasMaxLength(50);
             e.Property(p => p.PaidAt).HasMaxLength(100);
             e.Property(p => p.Remarks).HasMaxLength(500);

@@ -132,7 +132,7 @@ namespace POVISAPI.Models.DTO
     {
         public DateOnly From { get; set; }
         public DateOnly To { get; set; }
-        public decimal Rate { get; set; }
+        public decimal? Rate { get; set; }
         public List<IncentiveDivisionDTO> Divisions { get; set; } = new();
     }
 

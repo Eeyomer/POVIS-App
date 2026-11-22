@@ -22,6 +22,10 @@ public class UserDTO
 
     /// <summary>Only populated in the response to create, and shown to MIS Personnel once.</summary>
     public string? TemporaryPassword { get; set; }
+
+    /// <summary>Only set in the response to create: whether the temporary password was also texted to the user.</summary>
+    public bool? SmsSent { get; set; }
+    public string? SmsNote { get; set; }
     public DateTime CreatedAt { get; set; }
 }
 

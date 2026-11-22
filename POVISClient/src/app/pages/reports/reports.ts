@@ -45,7 +45,7 @@ export class Reports {
     { value: 'overall', label: 'Overall (ordinance summary)' },
     { value: 'per-barangay', label: '% per Barangay & per Ordinance' },
     { value: 'seminar', label: 'Talakayan Seminar per Barangay' },
-    { value: 'incentives', label: 'Incentives (10% per deputized enforcer)' },
+    { value: 'incentives', label: 'Incentives (per deputized enforcer)' },
     { value: 'enforcers', label: 'Deputized Enforcers' },
     { value: 'apprehension', label: 'Apprehension Report' },
   ];

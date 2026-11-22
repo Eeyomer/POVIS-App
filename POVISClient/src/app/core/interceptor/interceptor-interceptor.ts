@@ -6,10 +6,10 @@ import { AuthService } from '../services/auth-service';
 import { StorageNoticeService, STORAGE_FULL_MESSAGE } from '../services/storage-notice-service';
 import { isStorageFull } from '../environment/availability';
 
-const AUTH_ENDPOINTS = ['/api/Auth/login', '/api/Auth/register', '/api/Auth/admin-exists'];
+const AUTH_ENDPOINTS = ['/api/Auth/login', '/api/Auth/register', '/api/Auth/admin-exists', '/api/Auth/forgot-password'];
 
 /** POSTs that don't add records, so they stay allowed while storage is full. */
-const STORAGE_EXEMPT_POSTS = ['/api/Auth/login', '/api/Auth/change-password'];
+const STORAGE_EXEMPT_POSTS = ['/api/Auth/login', '/api/Auth/change-password', '/api/Auth/forgot-password'];
 
 export const authInterceptor: HttpInterceptorFn = (
   req: HttpRequest<unknown>,
