@@ -266,7 +266,8 @@ export class Violations implements OnInit {
   viewOnly = signal(false);
 
   openEdit(violation: ViolationDTO): void {
-    this.viewOnly.set(violation.isReviewed);
+    const notMine = this.authService.isApprehendingOfficer() && !violation.recordedByMe;
+    this.viewOnly.set(violation.isReviewed || notMine);
     this.form.enable({ emitEvent: false });
     this.editing.set(violation);
     this.resetEvidence();
@@ -296,7 +297,7 @@ export class Violations implements OnInit {
       remarks: violation.remarks ?? '',
       remarks2: violation.remarks2 ?? '',
     });
-    if (violation.isReviewed) this.form.disable({ emitEvent: false });
+    if (violation.isReviewed || notMine) this.form.disable({ emitEvent: false });
     this.showForm.set(true);
   }
 

@@ -33,6 +33,9 @@ namespace POVISAPI.Controllers
                 filter.RecordedByUserId = CurrentUserId() ?? Guid.Empty;
 
             var violations = await violationService.GetAllAsync(filter);
+            var me = CurrentUserId();
+            foreach (var item in violations.Items)
+                item.RecordedByMe = me.HasValue && item.RecordedByUserId == me;
             return Ok(new APIResponse<object>
             {
                 Success = true,
@@ -52,6 +55,8 @@ namespace POVISAPI.Controllers
         public async Task<IActionResult> GetViolationById(string id)
         {
             var violation = await violationService.GetByIdAsync(id);
+            var me = CurrentUserId();
+            violation.RecordedByMe = me.HasValue && violation.RecordedByUserId == me;
             return Ok(new APIResponse<object>
             {
                 Success = true,
@@ -87,10 +92,23 @@ namespace POVISAPI.Controllers
             });
         }
 
-        [Authorize(Roles = "MISPersonnel,OVRSupervisor")]
+        [Authorize(Roles = "MISPersonnel,OVRSupervisor,ApprehendingOfficer")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateViolation(string id, [FromBody] UpdateViolationDTO dto)
         {
+            // Apprehending officers may only edit violations they recorded themselves.
+            if (User.IsInRole("ApprehendingOfficer"))
+            {
+                var existing = await violationService.GetByIdAsync(id);
+                var me = CurrentUserId();
+                if (!me.HasValue || existing.RecordedByUserId != me || existing.IsReviewed)
+                    return StatusCode(StatusCodes.Status403Forbidden, new APIResponse<object>
+                    {
+                        Success = false,
+                        Message = "You can only edit violations that you recorded."
+                    });
+            }
+
             if (id != dto.ViolationId)
                 return BadRequest(new APIResponse<object>
                 {

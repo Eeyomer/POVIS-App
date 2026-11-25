@@ -15,6 +15,9 @@ namespace POVISAPI.Models.DTO
         public string ViolationId { get; set; } = string.Empty;
         [System.Text.Json.Serialization.JsonIgnore]
         public Guid? RecordedByUserId { get; set; }
+
+        /// <summary>Set by the controller: true when the logged-in user recorded this violation.</summary>
+        public bool RecordedByMe { get; set; }
         public string? ApprehendingOfficerId { get; set; }
         public string ViolatorId { get; set; } = string.Empty;
         public string ViolatorFullName { get; set; } = string.Empty;

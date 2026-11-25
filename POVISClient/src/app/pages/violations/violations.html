@@ -239,6 +239,8 @@
               {{ v.isReviewed ? 'Unreview' : 'Approve' }}
             </button>
             <button type="button" (click)="openEdit(v)" class="text-[#1e3a63] font-semibold mr-3">{{ v.isReviewed ? 'View' : 'Edit' }}</button>
+            } @else if (authService.isApprehendingOfficer()) {
+            <button type="button" (click)="openEdit(v)" class="text-[#1e3a63] font-semibold mr-3">{{ v.isReviewed || !v.recordedByMe ? 'View' : 'Edit' }}</button>
             }
             @if (authService.canDelete()) {
             <button type="button" (click)="remove(v)" class="text-red-500 font-semibold">Archive</button>
