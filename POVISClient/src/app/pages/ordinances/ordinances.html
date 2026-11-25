@@ -58,18 +58,22 @@
       <div>
         <label class="block text-[13px] font-semibold text-[#152238] mb-1">Ordinance Number</label>
         <input type="text" formControlName="ordinanceNumber" class="w-full px-3 py-2 rounded-lg border border-[#d3dae5] text-[14px]" />
+        <app-field-error [control]="form.controls.ordinanceNumber" label="Ordinance number" />
       </div>
       <div>
         <label class="block text-[13px] font-semibold text-[#152238] mb-1">Series (Year)</label>
         <input type="number" formControlName="series" class="w-full px-3 py-2 rounded-lg border border-[#d3dae5] text-[14px]" />
+        <app-field-error [control]="form.controls.series" label="Series" />
       </div>
       <div class="sm:col-span-2">
         <label class="block text-[13px] font-semibold text-[#152238] mb-1">Title</label>
         <input type="text" formControlName="title" class="w-full px-3 py-2 rounded-lg border border-[#d3dae5] text-[14px]" />
+        <app-field-error [control]="form.controls.title" label="Title" />
       </div>
       <div>
         <label class="block text-[13px] font-semibold text-[#152238] mb-1">Short Name</label>
         <input type="text" formControlName="shortName" class="w-full px-3 py-2 rounded-lg border border-[#d3dae5] text-[14px]" />
+        <app-field-error [control]="form.controls.shortName" label="Short name" />
       </div>
       <div class="flex items-center gap-2 mt-6">
         <input type="checkbox" formControlName="isExecutiveOrder" id="isEo" />
@@ -104,7 +108,9 @@
       <form [formGroup]="sectionForm" (ngSubmit)="addSection()" class="flex flex-col gap-2">
         <div class="text-[13px] font-semibold text-[#152238]">{{ editingSectionId() ? 'Edit section' : 'Add new section' }}</div>
         <input type="text" formControlName="sectionCode" maxlength="50" placeholder="Section code" class="w-full px-3 py-2 rounded-lg border border-[#d3dae5] text-[13px]" />
+        <app-field-error [control]="sectionForm.controls.sectionCode" label="Section code" />
         <textarea formControlName="description" maxlength="5000" rows="4" placeholder="Description" class="w-full px-3 py-2 rounded-lg border border-[#d3dae5] text-[13px] resize-y"></textarea>
+        <app-field-error [control]="sectionForm.controls.description" label="Description" />
         <div class="flex gap-2">
           <button type="submit" class="px-3 py-2 rounded-lg bg-[#1e3a63] text-white text-[13px] font-semibold">{{ editingSectionId() ? 'Save' : 'Add' }}</button>
           <button type="button" (click)="cancelSectionEdit()" class="px-3 py-2 rounded-lg border border-[#d3dae5] text-[13px] font-semibold text-[#152238]">Cancel</button>

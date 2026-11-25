@@ -1,3 +1,4 @@
+import { FieldError } from '../../shared/components/field-error/field-error';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { finalize } from 'rxjs';
 import { SkeletonRows } from '../../shared/components/skeleton/skeleton';
@@ -24,7 +25,7 @@ interface PenaltyScope {
 
 @Component({
   selector: 'app-ordinances',
-  imports: [SkeletonRows, CommonModule, ReactiveFormsModule, FormPanel],
+  imports: [FieldError, SkeletonRows, CommonModule, ReactiveFormsModule, FormPanel],
   templateUrl: './ordinances.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -170,6 +171,7 @@ export class Ordinances implements OnInit {
   save(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      this.toast.warn('Please fill in the required fields highlighted in red.');
       return;
     }
 
@@ -236,6 +238,7 @@ export class Ordinances implements OnInit {
     const detail = this.selected();
     if (!detail || this.sectionForm.invalid) {
       this.sectionForm.markAllAsTouched();
+      this.toast.warn('Please fill in the required fields highlighted in red.');
       return;
     }
     const raw = this.sectionForm.getRawValue();
@@ -270,7 +273,10 @@ export class Ordinances implements OnInit {
     const detail = this.selected();
     if (!detail) return;
     this.ordinancesService.removeSection(detail.ordinanceId, sectionId).subscribe({
-      next: () => this.viewDetail({ ordinanceId: detail.ordinanceId } as OrdinanceListDTO),
+      next: () => {
+        this.toast.success('Section deleted.');
+        this.viewDetail({ ordinanceId: detail.ordinanceId } as OrdinanceListDTO);
+      },
       error: (err) => this.toast.error(err.message),
     });
   }
@@ -343,6 +349,7 @@ export class Ordinances implements OnInit {
       penaltyText: text || `Fine of ₱${raw.fineAmount}`,
     }).subscribe({
       next: () => {
+        this.toast.success('Penalty added.');
         this.addingFor.set(null);
         this.viewDetail({ ordinanceId: detail.ordinanceId } as OrdinanceListDTO);
       },
@@ -354,7 +361,10 @@ export class Ordinances implements OnInit {
     const detail = this.selected();
     if (!detail) return;
     this.ordinancesService.removePenalty(detail.ordinanceId, penaltyId).subscribe({
-      next: () => this.viewDetail({ ordinanceId: detail.ordinanceId } as OrdinanceListDTO),
+      next: () => {
+        this.toast.success('Penalty deleted.');
+        this.viewDetail({ ordinanceId: detail.ordinanceId } as OrdinanceListDTO);
+      },
       error: (err) => this.toast.error(err.message),
     });
   }

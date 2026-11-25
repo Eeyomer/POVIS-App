@@ -1,3 +1,4 @@
+import { FieldError } from '../../shared/components/field-error/field-error';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal, computed } from '@angular/core';
 import { SkeletonRows } from '../../shared/components/skeleton/skeleton';
 import { finalize } from 'rxjs';
@@ -18,7 +19,7 @@ import { SearchSelect, SelectOption } from '../../shared/components/search-selec
 
 @Component({
   selector: 'app-payments',
-  imports: [SkeletonRows, CommonModule, ReactiveFormsModule, BulkUpload, Pagination, FormPanel, SearchSelect, DocPreview],
+  imports: [FieldError, SkeletonRows, CommonModule, ReactiveFormsModule, BulkUpload, Pagination, FormPanel, SearchSelect, DocPreview],
   templateUrl: './payments.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -145,6 +146,7 @@ export class Payments implements OnInit {
   save(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      this.toast.warn('Please fill in the required fields highlighted in red.');
       return;
     }
     const raw = this.form.getRawValue();

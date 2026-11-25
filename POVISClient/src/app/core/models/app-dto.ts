@@ -85,6 +85,8 @@ export interface ViolatorHistoryDTO {
 // ── Violations ───────────────────────────────────────────────────────────
 export interface ViolationDTO {
   violationId: string;
+  /** True when the signed-in user recorded this violation. */
+  recordedByMe?: boolean;
   violatorId: string;
   violatorFullName: string;
   ovrNumber: string;

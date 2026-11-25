@@ -24,11 +24,13 @@
         <label class="block text-[13px] font-semibold text-[#152238] mb-1">Violation</label>
         <app-search-select formControlName="violationId" [options]="violationOptions()" placeholder="Search OVR no. or violator name..."
           (searched)="searchViolations($event)" />
+        <app-field-error [control]="form.controls.violationId" label="Violation" />
       </div>
       }
       <div>
         <label class="block text-[13px] font-semibold text-[#152238] mb-1">Date Filed</label>
         <input type="date" formControlName="dateFiled" class="w-full px-3 py-2 rounded-lg border border-[#d3dae5] text-[14px]" />
+        <app-field-error [control]="form.controls.dateFiled" label="Date filed" />
       </div>
       <div>
         <label class="block text-[13px] font-semibold text-[#152238] mb-1">NPS Docket Number</label>

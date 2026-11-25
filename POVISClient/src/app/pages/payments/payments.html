@@ -24,15 +24,18 @@
         <label class="block text-[13px] font-semibold text-[#152238] mb-1">Violation</label>
         <app-search-select formControlName="violationId" [options]="violationOptions()" placeholder="Search OVR no. or violator name..."
           (searched)="searchViolations($event)" />
+        <app-field-error [control]="form.controls.violationId" label="Violation" />
       </div>
       }
       <div>
         <label class="block text-[13px] font-semibold text-[#152238] mb-1">Date of Payment</label>
         <input type="date" formControlName="dateOfPayment" class="w-full px-3 py-2 rounded-lg border border-[#d3dae5] text-[14px]" />
+        <app-field-error [control]="form.controls.dateOfPayment" label="Date of payment" />
       </div>
       <div>
         <label class="block text-[13px] font-semibold text-[#152238] mb-1">Amount</label>
         <input type="number" step="0.01" formControlName="amount" class="w-full px-3 py-2 rounded-lg border border-[#d3dae5] text-[14px]" />
+        <app-field-error [control]="form.controls.amount" label="Amount" />
       </div>
       <div>
         <label class="block text-[13px] font-semibold text-[#152238] mb-1">Receipt Number</label>

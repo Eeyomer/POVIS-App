@@ -24,6 +24,7 @@
         <label class="block text-[13px] font-semibold text-[#152238] mb-1">Violation</label>
         <app-search-select formControlName="violationId" [options]="violationOptions()" placeholder="Search OVR no. or violator name..."
           (searched)="searchViolations($event)" />
+        <app-field-error [control]="form.controls.violationId" label="Violation" />
       </div>
       }
       <div>
