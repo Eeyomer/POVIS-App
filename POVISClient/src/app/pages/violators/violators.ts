@@ -1,3 +1,4 @@
+import { FieldError } from '../../shared/components/field-error/field-error';
 import { ordinal } from '../../core/utils/offense-level';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { SkeletonRows } from '../../shared/components/skeleton/skeleton';
@@ -15,7 +16,7 @@ import { ToastService } from '../../shared/toast/toast-service';
 
 @Component({
   selector: 'app-violators',
-  imports: [SkeletonRows, CommonModule, ReactiveFormsModule, BulkUpload, Pagination, FormPanel],
+  imports: [FieldError, SkeletonRows, CommonModule, ReactiveFormsModule, BulkUpload, Pagination, FormPanel],
   templateUrl: './violators.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -123,6 +124,7 @@ export class Violators implements OnInit {
   save(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      this.toast.warn('Please fill in the required fields highlighted in red.');
       return;
     }
 

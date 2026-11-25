@@ -1,3 +1,11 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import 'tailwindcss';
+
+/* Highlight invalid fields once the user has touched them or tried to submit. */
+input.ng-invalid.ng-touched,
+select.ng-invalid.ng-touched,
+textarea.ng-invalid.ng-touched {
+  border-color: #c81e5c !important;
+  outline-color: #c81e5c;
+}

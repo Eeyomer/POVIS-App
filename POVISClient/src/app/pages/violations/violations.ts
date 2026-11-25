@@ -1,3 +1,4 @@
+import { FieldError } from '../../shared/components/field-error/field-error';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal, computed } from '@angular/core';
 import { SkeletonRows } from '../../shared/components/skeleton/skeleton';
 import { finalize } from 'rxjs';
@@ -29,7 +30,7 @@ import { SearchSelect, SelectOption } from '../../shared/components/search-selec
 
 @Component({
   selector: 'app-violations',
-  imports: [SkeletonRows, CommonModule, ReactiveFormsModule, BulkUpload, Pagination, FormPanel, SearchSelect],
+  imports: [FieldError, SkeletonRows, CommonModule, ReactiveFormsModule, BulkUpload, Pagination, FormPanel, SearchSelect],
   templateUrl: './violations.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -310,6 +311,7 @@ export class Violations implements OnInit {
   save(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      this.toast.warn('Please fill in the required fields highlighted in red.');
       return;
     }
 

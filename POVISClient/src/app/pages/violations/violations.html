@@ -45,12 +45,14 @@
         <label class="block text-[13px] font-semibold text-[#152238] mb-1">Violator</label>
         <app-search-select formControlName="violatorId" [options]="violatorOptions()" placeholder="Search violator name..."
           (searched)="searchViolators($event)" />
+        <app-field-error [control]="form.controls.violatorId" label="Violator" />
       </div>
       }
       <div>
         <label class="block text-[13px] font-semibold text-[#152238] mb-1">OVR Number</label>
         <input type="text" formControlName="ovrNumber" [readOnly]="!!editing()"
           class="w-full px-3 py-2 rounded-lg border border-[#d3dae5] text-[14px]" />
+        <app-field-error [control]="form.controls.ovrNumber" label="OVR number" />
       </div>
       <div>
         <label class="block text-[13px] font-semibold text-[#152238] mb-1">Division</label>
@@ -68,10 +70,12 @@
       <div>
         <label class="block text-[13px] font-semibold text-[#152238] mb-1">Date of Submission</label>
         <input type="date" formControlName="dateOfSubmission" class="w-full px-3 py-2 rounded-lg border border-[#d3dae5] text-[14px]" />
+        <app-field-error [control]="form.controls.dateOfSubmission" label="Date of submission" />
       </div>
       <div>
         <label class="block text-[13px] font-semibold text-[#152238] mb-1">Date of Occurrence</label>
         <input type="date" formControlName="dateOfOccurrence" class="w-full px-3 py-2 rounded-lg border border-[#d3dae5] text-[14px]" />
+        <app-field-error [control]="form.controls.dateOfOccurrence" label="Date of occurrence" />
       </div>
       <div>
         <label class="block text-[13px] font-semibold text-[#152238] mb-1">Time of Occurrence</label>
@@ -117,6 +121,7 @@
         <label class="block text-[13px] font-semibold text-[#152238] mb-1">Officer Deputation No. <span class="font-normal text-[#7a889c]">(optional)</span></label>
         <input type="text" formControlName="apprehendingOfficerDeputationNumber" maxlength="50"
           class="w-full px-3 py-2 rounded-lg border border-[#d3dae5] text-[14px]" />
+        <app-field-error [control]="form.controls.apprehendingOfficerDeputationNumber" label="Deputation number" />
         <p class="text-[11px] text-[#7a889c] mt-1">For officers not yet registered in the system.</p>
       </div>
       }
@@ -130,6 +135,7 @@
           <option [value]="o.ordinanceId">{{ o.shortName }}</option>
           }
         </select>
+        <app-field-error [control]="form.controls.ordinanceId" label="Ordinance" />
       </div>
       <div>
         <label class="block text-[13px] font-semibold text-[#152238] mb-1">Section</label>
