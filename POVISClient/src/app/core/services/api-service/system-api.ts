@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environment/environment';
 import { APIResponse, PagedResult } from '../../models/app-model';
-import { SystemHealth, TechnicalLog, TechnicalLogFilter } from '../../models/app-dto';
+import { BackupModule, SystemHealth, TechnicalLog, TechnicalLogFilter } from '../../models/app-dto';
 
 @Injectable({ providedIn: 'root' })
 export class SystemApi {
@@ -15,14 +15,21 @@ export class SystemApi {
     return this.http.get<APIResponse<SystemHealth>>(`${this.apiUrl}/health`);
   }
 
-  downloadBackup(): Observable<Blob> {
-    return this.http.get(`${this.apiUrl}/backup`, { responseType: 'blob' });
+  getBackupModules(): Observable<APIResponse<BackupModule[]>> {
+    return this.http.get<APIResponse<BackupModule[]>>(`${this.apiUrl}/backup/modules`);
   }
 
-  restore(file: File): Observable<APIResponse<null>> {
+  downloadBackup(moduleKey: string): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/backup/${encodeURIComponent(moduleKey)}`, { responseType: 'blob' });
+  }
+
+  restore(moduleKey: string, file: File): Observable<APIResponse<{ restored: number }>> {
     const formData = new FormData();
     formData.append('file', file);
-    return this.http.post<APIResponse<null>>(`${this.apiUrl}/restore`, formData);
+    return this.http.post<APIResponse<{ restored: number }>>(
+      `${this.apiUrl}/restore/${encodeURIComponent(moduleKey)}`,
+      formData,
+    );
   }
 
   getLogs(filter: TechnicalLogFilter): Observable<APIResponse<PagedResult<TechnicalLog>>> {

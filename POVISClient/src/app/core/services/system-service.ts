@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, map, throwError } from 'rxjs';
-import { SystemHealth, TechnicalLogFilter } from '../models/app-dto';
+import { BackupModule, SystemHealth, TechnicalLogFilter } from '../models/app-dto';
 import { PagedResult } from '../models/app-model';
 import { TechnicalLog } from '../models/app-dto';
 import { SystemApi } from './api-service/system-api';
@@ -24,26 +24,35 @@ export class SystemService {
     );
   }
 
-  restore(file: File): Observable<void> {
-    return this.api.restore(file).pipe(
-      map(() => void 0),
+  backupModules(): Observable<BackupModule[]> {
+    return this.api.getBackupModules().pipe(
+      map((res) => res.data ?? []),
       catchError((err) => this.rethrowAsError(err)),
     );
   }
 
-  downloadBackup(): void {
-    this.api.downloadBackup().subscribe({
-      next: (blob) => {
+  /** Restores one module; emits the number of records restored. */
+  restore(moduleKey: string, file: File): Observable<number> {
+    return this.api.restore(moduleKey, file).pipe(
+      map((res) => res.data?.restored ?? 0),
+      catchError((err) => this.rethrowAsError(err)),
+    );
+  }
+
+  downloadBackup(moduleKey: string): Observable<void> {
+    return this.api.downloadBackup(moduleKey).pipe(
+      map((blob) => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `povis-backup-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.json`;
+        a.download = `povis-${moduleKey}-backup-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.json`;
         document.body.appendChild(a);
         a.click();
         a.remove();
         window.URL.revokeObjectURL(url);
-      },
-    });
+      }),
+      catchError(() => throwError(() => new Error('Could not download the backup. Please try again.'))),
+    );
   }
 
 

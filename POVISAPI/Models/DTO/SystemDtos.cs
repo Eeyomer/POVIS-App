@@ -39,6 +39,14 @@ public class SystemHealthDTO
     public int TotalTechnicalLogs { get; set; }
 }
 
+public class BackupModuleDTO
+{
+    public string Key { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public int RecordCount { get; set; }
+}
+
 public class AppSettingsDTO
 {
     /// <summary>When true, create/edit/view panels open in a modal for every user.</summary>

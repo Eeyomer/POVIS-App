@@ -640,6 +640,13 @@ export interface SystemHealth {
   totalTechnicalLogs: number;
 }
 
+export interface BackupModule {
+  key: string;
+  name: string;
+  description: string;
+  recordCount: number;
+}
+
 export interface TechnicalLog {
   id: string;
   timestamp: string;

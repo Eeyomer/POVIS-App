@@ -4,8 +4,9 @@ namespace POVISAPI.Interfaces;
 
 public interface ISystemMaintenanceService
 {
-    Task<byte[]> CreateBackupAsync();
-    Task RestoreAsync(Stream backupJsonStream);
+    Task<List<BackupModuleDTO>> GetBackupModulesAsync();
+    Task<(byte[] Content, string ModuleKey)> CreateModuleBackupAsync(string moduleKey);
+    Task<int> RestoreModuleAsync(string moduleKey, Stream backupJsonStream);
     Task<SystemHealthDTO> GetHealthAsync();
     Task<PagedResult<TechnicalLogDTO>> GetLogsAsync(TechnicalLogFilterDTO filter);
 }

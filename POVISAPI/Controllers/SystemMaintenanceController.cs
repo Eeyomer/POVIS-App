@@ -27,27 +27,35 @@ namespace POVISAPI.Controllers
             return Ok(new APIResponse<object> { Success = true, Message = "OK", Data = health });
         }
 
-        [HttpGet("backup")]
-        public async Task<IActionResult> Backup()
+        [HttpGet("backup/modules")]
+        public async Task<IActionResult> GetBackupModules()
         {
-            var bytes = await systemService.CreateBackupAsync();
-            var fileName = $"povis-backup-{DateTime.UtcNow:yyyyMMdd-HHmmss}.json";
+            var modules = await systemService.GetBackupModulesAsync();
+            return Ok(new APIResponse<object> { Success = true, Message = "OK", Data = modules });
+        }
+
+        [HttpGet("backup/{module}")]
+        public async Task<IActionResult> Backup(string module)
+        {
+            var (bytes, key) = await systemService.CreateModuleBackupAsync(module);
+            var fileName = $"povis-{key}-backup-{DateTime.UtcNow:yyyyMMdd-HHmmss}.json";
             return File(bytes, "application/json", fileName);
         }
 
-        [HttpPost("restore")]
-        public async Task<IActionResult> Restore(IFormFile file)
+        [HttpPost("restore/{module}")]
+        public async Task<IActionResult> Restore(string module, IFormFile file)
         {
             if (file == null || file.Length == 0)
                 throw new ArgumentException("No backup file was uploaded.");
 
             await using var stream = file.OpenReadStream();
-            await systemService.RestoreAsync(stream);
+            var restored = await systemService.RestoreModuleAsync(module, stream);
 
             return Ok(new APIResponse<object>
             {
                 Success = true,
-                Message = "System restored successfully from backup. Restored record timestamps reflect the restore time."
+                Message = $"Restored {restored} record(s) from backup. Restored record timestamps reflect the restore time.",
+                Data = new { restored }
             });
         }
 

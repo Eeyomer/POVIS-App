@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { ViewModeService } from '../../core/services/view-mode-service';
 import { SystemService } from '../../core/services/system-service';
 import { ToastService } from '../../shared/toast/toast-service';
-import { SystemHealth, TechnicalLog } from '../../core/models/app-dto';
+import { BackupModule, SystemHealth, TechnicalLog } from '../../core/models/app-dto';
 import { PagedResult } from '../../core/models/app-model';
 
 const EMPTY_LOGS: PagedResult<TechnicalLog> = { items: [], totalCount: 0, page: 1, pageSize: 50 };
@@ -20,15 +20,18 @@ export class System implements OnInit {
   health = signal<SystemHealth | null>(null);
   logsPage = signal<PagedResult<TechnicalLog>>(EMPTY_LOGS);
   logsLoading = signal(true);
-  restoring = signal(false);
+
+  backupModules = signal<BackupModule[]>([]);
+  modulesLoading = signal(true);
+  selectedFiles = signal<Record<string, File | null>>({});
+  confirmKey = signal<string | null>(null);
+  restoringKey = signal<string | null>(null);
+  downloadingKey = signal<string | null>(null);
 
   searchTerm = signal('');
   methodFilter = signal('');
   page = signal(1);
   pageSize = 25;
-
-  selectedFile: File | null = null;
-  showRestoreConfirm = signal(false);
 
   constructor(
     private systemService: SystemService,
@@ -82,6 +85,7 @@ export class System implements OnInit {
   ngOnInit(): void {
     this.loadIncentiveRate();
     this.refreshHealth();
+    this.loadBackupModules();
     this.refreshLogs();
   }
 
@@ -144,43 +148,76 @@ export class System implements OnInit {
     this.refreshLogs();
   }
 
-  downloadBackup(): void {
-    this.systemService.downloadBackup();
-    this.toast.success('Backup download started.');
+  // ----- Per-module backup & restore -----
+  loadBackupModules(): void {
+    this.modulesLoading.set(true);
+    this.systemService.backupModules().subscribe({
+      next: (modules) => {
+        this.backupModules.set(modules);
+        this.modulesLoading.set(false);
+      },
+      error: (err) => {
+        this.toast.error(err.message);
+        this.modulesLoading.set(false);
+      },
+    });
   }
 
-  onFileSelected(event: Event): void {
+  downloadBackup(module: BackupModule): void {
+    this.downloadingKey.set(module.key);
+    this.systemService.downloadBackup(module.key).subscribe({
+      next: () => {
+        this.downloadingKey.set(null);
+        this.toast.success(`${module.name} backup downloaded.`);
+      },
+      error: (err) => {
+        this.downloadingKey.set(null);
+        this.toast.error(err.message);
+      },
+    });
+  }
+
+  onFileSelected(module: BackupModule, event: Event): void {
     const input = event.target as HTMLInputElement;
-    this.selectedFile = input.files?.[0] ?? null;
+    const file = input.files?.[0] ?? null;
+    this.selectedFiles.update((files) => ({ ...files, [module.key]: file }));
+    if (this.confirmKey() === module.key && !file) this.confirmKey.set(null);
+    input.value = '';
   }
 
-  openRestoreConfirm(): void {
-    if (!this.selectedFile) {
-      this.toast.error('Select a backup file first.');
+  selectedFile(key: string): File | null {
+    return this.selectedFiles()[key] ?? null;
+  }
+
+  openRestoreConfirm(module: BackupModule): void {
+    if (!this.selectedFile(module.key)) {
+      this.toast.error(`Select a ${module.name} backup file first.`);
       return;
     }
-    this.showRestoreConfirm.set(true);
+    this.confirmKey.set(module.key);
   }
 
   cancelRestore(): void {
-    this.showRestoreConfirm.set(false);
+    this.confirmKey.set(null);
   }
 
-  confirmRestore(): void {
-    if (!this.selectedFile) return;
-    this.restoring.set(true);
-    this.systemService.restore(this.selectedFile).subscribe({
-      next: () => {
-        this.toast.success('System restored from backup.');
-        this.restoring.set(false);
-        this.showRestoreConfirm.set(false);
-        this.selectedFile = null;
+  confirmRestore(module: BackupModule): void {
+    const file = this.selectedFile(module.key);
+    if (!file) return;
+    this.restoringKey.set(module.key);
+    this.systemService.restore(module.key, file).subscribe({
+      next: (count) => {
+        this.toast.success(`${module.name} restored from backup (${count} record${count === 1 ? '' : 's'}).`);
+        this.restoringKey.set(null);
+        this.confirmKey.set(null);
+        this.selectedFiles.update((files) => ({ ...files, [module.key]: null }));
+        this.loadBackupModules();
         this.refreshHealth();
         this.refreshLogs();
       },
       error: (err) => {
         this.toast.error(err.message);
-        this.restoring.set(false);
+        this.restoringKey.set(null);
       },
     });
   }

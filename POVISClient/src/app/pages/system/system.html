@@ -81,38 +81,70 @@
   <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
     <h2 class="text-[15px] font-semibold text-[#152238] mb-1">Backup &amp; Restore</h2>
     <p class="text-[12.5px] text-[#7a889c] mb-4">
-      Backups include all operational records (barangays, ordinances, violators, violations, payments,
-      filed cases, and compliance records). User accounts are managed separately and are not included.
-      Restoring replaces all current operational data with the contents of the backup file.
+      Back up and restore each module on its own. A restore brings back the records in the file and
+      overwrites them with their backed-up values; records added after the backup are kept.
+      Archived records are included. User accounts are managed separately and are not included.
+      When restoring several modules, go top to bottom (Barangays, Ordinances, Violators, Violations, then the rest).
     </p>
-    <div class="flex flex-wrap items-center gap-3">
-      <button type="button" (click)="downloadBackup()"
-        class="px-4 py-2 rounded-lg bg-[#1e3a63] text-white text-[13px] font-semibold hover:bg-[#284d82]">
-        Download Backup
-      </button>
-      <input type="file" accept="application/json" (change)="onFileSelected($event)"
-        class="text-[13px]" />
-      <button type="button" (click)="openRestoreConfirm()"
-        class="px-4 py-2 rounded-lg border border-[#d3dae5] text-[13px] font-semibold text-[#152238]">
-        Restore from Backup
-      </button>
-    </div>
 
-    @if (showRestoreConfirm()) {
-    <div class="mt-4 p-4 rounded-lg border border-red-200 bg-red-50">
-      <p class="text-[13px] text-red-700 font-semibold mb-3">
-        This will permanently replace all current operational data with the selected backup file. This cannot be undone. Continue?
-      </p>
-      <div class="flex gap-3">
-        <button type="button" (click)="confirmRestore()" [disabled]="restoring()"
-          class="px-4 py-2 rounded-lg bg-red-600 text-white text-[13px] font-semibold disabled:opacity-60">
-          {{ restoring() ? 'Restoring...' : 'Yes, Restore' }}
-        </button>
-        <button type="button" (click)="cancelRestore()"
-          class="px-4 py-2 rounded-lg border border-[#d3dae5] text-[13px] font-semibold text-[#152238]">
-          Cancel
-        </button>
+    @if (modulesLoading() && backupModules().length === 0) {
+    <div class="space-y-3">
+      @for (i of [1, 2, 3, 4]; track i) {
+      <app-skeleton class="h-12 w-full" />
+      }
+    </div>
+    } @else {
+    <div class="divide-y divide-[#eef1f5] border border-[#eef1f5] rounded-xl">
+      @for (module of backupModules(); track module.key) {
+      <div class="p-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="min-w-[200px]">
+            <div class="text-[13.5px] font-semibold text-[#152238]">
+              {{ module.name }}
+              <span class="ml-1 text-[12px] font-normal text-[#7a889c]">{{ module.recordCount | number }} record{{ module.recordCount === 1 ? '' : 's' }}</span>
+            </div>
+            <div class="text-[12px] text-[#7a889c]">{{ module.description }}</div>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button type="button" (click)="downloadBackup(module)" [disabled]="downloadingKey() === module.key"
+              class="px-3 py-1.5 rounded-lg bg-[#1e3a63] text-white text-[12.5px] font-semibold hover:bg-[#284d82] disabled:opacity-60">
+              {{ downloadingKey() === module.key ? 'Downloading...' : 'Download Backup' }}
+            </button>
+            <label
+              class="px-3 py-1.5 rounded-lg border border-[#d3dae5] text-[12.5px] font-semibold text-[#152238] cursor-pointer hover:bg-[#f3f5f8] max-w-[220px] truncate"
+              [title]="selectedFile(module.key)?.name ?? 'Choose a backup file'">
+              {{ selectedFile(module.key)?.name ?? 'Choose File' }}
+              <input type="file" accept="application/json,.json" class="hidden"
+                (change)="onFileSelected(module, $event)" />
+            </label>
+            <button type="button" (click)="openRestoreConfirm(module)"
+              [disabled]="!selectedFile(module.key) || restoringKey() !== null"
+              class="px-3 py-1.5 rounded-lg border border-[#d3dae5] text-[12.5px] font-semibold text-[#152238] disabled:opacity-50">
+              Restore
+            </button>
+          </div>
+        </div>
+
+        @if (confirmKey() === module.key) {
+        <div class="mt-3 p-4 rounded-lg border border-red-200 bg-red-50">
+          <p class="text-[13px] text-red-700 font-semibold mb-3">
+            Restore {{ module.name }} from "{{ selectedFile(module.key)?.name }}"? {{ module.name }} records in the file will
+            overwrite the current ones. This cannot be undone. Continue?
+          </p>
+          <div class="flex gap-3">
+            <button type="button" (click)="confirmRestore(module)" [disabled]="restoringKey() === module.key"
+              class="px-4 py-2 rounded-lg bg-red-600 text-white text-[13px] font-semibold disabled:opacity-60">
+              {{ restoringKey() === module.key ? 'Restoring...' : 'Yes, Restore' }}
+            </button>
+            <button type="button" (click)="cancelRestore()" [disabled]="restoringKey() === module.key"
+              class="px-4 py-2 rounded-lg border border-[#d3dae5] text-[13px] font-semibold text-[#152238]">
+              Cancel
+            </button>
+          </div>
+        </div>
+        }
       </div>
+      }
     </div>
     }
   </div>
